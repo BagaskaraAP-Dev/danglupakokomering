@@ -1,0 +1,15 @@
+# Sistem operasi & editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Dependensi & hasil build (bila nanti memakai tooling)
+node_modules/
+dist/
+.vercel/
+
+# Rahasia
+.env
+.env.*
