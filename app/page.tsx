@@ -1,0 +1,39 @@
+import { BusanaSection } from '@/components/BusanaSection';
+import { FloatingChat } from '@/components/FloatingChat';
+import { Footer } from '@/components/Footer';
+import { HeroSection } from '@/components/HeroSection';
+import { JajulukSection } from '@/components/JajulukSection';
+import { KamusSection } from '@/components/KamusSection';
+import { KulinerSection } from '@/components/KulinerSection';
+import { KuisSection } from '@/components/KuisSection';
+import { LaguSection } from '@/components/LaguSection';
+import { MargaSection } from '@/components/MargaSection';
+import { Navbar } from '@/components/Navbar';
+import { PetaSection } from '@/components/PetaSection';
+import { SejarahSection } from '@/components/SejarahSection';
+import { TranslatorSection } from '@/components/TranslatorSection';
+import { Tumpal } from '@/components/ui/Tumpal';
+
+export default function Beranda() {
+  return (
+    <>
+      <Navbar />
+      <main id="utama">
+        <HeroSection />
+        <Tumpal />
+        <TranslatorSection />
+        <KamusSection />
+        <SejarahSection />
+        <PetaSection />
+        <MargaSection />
+        <BusanaSection />
+        <KulinerSection />
+        <LaguSection />
+        <JajulukSection />
+        <KuisSection />
+      </main>
+      <Footer />
+      <FloatingChat />
+    </>
+  );
+}

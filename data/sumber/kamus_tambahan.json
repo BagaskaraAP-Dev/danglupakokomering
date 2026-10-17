@@ -1,0 +1,94 @@
+[
+  {
+    "idKata": "KOM-T0001",
+    "region": "komering",
+    "word": "nyuntuh",
+    "pos": "verb",
+    "dialect": "kh",
+    "meaning": "meneladani, mencontoh",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering”; belum ada di kamus sumber, perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "nyuntuh hulun sai sonang", "exampleId": "meneladani orang yang berbahagia" },
+      { "example": "nyuntuh di kanan kiri", "exampleId": "meneladani yang di kanan dan kiri" }
+    ],
+    "turunan": []
+  },
+  {
+    "idKata": "KOM-T0002",
+    "region": "komering",
+    "word": "tajok",
+    "pos": "verb",
+    "dialect": "kh",
+    "meaning": "tegak berdiri, berdiri kukuh",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering”; belum ada di kamus sumber, perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "tajok kumoring jadi", "exampleId": "hingga Komering tegak berdiri" }
+    ],
+    "turunan": []
+  },
+  {
+    "idKata": "KOM-T0003",
+    "region": "komering",
+    "word": "andan",
+    "pos": "noun",
+    "dialect": "kh",
+    "meaning": "restu, izin",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering”; belum ada di kamus sumber, perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "sikam ga kilu andan", "exampleId": "kami hendak memohon restu" }
+    ],
+    "turunan": []
+  },
+  {
+    "idKata": "KOM-T0004",
+    "region": "komering",
+    "word": "kacaroman",
+    "pos": "noun",
+    "dialect": "kh",
+    "meaning": "tata krama, sopan santun",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering”; belum ada di kamus sumber, perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "tingkah laku dang nyimpang jak adat kacaroman", "exampleId": "tingkah laku jangan menyimpang dari adat dan tata krama" }
+    ],
+    "turunan": []
+  },
+  {
+    "idKata": "KOM-T0005",
+    "region": "komering",
+    "word": "sangon",
+    "pos": "adverb",
+    "dialect": "kh",
+    "meaning": "sejak dahulu, memang",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering” dan kemiripannya dengan “sinangon” (dulu) pada contoh kalimat kamus; perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "adat sangon ti kating", "exampleId": "adat sejak dahulu dipegang teguh" }
+    ],
+    "turunan": []
+  },
+  {
+    "idKata": "KOM-T0006",
+    "region": "komering",
+    "word": "among",
+    "pos": "noun",
+    "dialect": "kh",
+    "meaning": "tetua, sebutan kerabat yang dituakan",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering” (disebut bersama ombai, akas, dan kemaman); perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "among lebu kemaman", "exampleId": "para tetua dan paman" }
+    ],
+    "turunan": []
+  },
+  {
+    "idKata": "KOM-T0007",
+    "region": "komering",
+    "word": "lebu",
+    "pos": "noun",
+    "dialect": "kh",
+    "meaning": "tetua, sebutan kerabat yang dituakan",
+    "catatan": "Arti dugaan dari konteks lirik lagu “Dang Lupa ko Komering” (disebut bersama ombai, akas, dan kemaman); perlu diverifikasi penutur asli.",
+    "examples": [
+      { "example": "among lebu kemaman", "exampleId": "para tetua dan paman" }
+    ],
+    "turunan": []
+  }
+]

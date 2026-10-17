@@ -5,10 +5,18 @@ desktop.ini
 .vscode/
 .idea/
 
-# Dependensi & hasil build (bila nanti memakai tooling)
+# Dependensi & hasil build Next.js
 node_modules/
+.next/
+out/
+build/
 dist/
+next-env.d.ts
+*.tsbuildinfo
 .vercel/
+
+# Log
+npm-debug.log*
 
 # Rahasia
 .env
