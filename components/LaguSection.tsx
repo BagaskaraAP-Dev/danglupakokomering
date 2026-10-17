@@ -107,7 +107,6 @@ export function LaguSection() {
   return (
     <Bab
       id="lagu"
-      nomor="07"
       label="Lagu Daerah"
       pita
       judul={

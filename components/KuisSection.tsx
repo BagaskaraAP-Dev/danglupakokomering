@@ -8,6 +8,7 @@ import { fmtAngka } from '@/lib/teks';
 import { useKamus } from './providers/KamusProvider';
 import { useToast } from './providers/ToastProvider';
 import { Bab } from './ui/Bab';
+import { Mahkota } from './ui/Mahkota';
 import { Reveal } from './ui/Reveal';
 
 const KUNCI_TERBAIK = 'dlk-kuis-terbaik';
@@ -88,8 +89,7 @@ export function KuisSection() {
   return (
     <Bab
       id="kuis"
-      nomor="09"
-      label="Uji Pengetahuan"
+      tata="tengah"
       pita
       judul={
         <>
@@ -103,9 +103,7 @@ export function KuisSection() {
           <AnimatePresence mode="wait">
             {tahap === 'mulai' && (
               <motion.div key="mulai" className="text-center" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                <div className="text-6xl" aria-hidden>
-                  🏆
-                </div>
+                <Mahkota className="mx-auto h-14 w-auto" />
                 <h3 className="mt-5 font-display text-3xl font-bold text-gading">Siap diuji, Sanak?</h3>
                 <p className="mt-3 text-gading/75">
                   {JUMLAH_SOAL} soal acak: budaya Komering, ditambah kosakata yang diambil langsung dari {fmtAngka(meta.jumlahKata)} kata kamus.
@@ -185,10 +183,7 @@ export function KuisSection() {
                     </span>
                   </div>
                 </div>
-                <p className="mt-6 text-5xl" aria-hidden>
-                  {p.ikon}
-                </p>
-                <h3 className="teks-emas mt-3 font-display text-3xl font-bold">{p.gelar}</h3>
+                <h3 className="teks-emas mt-6 font-display text-3xl font-bold">{p.gelar}</h3>
                 <p className="mt-3 text-gading/75">{p.pesan}</p>
                 <p className="mt-2 text-sm text-pasir">
                   Skor terbaik: {terbaik}/{JUMLAH_SOAL}
@@ -201,7 +196,7 @@ export function KuisSection() {
                     type="button"
                     className="btn-kaca"
                     onClick={async () => {
-                      const teks = `Aku meraih ${skor}/${JUMLAH_SOAL} di Kuis Ulun Kumoring — gelar "${p.gelar}"! Dang lupa ko Komering 🏆`;
+                      const teks = `Aku meraih ${skor}/${JUMLAH_SOAL} di Kuis Ulun Kumoring — gelar "${p.gelar}"! Dang lupa ko Komering.`;
                       if (navigator.share) {
                         try {
                           await navigator.share({ title: 'Kuis Ulun Kumoring', text: teks, url: location.href });

@@ -8,11 +8,11 @@
 
 export interface Sapaan { km: string; id: string }
 export interface Padanan { id: string; km: string; bukti: string }
-export interface Sejarah { era: string; ikon: string; judul: string; isi: string }
-export interface Wilayah { key: string; nama: string; kab: string; x: number; y: number; ikon: string; isi: string }
+export interface Sejarah { era: string; judul: string; isi: string }
+export interface Wilayah { key: string; nama: string; kab: string; x: number; y: number; isi: string }
 export interface Marga { nama: string; kab: string; isi: string }
 export interface TitikBusana { key: string; nama: string; x: number; y: number; isi: string }
-export interface TahapAdat { km: string; judul: string; ikon: string; kamus: string; isi: string }
+export interface TahapAdat { km: string; judul: string; kamus: string; isi: string }
 export interface Hidangan {
   nama: string;
   alias: string;
@@ -46,7 +46,7 @@ export interface Lagu {
 }
 export interface KataJajuluk { kata: string; arti: string }
 export interface Jajuluk {
-  sifat: Record<string, { label: string; ikon: string; kata: KataJajuluk[] }>;
+  sifat: Record<string, { label: string; kata: KataJajuluk[] }>;
   penutup: KataJajuluk[];
 }
 export interface SoalKuis { q: string; opsi: string[]; benar: number; info: string }
@@ -132,35 +132,35 @@ export const DATA: Konten = {
 
   sejarah: [
     {
-      era: 'Masa Leluhur', ikon: '⛰️', judul: 'Berakar dari Sekala Brak',
+      era: 'Masa Leluhur', judul: 'Berakar dari Sekala Brak',
       isi: 'Leluhur Ulun Kumoring (orang Komering) diyakini berasal dari dataran tinggi Sekala Brak di sekitar Gunung Pesagi dan Danau Ranau — kawasan yang juga dianggap tanah asal masyarakat Lampung. Karena itu, Basa Kumoring serumpun dengan bahasa Lampung.',
     },
     {
-      era: 'Cerita Tutur', ikon: '📜', judul: 'Asal Nama "Komering"',
+      era: 'Cerita Tutur', judul: 'Asal Nama "Komering"',
       isi: 'Salah satu cerita tutur menyebut nama Komering berasal dari seorang saudagar asal India bernama Komering Singh yang singgah dan wafat di tepian sungai ini. Sejak itu sungainya dikenal sebagai Way Komering, dan masyarakat di sepanjang alirannya disebut Ulun Kumoring.',
     },
     {
-      era: 'Persebaran', ikon: '🛶', judul: 'Menyusuri Way Komering',
+      era: 'Persebaran', judul: 'Menyusuri Way Komering',
       isi: 'Kelompok-kelompok keturunan (buay) bergerak menyusuri sungai dari hulu ke hilir, membuka dusun dan ladang di tepian Way Komering. Dari sinilah lahir kebuayan seperti Buay Madang, Semendawai, dan Buay Pemuka yang namanya masih dipakai hingga kini.',
     },
     {
-      era: 'Abad ke-17–19', ikon: '🕌', judul: 'Bersama Kesultanan Palembang',
+      era: 'Abad ke-17–19', judul: 'Bersama Kesultanan Palembang',
       isi: 'Wilayah uluan, termasuk tanah Komering, menjalin hubungan dengan Kesultanan Palembang Darussalam. Kitab hukum adat Simbur Cahaya — yang dikaitkan dengan Ratu Sinuhun — menjadi pedoman pemerintahan marga di daerah uluan.',
     },
     {
-      era: 'Masa Kolonial', ikon: '🏛️', judul: 'Sistem Marga & Pasirah',
+      era: 'Masa Kolonial', judul: 'Sistem Marga & Pasirah',
       isi: 'Pemerintah kolonial Belanda mempertahankan marga sebagai unit pemerintahan adat. Setiap marga dipimpin seorang Pasirah, dan tanah Komering dibagi ke dalam wilayah administratif Komering Ulu dan Komering Ilir.',
     },
     {
-      era: '1983', ikon: '📋', judul: 'Berakhirnya Pemerintahan Marga',
+      era: '1983', judul: 'Berakhirnya Pemerintahan Marga',
       isi: 'Sebagai pelaksanaan UU No. 5 Tahun 1979 tentang Pemerintahan Desa, Gubernur Sumatera Selatan menghapus sistem pemerintahan marga pada 1983. Marga tak lagi menjadi unit pemerintahan, tetapi tetap hidup sebagai identitas adat dan kekerabatan.',
     },
     {
-      era: '2003', ikon: '🗺️', judul: 'Lahirnya OKU Timur & OKU Selatan',
+      era: '2003', judul: 'Lahirnya OKU Timur & OKU Selatan',
       isi: 'Melalui UU No. 37 Tahun 2003, Kabupaten Ogan Komering Ulu dimekarkan menjadi OKU, OKU Timur (ibu kota Martapura), dan OKU Selatan (ibu kota Muaradua) — rumah bagi sebagian besar Ulun Kumoring.',
     },
     {
-      era: 'Kini', ikon: '🤖', judul: 'Menjaga Basa Kumoring',
+      era: 'Kini', judul: 'Menjaga Basa Kumoring',
       isi: 'Basa Kumoring (kode ISO 639-3: kge) masih dituturkan ratusan ribu orang, tetapi generasi muda makin jarang memakainya. Kamus mencatat keluhan yang sama: “incang-incang di Kumoring sa nayah tapi jolma ganta mak nayah sai pandai” — pantun-pantun di Komering banyak, tetapi orang sekarang tidak banyak yang bisa.',
     },
   ],
@@ -168,31 +168,31 @@ export const DATA: Konten = {
   /* Titik peta — x/y dalam persen terhadap gambar peta-wilayah-komering.jpg */
   wilayah: [
     {
-      key: 'ranau', nama: 'Danau Ranau', kab: 'OKU Selatan', x: 29.5, y: 75.5, ikon: '🏞️',
+      key: 'ranau', nama: 'Danau Ranau', kab: 'OKU Selatan', x: 29.5, y: 75.5,
       isi: 'Danau vulkanik di perbatasan Sumatera Selatan–Lampung, dikenal sebagai danau terbesar kedua di Sumatera. Kawasan inilah hulu Way Komering, dekat dengan Sekala Brak — tanah yang diyakini sebagai asal leluhur.',
     },
     {
-      key: 'muaradua', nama: 'Muaradua', kab: 'OKU Selatan', x: 30.2, y: 70.4, ikon: '📍',
+      key: 'muaradua', nama: 'Muaradua', kab: 'OKU Selatan', x: 30.2, y: 70.4,
       isi: 'Ibu kota Kabupaten OKU Selatan, di bagian hulu aliran Way Komering. Wilayah perbukitan yang sejuk dengan kebun kopi, sawah, dan tradisi uluan yang kuat.',
     },
     {
-      key: 'baturaja', nama: 'Baturaja', kab: 'OKU', x: 51.3, y: 59.2, ikon: '📍',
+      key: 'baturaja', nama: 'Baturaja', kab: 'OKU', x: 51.3, y: 59.2,
       isi: 'Ibu kota Kabupaten Ogan Komering Ulu. Kota multietnis tempat bertemunya masyarakat Ogan, Komering, Daya, dan pendatang.',
     },
     {
-      key: 'martapura', nama: 'Martapura', kab: 'OKU Timur', x: 53.5, y: 64.7, ikon: '⭐',
+      key: 'martapura', nama: 'Martapura', kab: 'OKU Timur', x: 53.5, y: 64.7,
       isi: 'Ibu kota OKU Timur dan salah satu jantung tanah Komering. Di sekitarnya terdapat kecamatan yang memakai nama kebuayan lama: Buay Madang, Semendawai, Bunga Mayang, dan Buay Pemuka Peliung.',
     },
     {
-      key: 'tanjunglubuk', nama: 'Tanjung Lubuk', kab: 'OKI', x: 61.1, y: 42.6, ikon: '📍',
+      key: 'tanjunglubuk', nama: 'Tanjung Lubuk', kab: 'OKI', x: 61.1, y: 42.6,
       isi: 'Wilayah Komering Ilir (hilir) di Kabupaten Ogan Komering Ilir. Permukiman tumbuh di sepanjang tepian sungai, dengan rumah panggung dan perahu sebagai bagian dari keseharian.',
     },
     {
-      key: 'kayuagung', nama: 'Kayu Agung', kab: 'OKI', x: 70.9, y: 43.9, ikon: '📍',
+      key: 'kayuagung', nama: 'Kayu Agung', kab: 'OKI', x: 70.9, y: 43.9,
       isi: 'Ibu kota Kabupaten OKI. Masyarakat asli Kayuagung memiliki bahasa yang berkerabat dekat dengan Basa Kumoring — sama-sama dari rumpun Lampungik.',
     },
     {
-      key: 'palembang', nama: 'Palembang', kab: 'Ibu Kota Provinsi', x: 63.1, y: 33.8, ikon: '🏙️',
+      key: 'palembang', nama: 'Palembang', kab: 'Ibu Kota Provinsi', x: 63.1, y: 33.8,
       isi: 'Di sekitar Palembang, Way Komering bertemu Sungai Musi. Kota bekas pusat Kesultanan Palembang Darussalam yang hukum adatnya, Simbur Cahaya, pernah berlaku hingga ke marga-marga uluan.',
     },
   ],
@@ -224,15 +224,15 @@ export const DATA: Konten = {
 
   /* Tahapan pernikahan adat — istilah & makna dari kamus (idKata di "kamus") */
   adatPernikahan: [
-    { km: 'Mancik', judul: 'Perkenalan Orang Tua', ikon: '🤝', kamus: 'KOM-K02420', isi: 'Perkenalan orang tua calon mempelai — menurut kamus, tahap pertama dalam tahapan pernikahan adat Komering.' },
-    { km: 'Ngalamar', judul: 'Lamaran & Baban Binatok', ikon: '🎁', kamus: 'KOM-K00269', isi: 'Pihak laki-laki melamar sambil membawa baban binatok: barang antaran calon pengantin laki-laki.' },
-    { km: 'Nerolok', judul: 'Menentukan Hari', ikon: '📅', kamus: 'KOM-K02511', isi: 'Kedua keluarga bermusyawarah menentukan waktu pernikahan.' },
-    { km: 'Ulangan', judul: 'Berpantun Keliling Kampung', ikon: '🎶', kamus: 'KOM-K03692', isi: 'Sebelum menikah, calon pengantin biasanya berpantun seperti bernyanyi keliling kampung.' },
-    { km: 'Nyawak & Buantak', judul: 'Gotong Royong Hajatan', ikon: '🌾', kamus: 'KOM-K03061', isi: 'Bapak-bapak membawa beras dalam karung (nyawak), ibu-ibu membawa beras dan pecah belah (buantak) untuk persiapan hajatan.' },
-    { km: 'Kunkunan', judul: 'Utusan Penjemput', ikon: '🚶', kamus: 'KOM-K01998', isi: 'Utusan dikirim lebih dulu sebelum penjemputan pengantin perempuan.' },
-    { km: 'Cacap', judul: 'Akad Nikah & Cacap', ikon: '💧', kamus: 'KOM-K00480', isi: 'Setelah akad nikah, kepala kedua kabayan (pengantin) disiram.' },
-    { km: 'Arak & Bumiyah', judul: 'Arak-arakan & Pesta', ikon: '🥁', kamus: 'KOM-K00144', isi: 'Kabayan diarak keliling kampung, lalu pesta besar semalam suntuk (bumiyah) dimeriahkan pantun canggoh dan bindiran.' },
-    { km: 'Jajuluk', judul: 'Pemberian Gelar', ikon: '👑', kamus: 'KOM-K01424', isi: 'Pengantin menerima jajuluk — misalnya Mangku Alam untuk suami dan Nai Mangku Alam untuk istri.' },
+    { km: 'Mancik', judul: 'Perkenalan Orang Tua', kamus: 'KOM-K02420', isi: 'Perkenalan orang tua calon mempelai — menurut kamus, tahap pertama dalam tahapan pernikahan adat Komering.' },
+    { km: 'Ngalamar', judul: 'Lamaran & Baban Binatok', kamus: 'KOM-K00269', isi: 'Pihak laki-laki melamar sambil membawa baban binatok: barang antaran calon pengantin laki-laki.' },
+    { km: 'Nerolok', judul: 'Menentukan Hari', kamus: 'KOM-K02511', isi: 'Kedua keluarga bermusyawarah menentukan waktu pernikahan.' },
+    { km: 'Ulangan', judul: 'Berpantun Keliling Kampung', kamus: 'KOM-K03692', isi: 'Sebelum menikah, calon pengantin biasanya berpantun seperti bernyanyi keliling kampung.' },
+    { km: 'Nyawak & Buantak', judul: 'Gotong Royong Hajatan', kamus: 'KOM-K03061', isi: 'Bapak-bapak membawa beras dalam karung (nyawak), ibu-ibu membawa beras dan pecah belah (buantak) untuk persiapan hajatan.' },
+    { km: 'Kunkunan', judul: 'Utusan Penjemput', kamus: 'KOM-K01998', isi: 'Utusan dikirim lebih dulu sebelum penjemputan pengantin perempuan.' },
+    { km: 'Cacap', judul: 'Akad Nikah & Cacap', kamus: 'KOM-K00480', isi: 'Setelah akad nikah, kepala kedua kabayan (pengantin) disiram.' },
+    { km: 'Arak & Bumiyah', judul: 'Arak-arakan & Pesta', kamus: 'KOM-K00144', isi: 'Kabayan diarak keliling kampung, lalu pesta besar semalam suntuk (bumiyah) dimeriahkan pantun canggoh dan bindiran.' },
+    { km: 'Jajuluk', judul: 'Pemberian Gelar', kamus: 'KOM-K01424', isi: 'Pengantin menerima jajuluk — misalnya Mangku Alam untuk suami dan Nai Mangku Alam untuk istri.' },
   ],
 
   /* Kuliner: foto di public/kuliner/. Kata Komering di teks diambil dari kamus
@@ -424,12 +424,12 @@ export const DATA: Konten = {
      atau "Satria Bangsawan"; gelar istri = "Nai" + gelar suami. */
   jajuluk: {
     sifat: {
-      berani: { label: 'Pemberani', ikon: '🛡️', kata: [{ kata: 'Satria', arti: 'kesatria yang berani' }, { kata: 'Perkasa', arti: 'kuat dan perkasa' }, { kata: 'Gagah', arti: 'gagah berani' }] },
-      bijak: { label: 'Bijaksana', ikon: '📜', kata: [{ kata: 'Mangku', arti: 'teguh memangku adat' }, { kata: 'Arif', arti: 'arif dan adil' }, { kata: 'Budi', arti: 'berbudi luhur' }] },
-      cerdas: { label: 'Cerdas', ikon: '💡', kata: [{ kata: 'Pandai', arti: 'pandai dan haus ilmu' }, { kata: 'Bestari', arti: 'berilmu dan berbudi' }, { kata: 'Cendekia', arti: 'cerdas dan berwawasan luas' }] },
-      ramah: { label: 'Ramah', ikon: '🤝', kata: [{ kata: 'Manis', arti: 'manis tutur katanya' }, { kata: 'Kasih', arti: 'penuh kasih sayang' }, { kata: 'Seri', arti: 'berseri dan menyenangkan' }] },
-      dermawan: { label: 'Dermawan', ikon: '🎁', kata: [{ kata: 'Mulia', arti: 'mulia hatinya' }, { kata: 'Budiman', arti: 'baik budi dan suka menolong' }, { kata: 'Dermawan', arti: 'murah hati' }] },
-      setia: { label: 'Setia', ikon: '🤍', kata: [{ kata: 'Teguh', arti: 'teguh pendirian' }, { kata: 'Setia', arti: 'setia pada keluarga dan janji' }, { kata: 'Tuah', arti: 'membawa tuah bagi sesama' }] },
+      berani: { label: 'Pemberani', kata: [{ kata: 'Satria', arti: 'kesatria yang berani' }, { kata: 'Perkasa', arti: 'kuat dan perkasa' }, { kata: 'Gagah', arti: 'gagah berani' }] },
+      bijak: { label: 'Bijaksana', kata: [{ kata: 'Mangku', arti: 'teguh memangku adat' }, { kata: 'Arif', arti: 'arif dan adil' }, { kata: 'Budi', arti: 'berbudi luhur' }] },
+      cerdas: { label: 'Cerdas', kata: [{ kata: 'Pandai', arti: 'pandai dan haus ilmu' }, { kata: 'Bestari', arti: 'berilmu dan berbudi' }, { kata: 'Cendekia', arti: 'cerdas dan berwawasan luas' }] },
+      ramah: { label: 'Ramah', kata: [{ kata: 'Manis', arti: 'manis tutur katanya' }, { kata: 'Kasih', arti: 'penuh kasih sayang' }, { kata: 'Seri', arti: 'berseri dan menyenangkan' }] },
+      dermawan: { label: 'Dermawan', kata: [{ kata: 'Mulia', arti: 'mulia hatinya' }, { kata: 'Budiman', arti: 'baik budi dan suka menolong' }, { kata: 'Dermawan', arti: 'murah hati' }] },
+      setia: { label: 'Setia', kata: [{ kata: 'Teguh', arti: 'teguh pendirian' }, { kata: 'Setia', arti: 'setia pada keluarga dan janji' }, { kata: 'Tuah', arti: 'membawa tuah bagi sesama' }] },
     },
     penutup: [
       { kata: 'Alam', arti: 'alam tempatnya tumbuh' },
@@ -477,9 +477,9 @@ export const DATA: Konten = {
     saran: ['Siapa suku Komering?', 'Asal-usul nama Komering', 'Bahasa komering "apa kabar"', 'Arti kata kabayan', 'Makanan khas Komering', 'Tahapan nikah adat Komering'],
     intents: [
       { id: 'salam', oleh: 'ratih', kata: ['halo', 'hai', 'hallo', 'hei', 'tabik', 'assalamualaikum', 'selamat pagi', 'selamat siang', 'selamat sore', 'selamat malam', 'permisi'],
-        jawab: ['Tabik! Api kabar? 😊 Mau ngobrol soal sejarah, bahasa, kuliner, atau adat Komering?', 'Tabik! Nyak Ratih di sini. Silakan tanya apa saja tentang Komering, atau minta nyak menerjemahkan kalimat.'] },
+        jawab: ['Tabik! Api kabar? Mau ngobrol soal sejarah, bahasa, kuliner, atau adat Komering?', 'Tabik! Nyak Ratih di sini. Silakan tanya apa saja tentang Komering, atau minta nyak menerjemahkan kalimat.'] },
       { id: 'kabar', oleh: 'ratih', kata: ['apa kabar', 'api kabar', 'kabarmu', 'gimana kabar'],
-        jawab: ['Kabarku baik! Kalau niku (kamu), api kabar? 😊'] },
+        jawab: ['Kabarku baik! Kalau niku (kamu), api kabar?'] },
       { id: 'tentang', oleh: 'raka', kata: ['suku komering', 'siapa komering', 'apa itu komering', 'orang komering', 'ulun kumoring', 'jolma kumoring', 'komering itu'],
         jawab: 'Ulun Kumoring (orang Komering) bermukim di sepanjang aliran Way Komering, Sumatera Selatan — terutama di OKU Timur, OKU Selatan, OKU, dan OKI. Bahasanya, Basa Kumoring, serumpun dengan bahasa Lampung.',
         aksi: [{ label: 'Lihat peta wilayah', href: '#peta' }] },
@@ -515,7 +515,7 @@ export const DATA: Konten = {
         jawab: 'Busana pengantin Komering didominasi kawai (baju) beludru merah marun bersulam emas, kain songket bermotif geometris, mahkota emas untuk mempelai perempuan, serta kopiah emas dan senjata pusaka untuk mempelai pria. Jari calon pengantin dihias pacar (inai).',
         aksi: [{ label: 'Jelajahi busana adat', href: '#busana' }] },
       { id: 'kuliner', oleh: 'ratih', kata: ['makanan', 'kuliner', 'masakan', 'pindang', 'tampuyak', 'tempoyak', 'jokjok', 'sambal', 'juadah', 'juadah basah', 'bolu', 'pandan', 'ingkuk', 'tumpi', 'bekasam', 'kuwol', 'keong', 'pepes', 'kue', 'khas', 'katodan'],
-        jawab: 'Coba cicipi **pindang Komering** (kuah asam-pedas ikan sungai), **pindang kuwol** (keong sawah), **pepes tampuyak** (ikan bertempoyak dalam daun pisang), **bekasam** (ikan fermentasi), **sambal jokjok** (pecel ikan), **juadah basah** (kue basah pandan), dan **tumpi** (ketan bungkus daun pisang). Ada juga tradisi **katodan** — membagi nasi dan lauk pauk kepada tetangga. Bangik nihan! 😋',
+        jawab: 'Coba cicipi **pindang Komering** (kuah asam-pedas ikan sungai), **pindang kuwol** (keong sawah), **pepes tampuyak** (ikan bertempoyak dalam daun pisang), **bekasam** (ikan fermentasi), **sambal jokjok** (pecel ikan), **juadah basah** (kue basah pandan), dan **tumpi** (ketan bungkus daun pisang). Ada juga tradisi **katodan** — membagi nasi dan lauk pauk kepada tetangga. Bangik nihan!',
         aksi: [{ label: 'Lihat kuliner', href: '#kuliner' }] },
       { id: 'rumah', oleh: 'raka', kata: ['rumah adat', 'rumah ulu', 'panggung', 'lombahan'],
         jawab: 'Rumah Ulu adalah rumah panggung kayu tradisional daerah uluan Sumatera Selatan. Dalam Basa Kumoring, rumah disebut lombahan. Di kolongnya biasa diletakkan sahara — kotak kayu besar penyimpan padi.' },
@@ -529,7 +529,7 @@ export const DATA: Konten = {
         jawab: 'Siap diuji? Kuis kami berisi 10 soal: budaya Komering plus kosakata acak langsung dari kamus. Raih skor sempurna untuk gelar "Ulun Kumoring Sejati"!',
         aksi: [{ label: 'Mulai kuis', href: '#kuis' }] },
       { id: 'terimakasih', oleh: 'ratih', kata: ['terima kasih', 'makasih', 'trims', 'thanks', 'tarima kasih', 'thank'],
-        jawab: ['Sama-sama! Dang lupa ko Kumoring, ya! 🙏'] },
+        jawab: ['Sama-sama! Dang lupa ko Kumoring, ya!'] },
       { id: 'maskot', oleh: 'raka', kata: ['raka', 'ratih', 'maskot', 'siapa kamu', 'kamu siapa'],
         jawab: 'Nyak Raka, pemandu sejarah, dan ini Ratih, pemandu bahasa. Kami mengenakan busana adat Komering: kawai beludru merah bersulam emas, kopiah emas untuk Raka, dan mahkota emas untuk Ratih.' },
       { id: 'ai', oleh: 'ratih', kata: ['ai', 'kecerdasan buatan', 'cara kerja', 'teknologi', 'algoritma'],

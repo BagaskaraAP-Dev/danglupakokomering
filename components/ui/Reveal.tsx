@@ -1,38 +1,21 @@
-'use client';
-
-import { motion, useReducedMotion } from 'framer-motion';
 import type { ReactNode } from 'react';
 
-const TAG = {
-  div: motion.div,
-  li: motion.li,
-  aside: motion.aside,
-  article: motion.article,
-  form: motion.form,
-} as const;
+type Tag = 'div' | 'li' | 'aside' | 'article' | 'form' | 'section';
 
 interface RevealProps {
   children: ReactNode;
-  as?: keyof typeof TAG;
+  as?: Tag;
   className?: string;
+  /** Dipertahankan agar pemanggil lama tetap valid; urutan kini diatur posisi gulir */
   delay?: number;
-  y?: number;
   id?: string;
 }
 
-/** Memunculkan isi dengan naik-pudar halus saat masuk layar (sekali saja) */
-export function Reveal({ children, as = 'div', className, delay = 0, y = 28, id }: RevealProps) {
-  const diam = useReducedMotion();
-  const Komponen = TAG[as];
+/** Naik-pudar halus saat masuk layar lewat CSS scroll-driven animation (.muncul).
+ *  Tidak butuh JavaScript, jadi isi langsung tampil di HTML dan tidak menunda LCP. */
+export function Reveal({ children, as: Komponen = 'div', className = '', id }: RevealProps) {
   return (
-    <Komponen
-      id={id}
-      className={className}
-      initial={diam ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.8, delay, ease: [0.2, 0.8, 0.2, 1] }}
-    >
+    <Komponen id={id} className={`muncul ${className}`}>
       {children}
     </Komponen>
   );

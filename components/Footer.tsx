@@ -45,7 +45,7 @@ export function Footer() {
           </p>
         </div>
       </div>
-      <p className="mt-12 text-center text-xs text-pasir">© 2026 Dang Lupa ko Komering · Tabik pun, tarima kasih! 🙏</p>
+      <p className="mt-12 text-center text-xs text-pasir">© 2026 Dang Lupa ko Komering · Tabik pun, tarima kasih!</p>
     </footer>
   );
 }

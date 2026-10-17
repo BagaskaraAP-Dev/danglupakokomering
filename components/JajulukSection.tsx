@@ -1,13 +1,14 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Download, RefreshCw, Share2, Sparkles } from 'lucide-react';
+import { Download, RefreshCw, Share2 } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { buatJajuluk, gambarKartu, type Gender, type HasilJajuluk } from '@/lib/jajuluk';
 import { DATA } from '@/lib/konten';
 import { norm } from '@/lib/teks';
 import { useToast } from './providers/ToastProvider';
 import { Bab } from './ui/Bab';
+import { Mahkota } from './ui/Mahkota';
 import { Reveal } from './ui/Reveal';
 import { TombolDengar } from './ui/TombolDengar';
 
@@ -73,8 +74,7 @@ export function JajulukSection() {
   return (
     <Bab
       id="jajuluk"
-      nomor="08"
-      label="Juluk & Adok"
+      label="Juluk & adok"
       judul={
         <>
           Generator <span className="teks-emas">Jajuluk</span>
@@ -108,7 +108,7 @@ export function JajulukSection() {
           <fieldset>
             <legend className="mb-2 block text-sm font-bold text-emas-200">Jenis kelamin</legend>
             <div className="flex gap-2">
-              {([['L', '👦 Laki-laki'], ['P', '👧 Perempuan']] as const).map(([v, label]) => (
+              {([['L', 'Laki-laki'], ['P', 'Perempuan']] as const).map(([v, label]) => (
                 <label key={v}>
                   <input type="radio" name="jj-gender" value={v} className="sr-only" checked={gender === v} onChange={() => setGender(v)} />
                   <span className="chip">{label}</span>
@@ -123,14 +123,14 @@ export function JajulukSection() {
                 <label key={k}>
                   <input type="radio" name="jj-sifat" value={k} className="sr-only" checked={sifat === k} onChange={() => setSifat(k)} />
                   <span className="chip">
-                    {s.ikon} {s.label}
+                    {s.label}
                   </span>
                 </label>
               ))}
             </div>
           </fieldset>
           <button type="submit" className="btn-emas w-full" onClick={kirim}>
-            <Sparkles className="size-[1.1rem]" aria-hidden /> Anugerahkan Jajuluk
+            Anugerahkan Jajuluk
           </button>
           <p className="text-xs leading-relaxed text-pasir">
             “Amon niku kahwin rik jolma kumoring bujajuluk” — kalau kamu menikah dengan orang Komering, kamu akan bergelar. Jajuluk di sini
@@ -144,9 +144,7 @@ export function JajulukSection() {
               {!hasil ? (
                 <motion.div key="kosong" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <p className="eyebrow justify-center">Jajuluk Komering</p>
-                  <div className="my-6 text-6xl" aria-hidden>
-                    👑
-                  </div>
+                  <Mahkota className="mx-auto my-6 h-16 w-auto" />
                   <p className="font-display text-2xl text-gading">Jajulukmu akan muncul di sini</p>
                   <p className="mx-auto mt-3 max-w-sm text-sm text-gading/75">
                     Isi nama, pilih karakter, lalu tekan <strong className="text-emas-300">Anugerahkan Jajuluk</strong>.
@@ -193,7 +191,7 @@ export function JajulukSection() {
                     <button
                       type="button"
                       className="btn-kaca btn-kecil"
-                      onClick={() => bagikan(`Jajuluk Komering-ku: ${hasil.judul}! ✨ ${hasil.doa} — buat punyamu di Dang Lupa ko Komering.`, 'Jajuluk Komering', toast)}
+                      onClick={() => bagikan(`Jajuluk Komering-ku: ${hasil.judul}. ${hasil.doa} — buat punyamu di Dang Lupa ko Komering.`, 'Jajuluk Komering', toast)}
                     >
                       <Share2 className="size-4" aria-hidden /> Bagikan
                     </button>

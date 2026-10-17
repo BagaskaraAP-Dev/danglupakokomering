@@ -125,7 +125,7 @@ function DialogHidangan({ indeks, tutup, geser }: { indeks: number | null; tutup
           </div>
 
           <div className="mt-4 rounded-2xl border border-emas/30 bg-gradient-to-br from-emas/15 to-marun-500/15 p-4">
-            <p className="eyebrow">💡 Tahukah Kamu?</p>
+            <p className="eyebrow">Tahukah Kamu?</p>
             <p className="mt-2 text-sm leading-relaxed text-gading/75">{h.fakta}</p>
           </div>
 
@@ -177,7 +177,6 @@ export function KulinerSection() {
   return (
     <Bab
       id="kuliner"
-      nomor="06"
       label="Bangik Nihan!"
       judul={
         <>

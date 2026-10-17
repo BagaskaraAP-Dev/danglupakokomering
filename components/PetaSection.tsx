@@ -17,7 +17,6 @@ export function PetaSection() {
   return (
     <Bab
       id="peta"
-      nomor="03"
       label="Tanoh Kumoring"
       pita
       judul={
@@ -48,7 +47,7 @@ export function PetaSection() {
                   <div>
                     <span className="tag">{w.kab}</span>
                     <h3 className="mt-2 font-display text-2xl font-bold text-gading">
-                      {w.ikon} {w.nama}
+                      {w.nama}
                     </h3>
                   </div>
                   <TombolDengar id={`peta-${w.key}`} teks={`${w.nama}. ${w.isi}`} label={`Dengarkan: ${w.nama}`} rate={1} />
@@ -62,7 +61,7 @@ export function PetaSection() {
           <div className="grid grid-cols-2 gap-1 lg:grid-cols-1">
             {DATA.wilayah.map((t, i) => (
               <button key={t.key} type="button" className="tombol-tempat" aria-pressed={i === aktif} onClick={() => setAktif(i)}>
-                <span aria-hidden>{t.ikon}</span>
+                
                 {t.nama}
               </button>
             ))}

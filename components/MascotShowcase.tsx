@@ -1,37 +1,30 @@
 'use client';
 /* =============================================================================
    Maskot Raka & Ratih di bingkai lengkung bermotif pucuk rebung.
-   - GSAP: animasi masuk bergiliran + gerak "bernapas" yang sangat halus.
-   - Sentuh/klik Raka: tanpa tulisan apa pun — Raka membesar sedikit dengan cahaya
-     emas lalu mengucapkan "Tabik pun!" (suara pria, Web Speech API id-ID).
-   - Kartu "Raka & Ratih menyapa": speaker membacakan sapaan beserta artinya;
-     kata tersorot satu per satu mengikuti suara, tombol beriak sampai selesai.
-   Tidak ada file audio yang dimuat, jadi tidak ada permintaan 404.
+   - Tampil langsung (tanpa menunggu JS); tidak ada gerak berulang tanpa pemicu.
+   - Sentuh/klik Raka: Raka membesar sedikit (Web Animations API) lalu mengucapkan
+     "Tabik pun!" (suara pria, Web Speech API id-ID). Tanpa tulisan apa pun di atas maskot.
+   - Kartu "Raka & Ratih menyapa": speaker membacakan sapaan beserta artinya; kata
+     tersorot mengikuti suara. Sapaan berganti hanya lewat tombol "berikutnya".
    ============================================================================= */
-import { useGSAP } from '@gsap/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import gsap from 'gsap';
-import { Volume2 } from 'lucide-react';
+import { ChevronRight, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DATA } from '@/lib/konten';
 import { suara, useSedangBicara } from '@/lib/suara';
 import { Avatar } from './ui/Avatar';
 
-gsap.registerPlugin(useGSAP);
-
 const UCAPAN_RAKA = 'Tabik pun!';
-/** Titik tengah tubuh Raka di dalam bingkai (persen) — asal skala & pusat cahaya */
+/** Titik tengah tubuh Raka di dalam bingkai (persen) — asal skala saat disentuh */
 const PUSAT_RAKA = '33% 52%';
 /** Perkiraan lama satu kata bila suara tidak mengirim event batas kata (ms) */
 const MS_PER_KATA = 430;
 
 /* ---------- Kartu sapaan bersuara ---------- */
 function KartuSapaan() {
-  const diam = useReducedMotion();
   const bicara = useSedangBicara('sapaan');
   const [iSapa, setISapa] = useState(0);
-  const [tahan, setTahan] = useState(false);
   const [kataAktif, setKataAktif] = useState(-1);
   const cadangan = useRef<ReturnType<typeof setInterval>>(undefined);
 
@@ -49,15 +42,6 @@ function KartuSapaan() {
     });
     return posisi;
   }, [ucapan]);
-
-  // Sapaan bergilir selama tidak sedang dibacakan atau di-hover
-  useEffect(() => {
-    if (diam || tahan || bicara) return;
-    const t = setInterval(() => {
-      if (!document.hidden) setISapa((i) => (i + 1) % DATA.sapaan.length);
-    }, 5500);
-    return () => clearInterval(t);
-  }, [diam, tahan, bicara]);
 
   useEffect(() => () => clearInterval(cadangan.current), []);
 
@@ -93,6 +77,11 @@ function KartuSapaan() {
     });
   };
 
+  const berikutnya = () => {
+    if (bicara) suara.berhenti();
+    setISapa((i) => (i + 1) % DATA.sapaan.length);
+  };
+
   const sorot = (j: number) => bicara && j === kataAktif;
   const kata = (daftar: string[], geser: number) =>
     daftar.map((k, j) => (
@@ -103,12 +92,7 @@ function KartuSapaan() {
     ));
 
   return (
-    <div
-      data-masuk="kartu"
-      className="siap-masuk gelembung ekor-atas permukaan-kuat mx-2 mt-7"
-      onMouseEnter={() => setTahan(true)}
-      onMouseLeave={() => setTahan(false)}
-    >
+    <div className="gelembung ekor-atas permukaan-kuat mx-2 mt-7">
       <div className="flex items-start gap-3">
         <div className="flex shrink-0 -space-x-3">
           <Avatar siapa="raka" />
@@ -116,13 +100,13 @@ function KartuSapaan() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold text-emas-400">Raka &amp; Ratih menyapa:</p>
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={iSapa}
-              initial={{ opacity: 0, y: 6, filter: 'blur(3px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.35 }}
+              transition={{ duration: 0.25 }}
               aria-live="polite"
             >
               <p className="font-display text-lg italic leading-snug text-gading">{kata(kataKm, 0)}</p>
@@ -130,26 +114,31 @@ function KartuSapaan() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <button
-          type="button"
-          className="ikon-btn kecil relative"
-          data-bicara={bicara}
-          aria-label={bicara ? 'Hentikan sapaan' : `Dengarkan sapaan: ${sapaan.km}`}
-          onClick={putar}
-        >
-          {bicara &&
-            [0, 1, 2].map((n) => (
-              <motion.span
-                key={n}
-                className="riak-suara"
-                initial={{ scale: 1, opacity: 0.7 }}
-                animate={{ scale: 2.1, opacity: 0 }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: n * 0.5, ease: 'easeOut' }}
-                aria-hidden
-              />
-            ))}
-          <Volume2 className="relative size-[1.05rem]" aria-hidden />
-        </button>
+        <div className="flex shrink-0 flex-col gap-1.5">
+          <button
+            type="button"
+            className="ikon-btn kecil relative"
+            data-bicara={bicara}
+            aria-label={bicara ? 'Hentikan sapaan' : `Dengarkan sapaan: ${sapaan.km}`}
+            onClick={putar}
+          >
+            {bicara &&
+              [0, 1, 2].map((n) => (
+                <motion.span
+                  key={n}
+                  className="riak-suara"
+                  initial={{ scale: 1, opacity: 0.7 }}
+                  animate={{ scale: 2.1, opacity: 0 }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: n * 0.5, ease: 'easeOut' }}
+                  aria-hidden
+                />
+              ))}
+            <Volume2 className="relative size-[1.05rem]" aria-hidden />
+          </button>
+          <button type="button" className="ikon-btn kecil" aria-label="Sapaan berikutnya" onClick={berikutnya}>
+            <ChevronRight className="size-[1.05rem]" aria-hidden />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -157,69 +146,54 @@ function KartuSapaan() {
 
 /* ---------- Bingkai maskot ---------- */
 export function MascotShowcase() {
-  const lingkup = useRef<HTMLDivElement>(null);
   const gambarRef = useRef<HTMLDivElement>(null);
   const diam = useReducedMotion();
   const rakaBicara = useSedangBicara('raka');
 
-  useGSAP(() => {
-    const mm = gsap.matchMedia();
-    mm.add({ gerak: '(prefers-reduced-motion: no-preference)', tenang: '(prefers-reduced-motion: reduce)' }, (ctx) => {
-      const { gerak } = ctx.conditions as { gerak: boolean };
-      if (!gerak) {
-        gsap.set('[data-masuk]', { autoAlpha: 1 });
-        return;
-      }
-      gsap.timeline({ defaults: { ease: 'power3.out' } })
-        .fromTo('[data-masuk="bingkai"]', { autoAlpha: 0, y: 48, scale: 0.94 }, { autoAlpha: 1, y: 0, scale: 1, duration: 1.1 }, 0.15)
-        .fromTo('[data-masuk="kartu"]', { autoAlpha: 0, y: 28 }, { autoAlpha: 1, y: 0, duration: 0.8 }, '-=0.6')
-        .call(() => {
-          gsap.to('[data-napas="bingkai"]', { y: -12, scale: 1.012, duration: 3.4, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-        });
-    });
-  }, { scope: lingkup });
-
-  // Raka disentuh: langsung bersuara, Raka membesar sedikit lalu kembali (asal skala di tubuh Raka)
+  // Raka disentuh: langsung bersuara, lalu membesar sedikit dan memantul kembali
   const sentuhRaka = () => {
     suara.ucapkan(UCAPAN_RAKA, { id: 'raka', jenis: 'pria', rate: 0.88 });
     const el = gambarRef.current;
     if (diam || !el) return;
-    gsap.timeline()
-      .to(el, { scale: 1.05, duration: 0.22, ease: 'power2.out', transformOrigin: PUSAT_RAKA, overwrite: 'auto' })
-      .to(el, { scale: 1, duration: 0.9, ease: 'elastic.out(1, 0.45)' });
+    el.style.transformOrigin = PUSAT_RAKA;
+    el.animate(
+      [
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.05)', offset: 0.2 },
+        { transform: 'scale(0.985)', offset: 0.5 },
+        { transform: 'scale(1.01)', offset: 0.72 },
+        { transform: 'scale(1)' },
+      ],
+      { duration: 1000, easing: 'ease-out' },
+    );
   };
 
   return (
-    <div ref={lingkup} className="relative flex justify-center">
-      <div className="cahaya-hero -top-10 left-1/2 -translate-x-1/2" aria-hidden />
-
-      <div className="relative w-full max-w-[25rem]">
-        <div data-masuk="bingkai" className="siap-masuk">
-          <div data-napas="bingkai" className="bingkai-lengkung">
-            <div ref={gambarRef} className="lapis-maskot">
-              <Image
-                src="/maskot-pasangan-hero.jpg"
-                alt="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas"
-                fill
-                priority
-                sizes="(min-width: 1024px) 400px, 90vw"
-              />
-            </div>
-            {/* Cahaya emas di tubuh Raka selama ia berbicara */}
-            <span className="cahaya-raka" data-aktif={rakaBicara} aria-hidden />
-            {/* Area sentuh transparan tepat di tubuh Raka (sisi kiri bingkai) */}
-            <button
-              type="button"
-              className="sentuh-raka"
-              data-bicara={rakaBicara}
-              aria-label="Sentuh Raka untuk mendengar sapaan Tabik pun"
-              onClick={sentuhRaka}
-            />
-          </div>
+    <div className="relative mx-auto w-full max-w-[25rem]">
+      {/* Di HP bingkai sedikit lebih kecil agar maskot muat di layar pertama */}
+      <div className="bingkai-lengkung mx-auto w-[min(17rem,72vw)] sm:w-full">
+        <div ref={gambarRef} className="lapis-maskot">
+          <Image
+            src="/maskot-pasangan-hero.jpg"
+            alt="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas"
+            fill
+            preload
+            sizes="(min-width: 1024px) 400px, (min-width: 640px) 400px, 72vw"
+          />
         </div>
-
-        <KartuSapaan />
+        {/* Cahaya emas di tubuh Raka selama ia berbicara */}
+        <span className="cahaya-raka" data-aktif={rakaBicara} aria-hidden />
+        {/* Area sentuh transparan tepat di tubuh Raka (sisi kiri bingkai) */}
+        <button
+          type="button"
+          className="sentuh-raka"
+          data-bicara={rakaBicara}
+          aria-label="Sentuh Raka untuk mendengar sapaan Tabik pun"
+          onClick={sentuhRaka}
+        />
       </div>
+
+      <KartuSapaan />
     </div>
   );
 }

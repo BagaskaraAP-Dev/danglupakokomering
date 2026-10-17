@@ -64,8 +64,8 @@ export function buatPutaran(kamus: Kamus | null): Soal[] {
 }
 
 export function peringkat(skor: number) {
-  if (skor === JUMLAH_SOAL) return { gelar: 'Ulun Kumoring Sejati', ikon: '👑', pesan: 'Sempurna! Niku benar-benar menjaga budaya Komering.' };
-  if (skor >= 8) return { gelar: 'Morli Maranai Pandai', ikon: '🌟', pesan: 'Hebat! Pengetahuanmu tentang Komering sangat baik.' };
-  if (skor >= 5) return { gelar: 'Sanak Rajin Belajar', ikon: '📚', pesan: 'Holau! Sedikit lagi menuju gelar tertinggi.' };
-  return { gelar: 'Ayo Belajar Lagi', ikon: '🌱', pesan: 'Dang lupa — jelajahi bab-bab di atas lalu coba lagi!' };
+  if (skor === JUMLAH_SOAL) return { gelar: 'Ulun Kumoring Sejati', pesan: 'Sempurna! Niku benar-benar menjaga budaya Komering.' };
+  if (skor >= 8) return { gelar: 'Morli Maranai Pandai', pesan: 'Hebat! Pengetahuanmu tentang Komering sangat baik.' };
+  if (skor >= 5) return { gelar: 'Sanak Rajin Belajar', pesan: 'Holau! Sedikit lagi menuju gelar tertinggi.' };
+  return { gelar: 'Ayo Belajar Lagi', pesan: 'Dang lupa — jelajahi bab-bab di atas lalu coba lagi!' };
 }

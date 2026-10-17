@@ -2,9 +2,11 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Dices, Search } from 'lucide-react';
+import Link from 'next/link';
 import { useDeferredValue, useMemo, useState } from 'react';
 import type { Entri, Kamus } from '@/lib/kamus';
 import { DATA } from '@/lib/konten';
+import { urlKata } from '@/lib/tautan';
 import { fmtAngka, glosa, norm, pick } from '@/lib/teks';
 import { useKamus } from './providers/KamusProvider';
 import { Reveal } from './ui/Reveal';
@@ -52,7 +54,9 @@ function KartuKata({ e, kamus }: { e: Entri; kamus: Kamus }) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="break-words font-display text-xl font-bold text-emas-300">{e.kata}</p>
+          <Link href={urlKata(e.kata)} className="break-words font-display text-xl font-bold text-emas-300 hover:underline" title={`Buka halaman kata “${e.kata}”`}>
+            {e.kata}
+          </Link>
           <p className="mt-0.5 text-sm text-gading/75">{e.arti}</p>
         </div>
         <TombolDengar id={`kamus-${e.id}`} teks={e.kata} label={`Dengarkan ${e.kata}`} />
@@ -66,8 +70,8 @@ function KartuKata({ e, kamus }: { e: Entri; kamus: Kamus }) {
         )}
         {e.varian.length > 0 && <span className="tag tag-lembut">varian: {e.varian.join(', ')}</span>}
         {e.catatan && (
-          <span className="tag tag-lembut cursor-help" title={e.catatan}>
-            ⚠ arti dugaan
+          <span className="tag tag-dugaan cursor-help" title={e.catatan}>
+            arti dugaan
           </span>
         )}
         {e.lihat && (
@@ -144,8 +148,8 @@ export function KamusSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="eyebrow">Kamus Basa Kumoring</p>
-            <h3 className="mt-2 font-display text-2xl font-bold text-gading sm:text-3xl">{fmtAngka(meta.jumlahKata)} Kata, Lengkap dengan Contoh</h3>
+            <p className="penanda-bab">Kamus Basa Kumoring</p>
+            <h2 className="mt-2 font-display text-2xl font-bold text-gading sm:text-3xl">{fmtAngka(meta.jumlahKata)} Kata, Lengkap dengan Contoh</h2>
             <p className="mt-2 text-sm text-gading/75">
               {fmtAngka(meta.jumlahKataDasar)} kata dasar &amp; {fmtAngka(meta.jumlahTurunan)} kata turunan — cari dalam Bahasa Indonesia atau Komering.
             </p>

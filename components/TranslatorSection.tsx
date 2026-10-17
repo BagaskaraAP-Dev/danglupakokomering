@@ -169,7 +169,6 @@ export function TranslatorSection() {
   return (
     <Bab
       id="penerjemah"
-      nomor="01"
       label="Ratih Menerjemahkan"
       pita
       judul={

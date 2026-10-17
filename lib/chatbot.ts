@@ -38,7 +38,7 @@ function entriKamus(kamus: Kamus, w: string): string | null {
   return hits.slice(0, 3).map((e) => {
     const kelas = e.kelas ? ` (${DATA.kelasKata[e.kelas]})` : '';
     const contoh = e.contoh[0] ? `\nContoh: “${e.contoh[0][0]}” — ${e.contoh[0][1]}` : '';
-    return `📖 **${e.kata}**${kelas} — ${e.arti}${contoh}`;
+    return `**${e.kata}**${kelas} — ${e.arti}${contoh}`;
   }).join('\n\n');
 }
 

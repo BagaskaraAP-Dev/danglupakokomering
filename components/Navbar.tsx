@@ -6,16 +6,16 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export const MENU = [
-  { id: 'penerjemah', label: 'Penerjemah', ikon: '🗣️' },
-  { id: 'kamus', label: 'Kamus', ikon: '📖' },
-  { id: 'sejarah', label: 'Sejarah', ikon: '📜' },
-  { id: 'peta', label: 'Peta', ikon: '🗺️' },
-  { id: 'marga', label: 'Marga', ikon: '🏛️' },
-  { id: 'busana', label: 'Busana & Adat', ikon: '👑' },
-  { id: 'kuliner', label: 'Kuliner', ikon: '🍲' },
-  { id: 'lagu', label: 'Lagu', ikon: '🎵' },
-  { id: 'jajuluk', label: 'Jajuluk', ikon: '✨' },
-  { id: 'kuis', label: 'Kuis', ikon: '🏆' },
+  { id: 'penerjemah', label: 'Penerjemah' },
+  { id: 'kamus', label: 'Kamus' },
+  { id: 'sejarah', label: 'Sejarah' },
+  { id: 'peta', label: 'Peta' },
+  { id: 'marga', label: 'Marga' },
+  { id: 'busana', label: 'Busana & Adat' },
+  { id: 'kuliner', label: 'Kuliner' },
+  { id: 'lagu', label: 'Lagu' },
+  { id: 'jajuluk', label: 'Jajuluk' },
+  { id: 'kuis', label: 'Kuis' },
 ] as const;
 
 /** Logo bundar: hanya lingkaran marun-emas bermahkota dari logokomering.jpeg yang tampil */
@@ -23,7 +23,7 @@ export function LogoBulat({ ukuran = 'w-12 h-12' }: { ukuran?: string }) {
   return (
     <span className={`${ukuran} flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/40 bg-kayu-800`}>
       {/* Lingkaran logo ±78% tinggi gambar & sedikit di bawah tengah → diperbesar 1,3× lalu digeser naik */}
-      <Image src="/logokomering.jpeg" alt="" width={1024} height={498} priority className="h-full w-full -translate-y-1 scale-[1.3] object-cover" />
+      <Image src="/logokomering.jpeg" alt="" width={1024} height={498} sizes="64px" loading="eager" className="h-full w-full -translate-y-1 scale-[1.3] object-cover" />
     </span>
   );
 }
@@ -135,7 +135,6 @@ export function Navbar() {
                       aktif === m.id ? 'bg-emas/10 text-emas-200' : 'text-gading/75 hover:bg-white/5 hover:text-gading'
                     }`}
                   >
-                    <span aria-hidden>{m.ikon}</span>
                     {m.label}
                   </a>
                 </li>

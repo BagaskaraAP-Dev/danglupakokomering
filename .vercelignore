@@ -1,0 +1,9 @@
+# Tidak ikut diunggah saat deploy lewat Vercel CLI
+node_modules
+.next
+out
+.env
+.env.*
+*.tsbuildinfo
+_arsip-statis
+DOKUMENTASIITFEST2026

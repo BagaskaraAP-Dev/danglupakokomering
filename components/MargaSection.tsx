@@ -21,7 +21,6 @@ export function MargaSection() {
   return (
     <Bab
       id="marga"
-      nomor="04"
       label="Buay & Marga"
       judul={
         <>

@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import { DATA } from '@/lib/konten';
 import { useKamus } from './providers/KamusProvider';
@@ -18,9 +19,9 @@ export function BusanaSection() {
   return (
     <Bab
       id="busana"
-      nomor="05"
-      label="Busana & Adat"
       pita
+      tata="kiri"
+      label="Busana & adat"
       judul={
         <>
           Busana Pengantin &amp; <span className="teks-emas">Adat Pernikahan</span>
@@ -40,7 +41,7 @@ export function BusanaSection() {
             onPilih={setAktif}
           />
         </Reveal>
-        <Reveal className="permukaan rounded-3xl p-6" delay={0.1}>
+        <Reveal className="permukaan rounded-3xl p-6">
           <div className="min-h-[11rem]" aria-live="polite">
             <AnimatePresence mode="wait">
               <motion.div key={b.key} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.3 }}>
@@ -63,35 +64,39 @@ export function BusanaSection() {
         </Reveal>
       </div>
 
-      <Reveal className="mt-16">
-        <h3 className="text-center font-display text-2xl font-bold text-gading sm:text-3xl">Tahapan Adat Pernikahan Komering</h3>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-pasir">
-          Istilah dan maknanya diambil dari Kamus Basa Kumoring — ketuk 📖 untuk membuka entrinya. Urutan dapat berbeda di setiap marga.
-        </p>
-      </Reveal>
-      <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {DATA.adatPernikahan.map((s, i) => {
-          const entri = kamus?.id(s.kamus);
-          return (
-            <Reveal as="li" key={s.km} delay={(i % 3) * 0.08} className="permukaan kartu-motif flex flex-col rounded-2xl p-5">
-              <div className="flex items-center gap-3">
-                <span className="angka-tahap" aria-hidden>
-                  {s.ikon}
+      {/* Tahapan adat: satu alur bernomor dari perkenalan sampai pemberian gelar */}
+      <Reveal className="mt-20 grid gap-4 lg:grid-cols-[0.42fr_1fr] lg:gap-12">
+        <div>
+          <h3 className="font-display text-2xl font-bold text-gading sm:text-3xl">Tahapan Adat Pernikahan</h3>
+          <p className="mt-3 text-sm leading-relaxed text-pasir">
+            Istilah dan maknanya diambil dari Kamus Basa Kumoring; ketuk nomor kamus untuk membuka entrinya. Urutan dapat berbeda di setiap
+            marga.
+          </p>
+        </div>
+        <ol className="alur-adat">
+          {DATA.adatPernikahan.map((s, i) => {
+            const entri = kamus?.id(s.kamus);
+            return (
+              <li key={s.km}>
+                <span className="nomor-alur" aria-hidden>
+                  {i + 1}
                 </span>
-                <span className="text-xs font-bold tracking-widest text-emas-400">TAHAP {i + 1}</span>
-              </div>
-              <h4 className="mt-4 font-display text-xl font-bold text-emas-300">{s.km}</h4>
-              <p className="text-sm font-semibold text-gading">{s.judul}</p>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-gading/75">{s.isi}</p>
-              {entri && (
-                <TagKata kata={entri.kata} className="mt-4 self-start">
-                  📖 {entri.kata} · {entri.id}
-                </TagKata>
-              )}
-            </Reveal>
-          );
-        })}
-      </ol>
+                <div className="min-w-0">
+                  <p className="font-display text-xl font-bold text-emas-300">
+                    {s.km} <span className="font-sans text-sm font-semibold text-gading">· {s.judul}</span>
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-gading/75">{s.isi}</p>
+                  {entri && (
+                    <TagKata kata={entri.kata} className="mt-2">
+                      <BookOpen className="size-3.5" aria-hidden /> {entri.kata} · {entri.id}
+                    </TagKata>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </Reveal>
     </Bab>
   );
 }
