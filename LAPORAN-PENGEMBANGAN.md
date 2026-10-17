@@ -1,13 +1,96 @@
 # Laporan Pengembangan — Dang Lupa ko Komering
 
-Tanggal laporan: 17 Oktober 2026
-Repositori: `BagaskaraAP-Dev/danglupakokomering` (privat) · commit terakhir di GitHub: `a415121` (versi awal)
+Tanggal laporan: 18 Oktober 2026
+Repositori: `BagaskaraAP-Dev/danglupakokomering` (privat) · situs produksi: https://danglupakokomering.vercel.app
 
-> **Status singkat:** situs sudah dimigrasi penuh ke **Next.js 16 + TypeScript + Tailwind CSS 4 + Framer Motion + GSAP** sesuai `prd.md`, termasuk **PRD Fase 2** (Raka bersih & bisa disentuh, sapaan bersuara, perbaikan kamus). TypeScript, ESLint, dan `next build` lolos tanpa error maupun peringatan; konsol browser bersih tanpa 404; semua fitur sudah diuji di Chrome ukuran desktop (1440 px) dan HP (390 px). **Semua perubahan belum di-commit.**
+> **Status singkat:** situs berjalan di **Next.js 16 + TypeScript + Tailwind CSS 4 + Framer Motion** dan sudah online di Vercel. Pembaruan 18 Oktober 2026 menjalankan `prd.md` Tahap 1 dan sebagian besar Tahap 2: halaman jauh lebih ringan (484 KB, Lighthouse HP 86–93), tampilan bebas jejak "template AI", chatbot dan penerjemah memakai **Google Gemini** berbasis kamus, serta halaman mandiri per kata, hidangan, dan lagu. Rincian ada di bagian pertama di bawah.
 
 ---
 
-## 0. Pembaruan Terbaru — PRD Fase 2
+## Pembaruan 18 Oktober 2026 — Revitalisasi sesuai `prd.md` (Tahap 1 & 2)
+
+Situs produksi: **https://danglupakokomering.vercel.app**
+
+| Ukuran | Sebelum | Sesudah |
+| --- | --- | --- |
+| Berat halaman awal (HP) | ±7,8 MB | **484 KB** |
+| Lighthouse HP — Performance | — | **86–93** (3 kali ukur di situs produksi) |
+| Lighthouse HP — Accessibility / Best Practices / SEO | — | **100 / 100 / 100** |
+| LCP · TBT · CLS (HP) | — | 3,1–3,4 dtk · 100–150 ms · 0 |
+| Chatbot & penerjemah | Aturan tetap & kata per kata di browser | **Google Gemini** + kamus (RAG), mesin lokal sebagai cadangan |
+| Alamat halaman di `sitemap.xml` | — (1 halaman) | **3.647** |
+
+### Tahap 1 — Perbaikan cepat
+
+| Poin PRD | Status | Hasil |
+| --- | --- | --- |
+| 1.1 Kompresi avatar maskot | Selesai | Tiga gambar maskot 2+ MB yang dipakai sebagai avatar diganti WebP 128 px (3–5 KB) dan label piringan lagu (15 KB) di `public/maskot/` |
+| 1.1 Teks hero tampil tanpa menunggu JavaScript | Selesai | Hero menjadi Server Component; animasi masuk tidak lagi menyembunyikan teks |
+| 1.1 Pemuatan tertunda | Selesai | Gambar di bawah layar pertama dimuat belakangan. Kamus (±160 KB) baru dimuat saat pengunjung menggulir, mengetuk, atau membuka chat. Lagu memakai `preload="none"`. Ikon situs 99 KB → 8 KB |
+| 1.2 Maskot tanpa latar putih | Selesai | `ratih-penerjemah.webp` dan `raka-sejarah.webp` (±80 KB, transparan) tampil di atas panggung marun bermotif songket |
+| 1.2 Foto kuliner & ornamen sudut | Sebagian | Ornamen sudut panel kini SVG yang tajam. Foto kuliner masih foto lama (387–736 px) karena tidak ada versi yang lebih besar; foto ditampilkan di ukuran aslinya agar tidak pecah |
+| 1.2 Hero versi HP | Selesai | Urutan judul → maskot → isi; Raka & Ratih terlihat di layar pertama |
+| 1.3 Bersihkan elemen generik | Selesai | Badge "Berbasis AI" dihapus; emoji diganti ikon dan ornamen mahkota SVG (`components/ui/Mahkota.tsx`); glow dan blur dikurangi; animasi berulang (maskot bernapas, kilau, riak titik peta) dihapus; GSAP dicabut dari proyek |
+| 1.3 Tata letak khas per bab | Selesai | **Kuliner:** daftar menu bernomor ala majalah + satu hidangan disorot. **Sejarah:** garis waktu mengikuti sungai berliku dari hulu ke hilir. **Lagu:** mode layar penuh, baris yang sedang dinyanyikan tampil besar di tengah. **Busana:** tahapan adat jadi alur bernomor. Pola "◆ BAB 0X ◆" dihapus |
+| 1.4 Deploy otomatis GitHub → Vercel | Belum | Aplikasi Vercel di GitHub belum diberi akses ke repo privat ini; deploy masih lewat `npx vercel deploy --prod` |
+
+### Tahap 2 — Naik kelas
+
+| Poin PRD | Status | Hasil |
+| --- | --- | --- |
+| 2.1 Chatbot & penerjemah Gemini | Selesai | Rute `POST /api/chat` dan `POST /api/translate` (lihat cara kerja di bawah) |
+| 2.2 Rekaman suara penutur asli | Belum | Butuh rekaman dari penutur asli; suara masih Text-to-Speech browser |
+| 2.3 Peta vektor wilayah | Belum | Butuh data batas wilayah resmi; peta masih gambar ilustrasi |
+| 2.4 Halaman mandiri + pratinjau tautan | Selesai | `/kamus/[kata]` untuk setiap kata (dibuat saat pertama dikunjungi lalu disimpan), `/kuliner/[slug]` untuk 7 hidangan, `/lagu/dang-lupa-ko-komering`. Tiap halaman punya judul & deskripsi sendiri, gambar pratinjau 1200×630 bergaya marun-emas, dan data terstruktur (JSON-LD). Ditambah `sitemap.xml` dan `robots.txt` |
+| 2.5 Halaman sumber & kredit | Selesai, datanya belum lengkap | `/sumber` memuat asal data kamus, rujukan sejarah, kredit lagu, peran AI, dan teknologi. Penyusun kamus asli dan sumber foto kuliner belum tercatat di data proyek, jadi ditulis "belum tercatat" |
+
+### Cara kerja Gemini
+
+1. **Mesin lokal** (di browser) tetap menerjemahkan kata per kata secara instan saat mengetik.
+2. Saat pengguna bertanya atau menekan **Terjemahkan**, server mencari entri kamus yang relevan, contoh kalimat yang memuat kata-kata itu, dan potongan bab situs yang paling cocok.
+3. Gemini diminta menjawab **hanya dari bahan itu**, menyebut sumbernya, dan memberi tahu bila sebuah kata berstatus "arti dugaan". Sumber yang dipakai muncul sebagai tombol di bawah jawaban chat.
+4. Setiap kata Komering hasil terjemahan Gemini dicek ke kamus dan korpus contoh kalimat; yang tidak ditemukan diberi tanda **"periksa"**.
+5. Bila Gemini gagal atau kuotanya habis, mesin lokal yang menjawab. Setiap jawaban diberi label "Gemini" atau "mesin lokal".
+
+**Berbeda dari rencana PRD:**
+
+- Model `gemini-2.5-flash` sudah tidak tersedia untuk pengguna baru. Yang dipakai: `gemini-3.5-flash`, dengan cadangan berurutan `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite` → `gemini-flash-latest`.
+- Gemini dipanggil lewat REST langsung (tanpa SDK `@google/genai`), jadi tidak ada dependensi baru.
+- Konteks kamus dicari di server, bukan dikirim dari browser, supaya sumber yang dikutip tidak bisa dipalsukan.
+
+**Keamanan & privasi:**
+
+- Kunci API hanya ada di `.env.local` (tidak ikut git) dan di Environment Variable Vercel (Production & Preview, tipe *Secret*).
+- Permintaan dari situs lain ditolak (403). Batas 12 pertanyaan chat dan 20 terjemahan per menit per IP. Panjang masukan dibatasi.
+- Perintah yang diselipkan di dalam teks terjemahan diabaikan (sudah diuji).
+- Chat menampilkan catatan bahwa pertanyaan dikirim ke Google Gemini. Klaim lama "tanpa server" di footer dan jawaban chatbot sudah diperbarui.
+- Jawaban untuk pertanyaan pembuka dan terjemahan yang sama disimpan sementara (cache) agar tidak menghabiskan kuota.
+
+### Pengujian
+
+- `tsc`, ESLint, dan `next build` lolos tanpa error.
+- Uji otomatis di Chrome (desktop 1440 px & HP 390 px): penerjemah Gemini, pilihan hidangan Kuliner, mode layar penuh Lagu (buka, putar, tutup), chat Gemini beserta tombol sumber, dan semua halaman mandiri. Konsol tanpa galat; tidak ada geser horizontal di HP.
+- Situs produksi: semua halaman 200, kata yang tidak ada 404, chat menjawab dalam 2,6–3,4 detik, terjemahan 1,4 detik, permintaan lintas situs 403.
+
+### Berkas
+
+- **Baru:** `app/api/chat/route.ts`, `app/api/translate/route.ts`, `app/kamus/[kata]/`, `app/kuliner/[slug]/`, `app/lagu/[slug]/`, `app/sumber/page.tsx`, `app/sitemap.ts`, `app/robots.ts`, `components/HalamanMandiri.tsx`, `components/ui/Mahkota.tsx`, `lib/ai.ts`, `lib/situs.ts`, `lib/tautan.ts`, `lib/server/` (basis pengetahuan, klien Gemini, penjaga permintaan, cache, data halaman kata, gambar pratinjau), `public/maskot/`
+- **Diubah besar:** `TranslatorSection`, `FloatingChat`, `KulinerSection`, `LaguSection`, `SejarahSection`, `BusanaSection`, `HeroSection`, `MascotShowcase`, `KamusProvider`, `app/globals.css`, `lib/konten.ts`
+
+### Tindak lanjut
+
+| Prioritas | Tindakan |
+| --- | --- |
+| Tinggi | **Aktifkan billing Gemini** di Google AI Studio. Kuota gratis hanya **20 permintaan per hari per model**; dengan empat model kapasitasnya sekitar 80 pertanyaan per hari, terlalu tipis untuk penjurian. Biaya model flash sangat kecil |
+| Tinggi | Beri akses repo ke aplikasi Vercel: github.com/settings/installations → Vercel → Configure → tambahkan `danglupakokomering`. Setelah itu setiap push ke `main` terdeploy otomatis |
+| Sedang | Minta penutur asli memeriksa hasil terjemahan Gemini. Pemeriksa otomatis hanya memastikan katanya ada di kamus, bukan bahwa susunan kalimatnya benar |
+| Sedang | Isi kredit foto di `KREDIT_FOTO` (`app/sumber/page.tsx`) dan nama penyusun kamus bila diketahui |
+| Sedang | Rekam suara penutur asli untuk sapaan, lirik, dan kosakata dasar (PRD 2.2) |
+| Rendah | Peta vektor dari data batas wilayah resmi (PRD 2.3) dan seluruh Tahap 3 |
+
+---
+
+## 0. Pembaruan 17 Oktober 2026 — PRD Fase 2
 
 | Poin PRD Fase 2 | Status | Hasil |
 | --- | --- | --- |
@@ -45,6 +128,7 @@ Urutan pekerjaan sejak repositori dibuat:
 | 4 | Upgrade hero (GSAP, Alpine.js, Lottie) | Selesai, lalu **digantikan** oleh versi React di langkah 5. |
 | 5 | Jalankan `prd.md` | Migrasi total ke Next.js. Hero, maskot, navbar, dan chat dibangun ulang sesuai PRD. |
 | 6 | Jalankan pembaruan `prd.md` (Fase 2) | Raka bersih & bisa disentuh, sapaan bersuara, perbaikan kamus, kredit lagu, foto juadah (lihat §0). |
+| 7 | Jalankan `prd.md` revitalisasi (Tahap 1 & 2) | Optimasi performa, maskot transparan, pembersihan jejak "AI-slop", tata letak khas per bab, Gemini untuk chatbot & penerjemah, halaman mandiri + pratinjau tautan, halaman sumber (lihat bagian Pembaruan 18 Oktober 2026). |
 
 ---
 
@@ -112,7 +196,8 @@ Urutan pekerjaan sejak repositori dibuat:
 | typescript | 5.9.3 |
 | tailwindcss / @tailwindcss/postcss | 4.3.3 |
 | framer-motion | 13.5.0 |
-| gsap / @gsap/react | 3.15.0 / 2.1.2 |
+| gsap / @gsap/react | dicabut 18 Okt 2026 (diganti CSS & Web Animations API) |
+| Google Gemini API | REST `generateContent`, model `gemini-3.5-flash` + cadangan |
 | lucide-react | 1.49.0 |
 | eslint / eslint-config-next | 9.39.5 / 16.3.8 |
 
@@ -191,9 +276,10 @@ Masalah yang ditemukan saat pengujian dan **sudah diperbaiki**:
 
 ## 7. Yang Perlu Ditindaklanjuti
 
+> Daftar terbaru ada di bagian **Pembaruan 18 Oktober 2026 → Tindak lanjut**. Tabel di bawah berasal dari 17 Oktober.
+
 | Prioritas | Tindakan |
 | --- | --- |
-| Tinggi | **Commit & push** ke GitHub. Semua perubahan sejak versi awal (`a415121`) belum tersimpan di repositori. |
 | Tinggi | Jika sudah pernah deploy ke Vercel sebagai situs statis ("Other"), ganti Framework Preset ke **Next.js**. |
 | Sedang | Pastikan rekaman lagu boleh dipakai untuk lomba. Kredit sudah tercantum (Pencipta: NN, sumber rekaman: video YouTube). |
 | Sedang | Minta penutur asli memastikan arti 7 kata lirik bertanda "arti dugaan" (*nyuntuh, tajok, andan, kacaroman, sangon, among, lebu*). Bila sudah pasti, hapus kolom `catatan` di `data/sumber/kamus_tambahan.json` lalu jalankan `npm run kamus`. |
@@ -224,8 +310,6 @@ npm run dev          # buka http://localhost:3000
 
 ## 9. Status Git Saat Ini
 
-- Branch `main`, commit terakhir `a415121` (versi awal statis).
-- **Dihapus dari pelacakan (dipindah):** `index.html`, `style.css`, `app.js`, `data.js`, `assets/*.jpg`
-- **Diubah:** `.gitignore` (ditambah `.next/`, `next-env.d.ts`, dll.), `README.md`
-- **Baru, belum dilacak:** `app/`, `components/`, `lib/`, `public/` (termasuk `kuliner/juadah-basah-hd.jpeg`), `data/` (termasuk `sumber/kamus_tambahan.json`), `tools/`, `package.json`, `package-lock.json`, `tsconfig.json`, `tailwind.config.ts`, `next.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, `_arsip-statis/`, `prd.md`, `LAPORAN-PENGEMBANGAN.md`
-- **Bukan buatan saya, belum disentuh:** `DOKUMENTASIITFEST2026/`
+- Branch `main` di `BagaskaraAP-Dev/danglupakokomering`. Pembaruan 18 Oktober 2026 masuk lewat pull request tersendiri; riwayat lengkap: `git log`.
+- Rahasia (`.env.local`, kunci Gemini) tidak dilacak git. Kunci produksi disimpan di Environment Variable Vercel.
+- Folder `DOKUMENTASIITFEST2026/` berisi dokumentasi lomba milik tim, bukan buatan asisten.

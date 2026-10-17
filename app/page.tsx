@@ -10,13 +10,15 @@ import { LaguSection } from '@/components/LaguSection';
 import { MargaSection } from '@/components/MargaSection';
 import { Navbar } from '@/components/Navbar';
 import { PetaSection } from '@/components/PetaSection';
+import { KamusProvider } from '@/components/providers/KamusProvider';
 import { SejarahSection } from '@/components/SejarahSection';
 import { TranslatorSection } from '@/components/TranslatorSection';
 import { Tumpal } from '@/components/ui/Tumpal';
 
 export default function Beranda() {
+  // Kamus (±520 KB) hanya dimuat di beranda; halaman mandiri dirender di server
   return (
-    <>
+    <KamusProvider>
       <Navbar />
       <main id="utama">
         <HeroSection />
@@ -34,6 +36,6 @@ export default function Beranda() {
       </main>
       <Footer />
       <FloatingChat />
-    </>
+    </KamusProvider>
   );
 }

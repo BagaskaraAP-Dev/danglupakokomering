@@ -15,6 +15,8 @@ interface NilaiKamus {
   /** Permintaan terakhir untuk membuka kata di bagian Kamus */
   permintaan: { kata: string; n: number } | null;
   bukaKamus: (kata: string) => void;
+  /** Minta kamus dimuat sekarang (mis. saat chat dibuka) */
+  muat: () => void;
 }
 
 const KamusContext = createContext<NilaiKamus | null>(null);
@@ -30,7 +32,22 @@ export function KamusProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<NilaiKamus['status']>('memuat');
   const [permintaan, setPermintaan] = useState<NilaiKamus['permintaan']>(null);
 
+  const [diminta, setDiminta] = useState(false);
+  const muat = useCallback(() => setDiminta(true), []);
+
+  // Kamus (±160 KB + pengindeksan) baru dimuat saat pengunjung mulai berinteraksi,
+  // agar tidak bersaing dengan tampilan layar pertama
   useEffect(() => {
+    if (diminta) return;
+    const peristiwa = ['scroll', 'pointerdown', 'keydown', 'touchstart'] as const;
+    const mulai = () => setDiminta(true);
+    peristiwa.forEach((p) => window.addEventListener(p, mulai, { once: true, passive: true }));
+    if (window.scrollY > 0 || location.hash) mulai();
+    return () => peristiwa.forEach((p) => window.removeEventListener(p, mulai));
+  }, [diminta]);
+
+  useEffect(() => {
+    if (!diminta) return;
     let batal = false;
     fetch('/data/kamus.json')
       .then((r) => {
@@ -50,9 +67,10 @@ export function KamusProvider({ children }: { children: ReactNode }) {
     return () => {
       batal = true;
     };
-  }, []);
+  }, [diminta]);
 
   const bukaKamus = useCallback((kata: string) => {
+    setDiminta(true);
     setPermintaan((p) => ({ kata, n: (p?.n ?? 0) + 1 }));
     const halus = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.getElementById('kamus')?.scrollIntoView({ behavior: halus ? 'smooth' : 'auto', block: 'start' });
@@ -65,7 +83,8 @@ export function KamusProvider({ children }: { children: ReactNode }) {
     meta: data?.kamus.meta ?? KAMUS_META,
     permintaan,
     bukaKamus,
-  }), [data, status, permintaan, bukaKamus]);
+    muat,
+  }), [data, status, permintaan, bukaKamus, muat]);
 
   return <KamusContext.Provider value={nilai}>{children}</KamusContext.Provider>;
 }

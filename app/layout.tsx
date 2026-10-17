@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { KamusProvider } from '@/components/providers/KamusProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
+import { SITUS } from '@/lib/situs';
 import './globals.css';
 
 const playfair = Playfair_Display({
@@ -20,12 +20,12 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
-/* Domain produksi Vercel bila tersedia (untuk gambar Open Graph) */
-const situs = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000';
-
 export const metadata: Metadata = {
-  metadataBase: new URL(situs),
-  title: 'Dang Lupa ko Komering — Portal Budaya & AI Suku Komering',
+  metadataBase: new URL(SITUS),
+  title: {
+    default: 'Dang Lupa ko Komering — Portal Budaya & AI Suku Komering',
+    template: '%s · Dang Lupa ko Komering',
+  },
   description:
     'Kenali sejarah, bahasa, marga, busana adat, kuliner, dan lagu Suku Komering bersama pemandu virtual Raka & Ratih. Dilengkapi penerjemah AI Basa Kumoring, kamus, generator jajuluk, kuis, dan chatbot.',
   openGraph: {
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Lewati ke konten utama
         </a>
         <ToastProvider>
-          <KamusProvider>{children}</KamusProvider>
+          {children}
         </ToastProvider>
       </body>
     </html>

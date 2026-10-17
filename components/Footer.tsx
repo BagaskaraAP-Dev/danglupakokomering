@@ -20,8 +20,8 @@ export function Footer() {
             </p>
           </div>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-gading/75">
-            Karya untuk <strong className="text-emas-300">{DATA.meta.acara}</strong> bertema <em>“{DATA.meta.tema}”</em>. Seluruh fitur AI
-            berjalan di browser — tanpa server, tanpa data pribadi yang dikirim.
+            Karya untuk <strong className="text-emas-300">{DATA.meta.acara}</strong> bertema <em>“{DATA.meta.tema}”</em>. Kamus dan penerjemah kata per kata
+            berjalan di browser; chatbot dan terjemahan kalimat disusun Google Gemini dari data kamus situs ini.
           </p>
         </div>
         <nav aria-label="Jelajahi">

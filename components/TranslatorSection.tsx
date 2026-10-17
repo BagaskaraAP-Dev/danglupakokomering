@@ -1,9 +1,10 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowLeftRight, Copy, Sparkles } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowLeftRight, Copy, Languages } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { terjemahAi, type TerjemahanAi } from '@/lib/ai';
 import { DATA } from '@/lib/konten';
 import { LABEL_BAHASA, type Bahasa, type HasilTerjemahan, type Segmen } from '@/lib/penerjemah';
 import { fmtAngka, glosa, norm } from '@/lib/teks';
@@ -118,50 +119,59 @@ function SegmenTerjemahan({ s, i, dari }: { s: Segmen; i: number; dari: Bahasa }
 export function TranslatorSection() {
   const { penerjemah, meta, status } = useKamus();
   const toast = useToast();
-  const diam = useReducedMotion();
   const [dari, setDari] = useState<Bahasa>('id');
   const [teks, setTeks] = useState('');
   const [hasil, setHasil] = useState<HasilTerjemahan | null>(null);
-  const [berpikir, setBerpikir] = useState(false);
+  const [ai, setAi] = useState<{ kunci: string; data: TerjemahanAi } | null>(null);
+  const [menunggu, setMenunggu] = useState<string | null>(null);
   const [putaran, setPutaran] = useState(0);
-  const tunda = useRef<ReturnType<typeof setTimeout>>(undefined);
   const terakhir = useRef('');
+  const batal = useRef<AbortController>(undefined);
   const ke: Bahasa = dari === 'id' ? 'km' : 'id';
 
-  const jalankan = (isi: string, arah: Bahasa, denganJeda: boolean) => {
-    clearTimeout(tunda.current);
+  /** Mesin lokal: instan, kata per kata, berjalan di browser */
+  const lokal = (isi: string, arah: Bahasa) => {
     const t = isi.trim();
     terakhir.current = `${arah}|${t}`;
-    if (!t || !penerjemah) {
-      setHasil(null);
-      setBerpikir(false);
-      return;
-    }
-    if (!denganJeda || diam) {
-      setBerpikir(false);
-      setHasil(penerjemah.translate(t, arah));
-      return;
-    }
-    setBerpikir(true);
-    tunda.current = setTimeout(() => {
-      setBerpikir(false);
-      setHasil(penerjemah.translate(t, arah));
-    }, 450);
+    setHasil(t && penerjemah ? penerjemah.translate(t, arah) : null);
   };
 
-  // Terjemahan langsung saat mengetik (jeda 300 ms)
+  /** Gemini menyusun kalimat alami dari entri & contoh kalimat kamus */
+  const mintaAi = async (isi: string, arah: Bahasa) => {
+    const t = isi.trim();
+    if (!t) return;
+    lokal(isi, arah);
+    const kunci = `${arah}|${t}`;
+    batal.current?.abort();
+    const c = new AbortController();
+    batal.current = c;
+    setMenunggu(kunci);
+    const r = await terjemahAi(t, arah, c.signal);
+    if (c.signal.aborted) return;
+    setMenunggu(null);
+    if (r.ok) setAi({ kunci, data: r.data });
+    else toast(r.status === 429 ? 'Kuota Gemini sedang penuh, jadi ditampilkan hasil mesin lokal.' : 'Gemini sedang tidak tersedia, jadi ditampilkan hasil mesin lokal.');
+  };
+
+  useEffect(() => () => batal.current?.abort(), []);
+
+  // Terjemahan lokal langsung saat mengetik (jeda 300 ms)
   useEffect(() => {
     if (!penerjemah || terakhir.current === `${dari}|${teks.trim()}`) return;
-    const t = setTimeout(() => jalankan(teks, dari, false), 300);
+    const t = setTimeout(() => lokal(teks, dari), 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teks, dari, penerjemah]);
 
+  const kunciKini = `${dari}|${teks.trim()}`;
+  const hasilAi = ai?.kunci === kunciKini ? ai.data : null;
+  const sedangAi = menunggu === kunciKini;
+  const tampil = hasilAi?.terjemahan ?? hasil?.text ?? '';
+
   const tukar = () => {
     setPutaran((p) => p + 180);
-    const lama = hasil?.text ?? '';
     setDari(ke);
-    if (lama) setTeks(lama);
+    if (tampil) setTeks(tampil);
   };
 
   const pct = Math.round((hasil?.conf ?? 0) * 100);
@@ -171,29 +181,31 @@ export function TranslatorSection() {
       id="penerjemah"
       label="Ratih Menerjemahkan"
       pita
+      tata="belah"
       judul={
         <>
-          AI Penerjemah <span className="teks-emas">Basa Kumoring</span>
+          Penerjemah <span className="teks-emas">Basa Kumoring</span>
         </>
       }
       deskripsi={
         <>
-          Ketik kalimat Bahasa Indonesia atau Basa Kumoring. Mesin NLP lokal belajar dari{' '}
-          <strong className="text-emas-200">{fmtAngka(meta.jumlahKata)} kata</strong> dan{' '}
-          <strong className="text-emas-200">{fmtAngka(meta.jumlahContoh)} contoh kalimat</strong> Kamus Basa Kumoring, mengenali
-          imbuhan, memperbaiki salah ketik, lalu membacakan hasilnya.
+          Saat kamu mengetik, mesin lokal mencocokkan tiap kata dengan{' '}
+          <strong className="text-emas-200">{fmtAngka(meta.jumlahKata)} kata</strong> Kamus Basa Kumoring. Tekan{' '}
+          <strong className="text-emas-200">Terjemahkan</strong>, dan Gemini menyusun kalimat yang alami dari entri kamus serta{' '}
+          {fmtAngka(meta.jumlahContoh)} contoh kalimatnya.
         </>
       }
     >
       <div className="grid items-start gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal as="aside" className="order-2 space-y-5 lg:order-1">
-          <div className="bingkai-persegi mx-auto max-w-sm lg:max-w-none">
+          <div className="panggung-maskot mx-auto max-w-sm lg:max-w-none">
             <Image
-              src="/maskot-ratih-penerjemah.jpg"
+              src="/maskot/ratih-penerjemah.webp"
               alt="Maskot Ratih berhijab merah dengan mahkota emas, menunjuk ke arah penerjemah"
-              width={1200}
-              height={896}
+              width={1100}
+              height={821}
               sizes="(min-width: 1024px) 30vw, 90vw"
+              className="relative z-[1] block h-auto w-full"
             />
           </div>
           <div className="gelembung ekor-atas permukaan-kuat">
@@ -239,7 +251,7 @@ export function TranslatorSection() {
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                jalankan(teks, dari, true);
+                void mintaAi(teks, dari);
               }
             }}
           />
@@ -254,13 +266,15 @@ export function TranslatorSection() {
                 onClick={() => {
                   setTeks('');
                   setHasil(null);
+                  batal.current?.abort();
+                  setMenunggu(null);
                   document.getElementById('tr-masukan')?.focus();
                 }}
               >
                 Hapus
               </button>
-              <button type="button" className="btn-emas btn-kecil" disabled={status !== 'siap'} onClick={() => jalankan(teks, dari, true)}>
-                <Sparkles className="size-4" aria-hidden /> {status === 'memuat' ? 'Memuat kamus…' : 'Terjemahkan'}
+              <button type="button" className="btn-emas btn-kecil" disabled={!teks.trim() || sedangAi} onClick={() => void mintaAi(teks, dari)}>
+                <Languages className="size-4" aria-hidden /> {sedangAi ? 'Menyusun…' : 'Terjemahkan'}
               </button>
             </div>
           </div>
@@ -268,16 +282,45 @@ export function TranslatorSection() {
           <div className="hasil-terjemahan mt-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-emas-400">Hasil · {LABEL_BAHASA[ke]}</p>
+                <p className="mb-1.5 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-emas-400">
+                  Hasil · {LABEL_BAHASA[ke]}
+                  {tampil && (
+                    <span className="ml-2 font-semibold normal-case tracking-normal text-pasir">
+                      {hasilAi ? '· disusun Gemini dari kamus' : '· kata per kata (mesin lokal)'}
+                    </span>
+                  )}
+                </p>
                 <div aria-live="polite" className="min-h-[2.2rem]">
-                  {berpikir ? (
+                  {tampil ? (
+                    <>
+                      <p className="break-words font-display text-[1.3rem] font-semibold leading-snug text-gading sm:text-[1.45rem]">{tampil}</p>
+                      {sedangAi && (
+                        <p className="mt-2 flex items-center gap-2 text-xs font-semibold text-pasir">
+                          <span className="berpikir" aria-hidden>
+                            <i />
+                            <i />
+                            <i />
+                          </span>
+                          Gemini sedang menyusun kalimat…
+                        </p>
+                      )}
+                      {hasilAi && hasil?.text && hasil.text !== hasilAi.terjemahan && (
+                        <p className="mt-2 text-xs text-pasir">Kata per kata: {hasil.text}</p>
+                      )}
+                      {hasilAi?.catatan && <p className="mt-2 text-xs leading-relaxed text-gading/70">{hasilAi.catatan}</p>}
+                      {hasilAi && hasilAi.kataLuarKamus.length > 0 && (
+                        <p className="mt-2 text-xs leading-relaxed text-gading/70">
+                          <span className="tag tag-dugaan mr-1.5">periksa</span>
+                          Belum ditemukan di kamus: {hasilAi.kataLuarKamus.join(', ')}.
+                        </p>
+                      )}
+                    </>
+                  ) : sedangAi ? (
                     <span className="berpikir" aria-label="Sedang menerjemahkan">
                       <i />
                       <i />
                       <i />
                     </span>
-                  ) : hasil?.text ? (
-                    <p className="break-words font-display text-[1.3rem] font-semibold leading-snug text-gading sm:text-[1.45rem]">{hasil.text}</p>
                   ) : (
                     <p className="font-display text-lg italic text-pasir">
                       {status === 'gagal' ? 'Kamus gagal dimuat. Muat ulang halaman.' : 'Hasil terjemahan akan muncul di sini.'}
@@ -286,14 +329,14 @@ export function TranslatorSection() {
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
-                <TombolDengar id="hasil-terjemahan" teks={hasil?.text ?? ''} label="Dengarkan hasil terjemahan" kecil={false} rate={dari === 'id' ? 0.85 : 0.95} />
+                <TombolDengar id="hasil-terjemahan" teks={tampil} label="Dengarkan hasil terjemahan" kecil={false} rate={dari === 'id' ? 0.85 : 0.95} />
                 <button
                   type="button"
                   className="ikon-btn"
                   aria-label="Salin hasil terjemahan"
                   onClick={async () => {
-                    if (!hasil?.text) return toast('Belum ada hasil untuk disalin.');
-                    toast((await salin(hasil.text)) ? 'Tersalin ke clipboard ✓' : 'Gagal menyalin — salin manual, ya.');
+                    if (!tampil) return toast('Belum ada hasil untuk disalin.');
+                    toast((await salin(tampil)) ? 'Tersalin ke clipboard.' : 'Gagal menyalin, salin manual, ya.');
                   }}
                 >
                   <Copy className="size-[1.1rem]" aria-hidden />
@@ -302,7 +345,7 @@ export function TranslatorSection() {
             </div>
 
             <div className="mt-5 flex items-center gap-3">
-              <span className="shrink-0 text-xs font-semibold text-pasir">Keyakinan AI</span>
+              <span className="shrink-0 text-xs font-semibold text-pasir" title="Persentase kata yang dikenali mesin lokal dari kamus">Cakupan kamus</span>
               <div className="meter flex-1">
                 <span style={{ width: `${hasil ? pct : 0}%` }} />
               </div>
@@ -310,8 +353,7 @@ export function TranslatorSection() {
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <AnimatePresence>
-                {!berpikir &&
-                  hasil?.segs.filter((s) => s.type !== 'punct').map((s, i) => <SegmenTerjemahan key={`${s.src}-${i}`} s={s} i={i} dari={dari} />)}
+                {hasil?.segs.filter((s) => s.type !== 'punct').map((s, i) => <SegmenTerjemahan key={`${s.src}-${i}`} s={s} i={i} dari={dari} />)}
               </AnimatePresence>
             </div>
             <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[0.72rem] text-pasir">
@@ -334,7 +376,7 @@ export function TranslatorSection() {
                   className="chip"
                   onClick={() => {
                     setTeks(k);
-                    jalankan(k, dari, true);
+                    void mintaAi(k, dari);
                   }}
                 >
                   {k}

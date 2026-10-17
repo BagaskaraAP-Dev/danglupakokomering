@@ -1047,6 +1047,99 @@
     object-fit: cover;
   }
 
+  /* ---------- Kuliner: daftar menu bernomor + sorotan ---------- */
+  .foto-hidangan[data-utuh]:not([data-piring]) {
+    display: grid;
+    place-items: center;
+  }
+  /* Foto kecil tidak diperbesar melewati ukuran aslinya → tetap tajam */
+  .foto-hidangan[data-utuh]:not([data-piring]) img {
+    width: auto;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.9);
+  }
+  .menu-kuliner {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+  }
+  .menu-kuliner button {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: 100%;
+    white-space: nowrap;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--garis);
+    border-radius: 999px;
+    color: rgba(253, 251, 247, 0.72);
+    text-align: left;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+  }
+  .menu-kuliner button:hover {
+    color: var(--gading);
+  }
+  .menu-kuliner button[aria-pressed='true'] {
+    color: var(--emas-terang);
+    border-color: rgba(212, 175, 55, 0.6);
+    background: rgba(212, 175, 55, 0.08);
+  }
+  .nomor-menu {
+    font-family: var(--font-playfair), serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--pasir);
+    font-variant-numeric: tabular-nums;
+  }
+  .menu-kuliner button[aria-pressed='true'] .nomor-menu {
+    color: var(--emas);
+  }
+  @media (min-width: 1024px) {
+    .menu-kuliner {
+      display: block;
+      overflow: visible;
+      border-top: 1px solid var(--garis);
+    }
+    .menu-kuliner button {
+      white-space: normal;
+      padding: 1.1rem 0.25rem;
+      border: 0;
+      border-bottom: 1px solid var(--garis);
+      border-radius: 0;
+    }
+    .menu-kuliner button[aria-pressed='true'] {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent 70%);
+    }
+    .nomor-menu {
+      font-size: 1.6rem;
+      min-width: 2.6rem;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sorotan-kuliner {
+      animation: sorotan-masuk 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+  }
+  @keyframes sorotan-masuk {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  /* ---------- Lagu: mode layar penuh ---------- */
+  .panggung-lagu {
+    background:
+      radial-gradient(80% 60% at 50% 45%, rgba(142, 36, 41, 0.5), transparent 70%),
+      var(--pola-songket),
+      linear-gradient(180deg, #140706, #2a0d0c);
+    color: var(--gading);
+  }
+
   /* ---------- Pemutar lagu ---------- */
   .piringan {
     position: relative;
