@@ -1,7 +1,7 @@
 /* =============================================================================
    Dang Lupa ko Komering — app.js
    Logika interaktif: AI Translator (NLP lokal), TTS, Kamus, Sejarah, Peta,
-   Marga, Busana & Adat, Kuliner, Audio Player (Web Audio), Generator Jajuluk,
+   Marga, Busana & Adat, Kuliner, Pemutar Lagu, Generator Jajuluk,
    Kuis, dan Chatbot. Bergantung pada objek global DATA dari data.js.
    ============================================================================= */
 'use strict';
@@ -210,6 +210,68 @@ const Reveal = {
   },
 };
 
+/* =============================================================================
+   KAMUS BASA KUMORING — dimuat dari data/kamus-komering.js
+   (dibangun dari data/kamus_komering.json oleh tools/build-kamus.js)
+   ============================================================================= */
+const KAMUS = (() => {
+  const K = window.KAMUS_KOMERING;
+  if (!K) console.warn('data/kamus-komering.js belum termuat — kamus kosong.');
+  const src = K || { meta: {}, entri: [], selaras: [], frekuensi: [], sensitif: [] };
+  const sensitif = new Set(src.sensitif || []);
+  const entri = src.entri.map(([id, kata, kelas = '', arti = '', contoh = [], induk = '', varian = [], lihat = '']) => ({
+    id, kata, kelas, arti, contoh, induk, varian, lihat, sensitif: sensitif.has(id),
+  }));
+  const perKata = new Map();
+  const perId = new Map();
+  const turunan = new Map();
+  const tambah = (m, k, v) => m.set(k, [...(m.get(k) || []), v]);
+  entri.forEach((e) => {
+    perId.set(e.id, e);
+    [e.kata, ...e.varian].forEach((w) => tambah(perKata, norm(w), e));
+    if (e.induk) tambah(turunan, norm(e.induk), e);
+  });
+  return {
+    meta: { ...src.meta, jumlahKata: entri.length },
+    entri,
+    /* Entri yang layak tampil acak (kuis, kata acak, kata hari ini): bukan turunan,
+       punya contoh, dan kata itu tidak punya arti sensitif (mis. homonim "manuk") */
+    layakAcak: (() => {
+      const kataSensitif = new Set(entri.filter((e) => e.sensitif).map((e) => norm(e.kata)));
+      return entri.filter((e) => !kataSensitif.has(norm(e.kata)) && !e.induk && e.contoh.length);
+    })(),
+    selaras: src.selaras || [],
+    frek: new Map(src.frekuensi || []),
+    cari: (w) => perKata.get(norm(w)) || [],
+    id: (id) => perId.get(id),
+    turunanDari: (w) => turunan.get(norm(w)) || [],
+  };
+})();
+
+/* Pecah arti kamus menjadi glosa: "mau, akan, suka" → [mau, akan, suka];
+   "ahad (nama hari)" → [ahad]; "pakaian atau seluruh …" → [pakaian, seluruh …] */
+function glosa(arti) {
+  return String(arti).replace(/\([^)]*\)/g, ' ')
+    .split(/\s*(?:[,;/]|\s-\s|\batau\b)\s*/i)
+    .map(norm)
+    .filter((g) => g && g !== '-');
+}
+
+/* Arti ringkas untuk label tombol: glosa pertama, dipotong sebelum "yang …"
+   atau di kata ke-5 ("pelepah pinang yang sering …" → "pelepah pinang") */
+function artiSingkat(arti, kata = '') {
+  const gs = glosa(arti);
+  const g = gs.find((x) => x !== norm(kata)) || gs[0] || norm(arti);
+  const kt = g.split(' ');
+  const yang = kt.indexOf('yang');
+  if (yang >= 2) return kt.slice(0, yang).join(' ');
+  return kt.length > 5 ? `${kt.slice(0, 5).join(' ')}…` : g;
+}
+
+const fmtAngka = (n) => Number(n || 0).toLocaleString('id-ID');
+/* Isi penanda {jumlahKata}, {jumlahContoh}, … dengan angka dari meta kamus */
+const isiAngka = (s) => String(s).replace(/\{(\w+)\}/g, (m, k) => (k in KAMUS.meta ? fmtAngka(KAMUS.meta[k]) : m));
+
 /* ---------- Hero ---------- */
 const Hero = {
   i: 0,
@@ -233,11 +295,12 @@ const Hero = {
     }
 
     const totals = {
-      kamus: DATA.kamus.length + DATA.frasa.length,
+      kamus: KAMUS.meta.jumlahKata,
+      contoh: KAMUS.meta.jumlahContoh || 0,
       marga: DATA.marga.length,
-      kuis: DATA.kuis.length,
       kab: 4,
     };
+    $$('[data-meta]').forEach((el) => { el.textContent = fmtAngka(KAMUS.meta[el.dataset.meta]); });
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return;
@@ -249,16 +312,106 @@ const Hero = {
   },
 };
 
+/* ---------- Maskot hero (Alpine.js + GSAP + dotLottie) ----------
+   Dipakai lewat x-data="heroMaskot" di index.html. GSAP memunculkan bingkai maskot,
+   badge AI Penerjemah, dan kartu sapaan bergiliran, lalu membuatnya melayang.
+   Raka mengucapkan "Tabik Pun!" saat halaman dibuka, saat badge di-hover, dan
+   saat diklik (memutar tabik-pun.mp3 bila file itu tersedia). */
+document.addEventListener('alpine:init', () => {
+  window.Alpine.data('heroMaskot', () => ({
+    bicara: false,
+    suaraMain: false,
+    timer: 0,
+
+    init() {
+      // Muat animasi gelombang (assets/lottie/gelombang-suara.js) setelah <dotlottie-player> siap
+      const wave = this.$refs.wave;
+      if (window.LOTTIE_GELOMBANG) {
+        customElements.whenDefined('dotlottie-player')
+          .then(() => wave.updateComplete)
+          .then(() => wave.load(JSON.stringify(window.LOTTIE_GELOMBANG)))
+          .catch(() => {});
+      }
+
+      const g = window.gsap;
+      const { frame, melayang, kartu } = this.$refs;
+      // Bila GSAP terlambat dimuat, cadangan CSS (.gsap-masuk) sudah mulai memunculkan elemen
+      const terlambat = parseFloat(getComputedStyle(frame).opacity) > 0.05;
+      if (!g || terlambat) {
+        if (g) {
+          g.set([frame, melayang, kartu], { autoAlpha: 1 });
+          document.documentElement.classList.add('gsap-aktif');
+          if (!reduceMotion) this.melayang(g);
+        }
+        setTimeout(() => this.sapa(), 400);
+        return;
+      }
+      document.documentElement.classList.add('gsap-aktif');
+      if (reduceMotion) {
+        g.set([frame, melayang, kartu], { autoAlpha: 1 });
+        setTimeout(() => this.sapa(), 400);
+        return;
+      }
+      g.timeline({ defaults: { ease: 'power3.out' } })
+        .fromTo(frame, { autoAlpha: 0, y: 48, scale: 0.94 }, { autoAlpha: 1, y: 0, scale: 1, duration: 1.1 }, 0.15)
+        .fromTo(melayang, { autoAlpha: 0, x: -28, scale: 0.7 }, { autoAlpha: 1, x: 0, scale: 1, duration: 0.8, ease: 'back.out(2.2)' }, '-=0.55')
+        .fromTo(kartu, { autoAlpha: 0, y: 28 }, { autoAlpha: 1, y: 0, duration: 0.8 }, '-=0.5')
+        .call(() => {
+          this.melayang(g);
+          this.sapa();
+        });
+    },
+
+    melayang(g) {
+      g.to(this.$refs.frame, { y: -12, duration: 2.8, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+      g.to(this.$refs.melayang, { y: -9, duration: 2.2, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.6 });
+    },
+
+    /* Tampilkan "Tabik Pun!" + gelombang suara; suara=true juga memutar rekaman Raka */
+    sapa(suara = false) {
+      if (this.suaraMain && !suara) return; // jangan memotong suara yang sedang diputar
+      clearTimeout(this.timer);
+      this.bicara = true;
+      this.$refs.wave.play?.();
+      window.gsap?.fromTo(this.$refs.badge, { scale: 0.88 }, { scale: 1, duration: 0.7, ease: 'elastic.out(1, 0.45)', overwrite: 'auto' });
+      if (!suara) {
+        this.selesai(2800);
+        return;
+      }
+      const audio = this.$refs.audio;
+      // tabik-pun.mp3 belum ada / gagal dimuat: cukup gelembung & gelombang
+      if (audio.error || audio.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        this.selesai(2000);
+        return;
+      }
+      Suara.stop();
+      audio.currentTime = 0;
+      audio.play().catch(() => this.selesai(2000));
+      this.selesai(8000); // pengaman bila event "ended" tidak pernah datang
+    },
+
+    /* Hentikan gelombang & sembunyikan gelembung setelah ms */
+    selesai(ms) {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.bicara = false;
+        this.suaraMain = false;
+        this.$refs.wave.stop?.();
+      }, ms);
+    },
+  }));
+});
+
 function countUp(el, target) {
   if (reduceMotion) {
-    el.textContent = target;
+    el.textContent = fmtAngka(target);
     return;
   }
   const t0 = performance.now();
   const dur = 1200;
   const step = (now) => {
     const p = Math.min(1, (now - t0) / dur);
-    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+    el.textContent = fmtAngka(Math.round(target * (1 - Math.pow(1 - p, 3))));
     if (p < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -266,22 +419,27 @@ function countUp(el, target) {
 
 /* =============================================================================
    AI PENERJEMAH — mesin NLP ringan di browser
-   1) Pencocokan frasa terpanjang (n-gram) dari kamus + frasa
+   Pengetahuan:
+   a) Kamus Basa Kumoring (kata dasar + turunan, arti Indonesia → glosa)
+   b) Padanan kata fungsi hasil penyelarasan korpus contoh kalimat (skor Dice)
+   c) Padanan berbukti dari data.js
+   Proses:
+   1) Pencocokan frasa terpanjang (n-gram)
    2) Stemming Bahasa Indonesia (imbuhan me-, ber-, di-, -kan, -an, -nya, …)
-   3) Akhiran kepemilikan: -ku, -mu, -nya ⇄ -ku, -mu, -ni
+   3) Akhiran: -nya ⇄ -na, -ku, -mu, -lah ⇄ -da
    4) Reduplikasi (jama-jama) dan pola "sangat X" → "X nihan"
    5) Koreksi ejaan dengan jarak Levenshtein
-   6) Skor keyakinan berbobot per kata
+   6) Peringkat kandidat (ketepatan glosa + frekuensi korpus) & skor keyakinan
    ============================================================================= */
 const Penerjemah = (() => {
-  const dict = { id: new Map(), km: new Map() };
+  const dict = { id: new Map(), km: new Map() }; // kunci → { out, type?, ref? }
   const maxLen = { id: 1, km: 1 };
   const same = new Set(DATA.kataSama.map(norm));
   const LABEL = { id: 'Bahasa Indonesia', km: 'Basa Kumoring' };
-  const BOBOT = { exact: 1, same: 1, stem: 0.8, fuzzy: 0.6, unknown: 0 };
+  const BOBOT = { exact: 1, same: 0.9, korpus: 0.85, stem: 0.8, fuzzy: 0.6, unknown: 0 };
   const SUFIKS = {
-    id: [['nya', 'ni'], ['ku', 'ku'], ['mu', 'mu'], ['lah', ''], ['kah', ''], ['pun', '']],
-    km: [['ni', 'nya'], ['ku', 'ku'], ['mu', 'mu']],
+    id: [['nya', 'na'], ['ku', 'ku'], ['mu', 'mu'], ['lah', 'da'], ['kah', ''], ['pun', '']],
+    km: [['na', 'nya'], ['ku', 'ku'], ['mu', 'mu'], ['da', 'lah']],
   };
   const PREFIKS = [
     [/^meny([a-z]{3,})$/, (m) => [`s${m}`]],
@@ -299,19 +457,75 @@ const Penerjemah = (() => {
   ];
   const TOKEN_RE = /[\p{L}\p{N}]+(?:[-'][\p{L}\p{N}]+)*|[^\s\p{L}\p{N}]/gu;
 
-  function add(lang, key, out) {
+  // Kosakata yang benar-benar dipakai di korpus: kata ini tidak "dikoreksi ejaannya"
+  // (mencegah "sedang" → "senang" atau "kasih" → "masih").
+  const kosakata = { id: new Set(), km: new Set() };
+  const kataDari = (s) => String(s).toLowerCase().match(/[a-z]+(?:[-'][a-z]+)*/g) || [];
+  KAMUS.entri.forEach((e) => e.contoh.forEach(([k, i]) => {
+    kataDari(k).forEach((w) => kosakata.km.add(w));
+    kataDari(i).forEach((w) => kosakata.id.add(w));
+  }));
+
+  // Arti kamus yang panjang diringkas ke intinya: "permisi kepada orang-orang yang …" → "permisi"
+  const PENGHUBUNG = /\s(?:kepada|yang|untuk|sambil|dengan|dari|karena|seperti|dalam|di|ke|pada|saat|ketika|agar)\s/;
+  function ringkas(g) {
+    if (g.split(' ').length <= 3) return g;
+    const inti = g.split(PENGHUBUNG)[0];
+    return inti.split(' ').length <= 4 ? inti : g.split(' ').slice(0, 3).join(' ');
+  }
+
+  function set(lang, key, val) {
     const k = norm(key);
-    if (!k || dict[lang].has(k)) return;
-    dict[lang].set(k, out);
+    if (!k) return;
+    dict[lang].set(k, val);
     maxLen[lang] = Math.max(maxLen[lang], k.split(' ').length);
   }
 
   function build() {
-    [...DATA.frasa, ...DATA.kamus].forEach((e) => {
-      const ids = e.id.split('|').map((s) => s.trim());
-      const kms = e.km.split('|').map((s) => s.trim());
-      ids.forEach((k) => add('id', k, kms[0]));
-      kms.forEach((k) => add('km', k, ids[0]));
+    const korpusKm = new Map(); // pasangan korpus terkuat untuk tiap kata Komering
+    KAMUS.selaras.forEach(([km, id, skor]) => {
+      if (!korpusKm.has(km) || korpusKm.get(km).skor < skor) korpusKm.set(km, { id, skor });
+    });
+    const bonusFrek = (w) => Math.log1p(KAMUS.frek.get(norm(w)) || 0) * 0.5;
+
+    // 1) Komering → Indonesia: kata dasar didahulukan, lalu yang contohnya terbanyak
+    const urut = [...KAMUS.entri].sort((a, b) => (a.induk ? 1 : 0) - (b.induk ? 1 : 0) || b.contoh.length - a.contoh.length);
+    urut.forEach((e) => [e.kata, ...e.varian].forEach((w) => {
+      const k = norm(w);
+      if (dict.km.has(k)) return;
+      const g = glosa(e.arti);
+      let out = ringkas(g[0] || norm(e.arti));
+      const kp = korpusKm.get(k);
+      // Korpus memilih glosa yang paling sering dipakai (kuti: "mereka, kalian" → kalian)
+      if (kp && kp.skor >= 0.75 && g.includes(kp.id)) out = kp.id;
+      else if (kp && kp.skor >= 0.5 && out.split(' ').length > 2) out = kp.id;
+      set('km', k, { out, ref: e });
+    }));
+    korpusKm.forEach((kp, km) => {
+      if (!dict.km.has(km)) set('km', km, { out: kp.id, type: 'korpus' });
+    });
+
+    // 2) Indonesia → Komering: kandidat berperingkat (glosa tunggal > glosa pertama > glosa lain;
+    //    kata dasar > turunan; makin sering muncul di korpus makin diutamakan)
+    const kandidat = new Map();
+    const usul = (key, skor, val) => {
+      const k = norm(key);
+      if (!k || k.split(' ').length > 3) return;
+      if (!kandidat.has(k) || kandidat.get(k).skor < skor) kandidat.set(k, { ...val, skor });
+    };
+    KAMUS.entri.forEach((e) => {
+      const g = glosa(e.arti);
+      g.forEach((gl, i) => usul(gl, (g.length === 1 ? 3 : i === 0 ? 2 : 1) + (e.induk ? 0 : 0.5) + bonusFrek(e.kata), { out: e.kata, ref: e }));
+    });
+    KAMUS.selaras.forEach(([km, id, skor]) => usul(id, 2.5 + skor + bonusFrek(km), { out: km, type: 'korpus' }));
+    kandidat.forEach((v, k) => set('id', k, v));
+
+    // 3) Padanan berbukti dari data.js menimpa keduanya
+    DATA.padanan.forEach((p) => {
+      const ids = p.id.split('|');
+      const kms = p.km.split('|');
+      ids.forEach((k) => set('id', k, { out: kms[0] }));
+      kms.forEach((k) => set('km', k, { out: ids[0] }));
     });
   }
 
@@ -336,13 +550,14 @@ const Penerjemah = (() => {
 
   function derive(w) {
     for (const c of idCandidates(w)) {
-      if (dict.id.has(c)) return { out: dict.id.get(c), base: c };
+      const v = dict.id.get(c);
+      if (v) return { out: v.out, base: c, ref: v.ref };
     }
     return null;
   }
 
   function fuzzy(w, lang) {
-    if (w.length < 5) return null;
+    if (w.length < 5 || kosakata[lang].has(w)) return null;
     const max = w.length >= 8 ? 2 : 1;
     let best = null;
     let bestD = max + 1;
@@ -359,17 +574,20 @@ const Penerjemah = (() => {
 
   function lookupWord(w, lang) {
     const d = dict[lang];
-    if (d.has(w)) return { out: d.get(w), type: 'exact' };
+    if (d.has(w)) {
+      const v = d.get(w);
+      return { out: v.out, type: v.type || 'exact', ref: v.ref };
+    }
     if (same.has(w)) return { out: w, type: 'same' };
 
     for (const [suf, ganti] of SUFIKS[lang]) {
       if (w.length <= suf.length + 2 || !w.endsWith(suf)) continue;
       const base = w.slice(0, -suf.length);
       let hit = null;
-      if (d.has(base)) hit = { out: d.get(base) };
+      if (d.has(base)) hit = d.get(base);
       else if (same.has(base)) hit = { out: base };
       else if (lang === 'id') hit = derive(base);
-      if (hit) return { out: hit.out + ganti, type: 'stem', base: hit.base || base };
+      if (hit) return { out: hit.out + ganti, type: 'stem', base: hit.base || base, ref: hit.ref };
     }
 
     if (lang === 'id') {
@@ -378,7 +596,10 @@ const Penerjemah = (() => {
     }
 
     const fz = fuzzy(w, lang);
-    if (fz) return { out: d.get(fz), type: 'fuzzy', base: fz };
+    if (fz) {
+      const v = d.get(fz);
+      return { out: v.out, type: 'fuzzy', base: fz, ref: v.ref };
+    }
     return null;
   }
 
@@ -426,9 +647,9 @@ const Penerjemah = (() => {
       let matched = false;
       for (let L = Math.min(maxLen[from], run); L >= 2; L--) {
         const src = toks.slice(i, i + L).map((x) => x.t).join(' ');
-        const out = dict[from].get(norm(src));
-        if (out) {
-          segs.push({ src, out, type: 'exact', cap: isCap(tk.t) });
+        const v = dict[from].get(norm(src));
+        if (v) {
+          segs.push({ src, out: v.out, type: v.type || 'exact', ref: v.ref, cap: isCap(tk.t) });
           i += L;
           matched = true;
           break;
@@ -454,11 +675,11 @@ const Penerjemah = (() => {
     return { text: text2, segs, conf };
   }
 
-  /* Tebak bahasa: jumlah kata yang cocok persis (frasa dihitung per kata).
+  /* Tebak bahasa: jumlah kata yang dikenali langsung (frasa dihitung per kata).
      Contoh "api kabar": frasa Komering (2 kata) mengalahkan "api" Indonesia (1). */
   function detect(text) {
     const score = (lang) => translate(text, lang).segs
-      .reduce((a, s) => a + (s.type === 'exact' ? s.src.split(/\s+/).length : 0), 0);
+      .reduce((a, s) => a + (s.type === 'exact' || s.type === 'korpus' ? s.src.split(/\s+/).length : 0), 0);
     return score('km') > score('id') ? 'km' : 'id';
   }
 
@@ -478,8 +699,8 @@ const Penerjemah = (() => {
     $('#trTo').classList.toggle('km', to === 'km');
     $('#trOutLabel').textContent = `Hasil · ${LABEL[to]}`;
     $('#trInput').placeholder = from === 'id'
-      ? 'Ketik kalimat… contoh: Saya mau makan pindang ikan'
-      : 'Ketik Basa Kumoring… contoh: Nyak haga mangan';
+      ? 'Ketik kalimat… contoh: Saya mau makan ikan'
+      : 'Ketik Basa Kumoring… contoh: Nyak haga mongan';
     renderExamples();
   }
 
@@ -509,16 +730,24 @@ const Penerjemah = (() => {
     const note = {
       exact: 'cocok di kamus',
       same: 'kata sama/serapan',
+      korpus: 'dipelajari dari korpus',
       stem: 'dari kata dasar',
       fuzzy: 'koreksi ejaan',
       unknown: 'belum dikenal',
     };
+    const potong = (t, n = 26) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
     $('#trBreakdown').innerHTML = res.segs
       .filter((s) => s.type !== 'punct')
       .map((s, k) => {
-        const hint = s.type === 'fuzzy' ? `maksudmu “${s.base}”?` : s.type === 'stem' && s.base ? `dasar: ${s.base}` : note[s.type];
-        return `<span class="seg ${s.type}" style="animation-delay:${k * 40}ms" title="${esc(note[s.type])}">
-          <small>${esc(s.src)}</small><b>${esc(s.out)}</b><small>${esc(hint)}</small></span>`;
+        let hint = note[s.type];
+        if (s.type === 'fuzzy') hint = `maksudmu “${s.base}”?`;
+        else if (s.type === 'stem' && s.base) hint = `dasar: ${s.base}`;
+        else if (s.ref && from === 'km' && norm(s.ref.arti) !== norm(s.out)) hint = potong(s.ref.arti);
+        else if (s.ref) hint = s.ref.id;
+        const title = s.ref ? `${s.ref.kata} — ${s.ref.arti} (${s.ref.id}). Klik untuk buka di kamus.` : note[s.type];
+        const attr = `class="seg ${s.type}" style="animation-delay:${k * 40}ms" title="${esc(title)}"`;
+        const isi = `<small>${esc(s.src)}</small><b>${esc(s.out)}</b><small>${esc(hint)}</small>`;
+        return s.ref ? `<button type="button" ${attr} data-cari="${esc(s.ref.kata)}">${isi}</button>` : `<span ${attr}>${isi}</span>`;
       })
       .join('');
   }
@@ -589,83 +818,147 @@ const Penerjemah = (() => {
   return { init, translate, detect, LABEL };
 })();
 
-/* ---------- Kamus mini & kata hari ini ---------- */
+/* ---------- Kamus Basa Kumoring & kata hari ini ---------- */
 const Kamus = (() => {
   const PER_PAGE = 12;
-  let kat = 'semua';
+  let kelas = 'semua';
   let query = '';
+  let dasarSaja = false;
   let shown = PER_PAGE;
+  let debounce;
 
-  const primary = (s) => s.split('|')[0];
-  const alt = (s) => s.split('|').slice(1).join(', ');
+  /* Peringkat hasil: kata persis > arti persis > awalan kata > kata dalam arti > … > contoh kalimat */
+  function skor(e, q) {
+    const w = norm(e.kata);
+    if (w === q || e.varian.some((v) => norm(v) === q)) return 100;
+    if (glosa(e.arti).includes(q)) return 80;
+    if (w.startsWith(q)) return 60;
+    const arti = ` ${norm(e.arti)} `;
+    if (arti.includes(` ${q} `)) return 45;
+    if (w.includes(q)) return 30;
+    if (arti.includes(q)) return 20;
+    if (e.contoh.some(([k, i]) => norm(`${k} ${i}`).includes(q))) return 5;
+    return 0;
+  }
 
-  function filtered() {
+  function hasil() {
     const q = norm(query);
-    return DATA.kamus.filter((e) => {
-      if (kat !== 'semua' && e.kat !== kat) return false;
-      if (!q) return true;
-      return norm(e.id).includes(q) || norm(e.km).includes(q);
-    });
+    const list = KAMUS.entri.filter((e) => (kelas === 'semua' || e.kelas === kelas) && (!dasarSaja || !e.induk));
+    if (!q) return list;
+    // Skor sama → kata yang lebih sering dipakai di korpus didahulukan
+    return list
+      .map((e) => [skor(e, q) - (e.induk ? 1 : 0), KAMUS.frek.get(norm(e.kata)) || 0, e])
+      .filter(([s]) => s > 0)
+      .sort((a, b) => b[0] - a[0] || b[1] - a[1])
+      .map(([, , e]) => e);
   }
 
   function card(e) {
-    const contoh = e.contoh
-      ? `<p class="text-xs mt-3 pt-3 border-t italic" style="border-color:var(--garis);color:var(--teks-samar)">
-           “${esc(e.contoh[0])}”<br><span class="not-italic">${esc(e.contoh[1])}</span></p>`
-      : '';
-    const alternatif = alt(e.id) ? `<span style="color:var(--teks-samar)"> · ${esc(alt(e.id))}</span>` : '';
+    const label = DATA.kelasKata[e.kelas] || DATA.kelasKata[''];
+    const anak = e.induk ? [] : KAMUS.turunanDari(e.kata);
+    const contoh = e.contoh.slice(0, 2)
+      .map(([k, i]) => `<p class="mt-1.5"><span class="italic">“${esc(k)}”</span><br>${esc(i)}</p>`).join('');
     return `<article class="kamus-card glass">
       <div class="flex items-start justify-between gap-2">
         <div class="min-w-0">
-          <p class="font-display text-xl font-bold text-emas-300 break-words">${esc(primary(e.km))}</p>
-          <p class="text-sm mt-0.5" style="color:var(--teks-redup)">${esc(primary(e.id))}${alternatif}</p>
+          <p class="font-display text-xl font-bold text-emas-300 break-words">${esc(e.kata)}</p>
+          <p class="text-sm mt-0.5" style="color:var(--teks-redup)">${esc(e.arti)}</p>
         </div>
-        <button class="icon-btn sm" data-say="${esc(primary(e.km))}" aria-label="Dengarkan ${esc(primary(e.km))}">${icon('volume')}</button>
+        <button class="icon-btn sm" data-say="${esc(e.kata)}" aria-label="Dengarkan ${esc(e.kata)}">${icon('volume')}</button>
       </div>
-      <span class="tag mt-3">${esc(DATA.kategori[e.kat] || e.kat)}</span>
-      ${contoh}
+      <div class="flex flex-wrap gap-1.5 mt-3">
+        <span class="tag">${esc(label)}</span>
+        ${e.induk ? `<button type="button" class="tag tag-link" data-cari="${esc(e.induk)}">turunan dari ${esc(e.induk)}</button>` : ''}
+        ${e.varian.length ? `<span class="tag tag-soft">varian: ${esc(e.varian.join(', '))}</span>` : ''}
+        ${e.lihat ? `<button type="button" class="tag tag-link" data-cari="${esc(e.lihat)}">lihat: ${esc(e.lihat)}</button>` : ''}
+      </div>
+      ${contoh ? `<div class="text-xs mt-3 pt-2 border-t" style="border-color:var(--garis);color:var(--teks-samar)">${contoh}</div>` : ''}
+      ${anak.length ? `<details class="turunan mt-3"><summary>${anak.length} kata turunan</summary><ul>
+        ${anak.map((t) => `<li><button type="button" data-cari="${esc(t.kata)}">${esc(t.kata)}</button> — ${esc(t.arti)}</li>`).join('')}
+      </ul></details>` : ''}
+      <p class="kamus-id">${esc(e.id)}</p>
     </article>`;
   }
 
   function render() {
-    const list = filtered();
+    const list = hasil();
+    const q = query.trim();
     $('#kamusList').innerHTML = list.length
       ? list.slice(0, shown).map(card).join('')
-      : '<p class="col-span-full text-center py-8" style="color:var(--teks-samar)">Kata tidak ditemukan. Coba kata lain, ya!</p>';
+      : `<p class="col-span-full text-center py-8" style="color:var(--teks-samar)">Kata “${esc(q)}” belum ada di kamus. Coba ejaan lain, atau pakai penerjemah di atas.</p>`;
     $('#kamusMore').classList.toggle('is-hidden', shown >= list.length);
+    $('#kamusInfo').textContent = q
+      ? `${fmtAngka(list.length)} hasil untuk “${q}”`
+      : `Menampilkan ${fmtAngka(Math.min(shown, list.length))} dari ${fmtAngka(list.length)} kata`;
+  }
+
+  function setKelas(k) {
+    kelas = k;
+    $$('#kamusFilter [data-kelas]').forEach((c) => {
+      c.classList.toggle('active', c.dataset.kelas === k);
+      c.setAttribute('aria-pressed', String(c.dataset.kelas === k));
+    });
+  }
+
+  /* Cari kata dari mana saja (tombol data-cari, chatbot, penerjemah) */
+  function cari(kata) {
+    query = kata;
+    shown = PER_PAGE;
+    setKelas('semua');
+    $('#kamusSearch').value = kata;
+    render();
+    $('#kamus').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
   }
 
   function wordOfDay() {
-    const pool = DATA.kamus.filter((e) => e.contoh);
+    const pool = KAMUS.layakAcak.filter((e) => ['n', 'v', 'a'].includes(e.kelas)
+      && glosa(e.arti)[0] && glosa(e.arti)[0].split(' ').length <= 3 && glosa(e.arti)[0] !== norm(e.kata));
+    if (!pool.length) return;
     const now = new Date();
     const day = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
     const e = pool[day % pool.length];
-    $('#wotdKm').textContent = primary(e.km);
-    $('#wotdId').textContent = `Artinya: ${primary(e.id)}`;
-    $('#wotdContoh').textContent = `“${e.contoh[0]}” — ${e.contoh[1]}`;
-    $('#wotdSpeak').addEventListener('click', (ev) => Suara.speak(`${primary(e.km)}. ${e.contoh[0]}`, { btn: ev.currentTarget }));
+    $('#wotdKm').textContent = e.kata;
+    $('#wotdId').textContent = `Artinya: ${e.arti}`;
+    $('#wotdContoh').textContent = `“${e.contoh[0][0]}” — ${e.contoh[0][1]}`;
+    $('#wotdKm').dataset.cari = e.kata;
+    $('#wotdSpeak').addEventListener('click', (ev) => Suara.speak(`${e.kata}. ${e.contoh[0][0]}`, { btn: ev.currentTarget }));
   }
 
   function init() {
-    const cats = { semua: 'Semua', ...DATA.kategori };
-    $('#kamusFilter').innerHTML = Object.entries(cats)
-      .map(([k, v]) => `<button type="button" class="chip${k === kat ? ' active' : ''}" data-kat="${k}" aria-pressed="${k === kat}">${esc(v)}</button>`)
-      .join('');
+    const jumlah = {};
+    KAMUS.entri.forEach((e) => { jumlah[e.kelas] = (jumlah[e.kelas] || 0) + 1; });
+    const urutan = ['semua', ...Object.keys(DATA.kelasKata).filter((k) => jumlah[k])];
+    $('#kamusFilter').innerHTML = `${urutan.map((k) => {
+      const nama = k === 'semua' ? 'Semua' : DATA.kelasKata[k];
+      const n = k === 'semua' ? KAMUS.entri.length : jumlah[k];
+      return `<button type="button" class="chip${k === kelas ? ' active' : ''}" data-kelas="${k}" aria-pressed="${k === kelas}">${esc(nama)} <span class="opacity-60">${fmtAngka(n)}</span></button>`;
+    }).join('')}
+      <button type="button" class="chip" id="kamusDasar" aria-pressed="false">Kata dasar saja</button>
+      <button type="button" class="chip" id="kamusAcak">🎲 Kata acak</button>`;
+
     $('#kamusFilter').addEventListener('click', (e) => {
-      const b = e.target.closest('[data-kat]');
-      if (!b) return;
-      kat = b.dataset.kat;
+      const b = e.target.closest('[data-kelas]');
+      if (b) {
+        setKelas(b.dataset.kelas);
+        shown = PER_PAGE;
+        render();
+      }
+    });
+    $('#kamusDasar').addEventListener('click', (e) => {
+      dasarSaja = !dasarSaja;
+      e.currentTarget.classList.toggle('active', dasarSaja);
+      e.currentTarget.setAttribute('aria-pressed', String(dasarSaja));
       shown = PER_PAGE;
-      $$('#kamusFilter .chip').forEach((c) => {
-        c.classList.toggle('active', c === b);
-        c.setAttribute('aria-pressed', String(c === b));
-      });
       render();
+    });
+    $('#kamusAcak').addEventListener('click', () => {
+      if (KAMUS.layakAcak.length) cari(pick(KAMUS.layakAcak).kata);
     });
     $('#kamusSearch').addEventListener('input', (e) => {
       query = e.target.value;
       shown = PER_PAGE;
-      render();
+      clearTimeout(debounce);
+      debounce = setTimeout(render, 150);
     });
     $('#kamusMore').addEventListener('click', () => {
       shown += PER_PAGE;
@@ -675,11 +968,18 @@ const Kamus = (() => {
       const b = e.target.closest('[data-say]');
       if (b) Suara.speak(b.dataset.say, { btn: b });
     });
+    // Tautan [data-cari] di seluruh halaman membuka kata itu di kamus
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-cari]');
+      if (!b) return;
+      e.preventDefault();
+      cari(b.dataset.cari);
+    });
     render();
     wordOfDay();
   }
 
-  return { init };
+  return { init, cari };
 })();
 
 /* ---------- Sejarah ---------- */
@@ -839,344 +1139,326 @@ const Busana = {
     });
     select(1);
 
-    $('#adatSteps').innerHTML = DATA.adatPernikahan.map((s, i) => `
-      <li class="glass rounded-2xl p-5 reveal ${i ? `d${Math.min(i, 3)}` : ''}">
+    $('#adatSteps').innerHTML = DATA.adatPernikahan.map((s, i) => {
+      const entri = KAMUS.id(s.kamus);
+      return `
+      <li class="glass rounded-2xl p-5 reveal ${i % 3 ? `d${i % 3}` : ''} flex flex-col">
         <div class="flex items-center gap-3">
           <span class="step-num" aria-hidden="true">${s.ikon}</span>
           <span class="text-xs font-bold tracking-widest text-emas-400">TAHAP ${i + 1}</span>
         </div>
-        <h4 class="font-display text-lg font-bold text-white mt-4">${esc(s.judul)}</h4>
-        <p class="text-sm leading-relaxed mt-2" style="color:var(--teks-redup)">${esc(s.isi)}</p>
-      </li>`).join('');
+        <h4 class="font-display text-xl font-bold text-emas-300 mt-4">${esc(s.km)}</h4>
+        <p class="text-sm font-semibold text-white">${esc(s.judul)}</p>
+        <p class="text-sm leading-relaxed mt-2 flex-1" style="color:var(--teks-redup)">${esc(s.isi)}</p>
+        ${entri ? `<button type="button" class="tag tag-link self-start mt-4" data-cari="${esc(entri.kata)}">📖 ${esc(entri.kata)} · ${esc(entri.id)}</button>` : ''}
+      </li>`;
+    }).join('');
   },
 };
 
-/* ---------- Kuliner ---------- */
-const Kuliner = {
-  init() {
-    const grid = $('#kulinerGrid');
-    grid.innerHTML = DATA.kuliner.map((k, i) => `
-      <article class="flip-card reveal ${i % 3 ? `d${i % 3}` : ''}" tabindex="0" role="button" aria-pressed="false"
-        aria-label="${esc(k.nama)} — ketuk untuk melihat resep">
-        <div class="flip-inner">
-          <div class="flip-face glass">
-            <div class="food-emoji" aria-hidden="true">${k.emoji}</div>
-            <span class="tag mt-5 self-start">${esc(k.jenis)}</span>
-            <h3 class="font-display text-2xl font-bold text-white mt-3">${esc(k.nama)}</h3>
-            <p class="text-sm leading-relaxed mt-2 flex-1" style="color:var(--teks-redup)">${esc(k.isi)}</p>
-            <p class="text-xs font-bold text-emas-400 mt-4 flex items-center gap-1.5">Lihat resep ${icon('arrow')}</p>
+/* ---------- Kuliner: kartu berfoto + dialog kisah hidangan ---------- */
+const Kuliner = (() => {
+  const items = DATA.kuliner;
+  let dlg = null;
+  let current = 0;
+  let pemicu = null;
+
+  /* Tombol kata kamus: "lalak · pedas" → membuka kata itu di kamus */
+  function tagKata(kata, arti) {
+    const e = KAMUS.cari(kata).find((x) => !x.sensitif);
+    if (!e) return '';
+    return `<button type="button" class="tag tag-link" data-cari="${esc(e.kata)}" title="${esc(e.arti)}"><strong>${esc(e.kata)}</strong>&nbsp;· ${esc(arti || artiSingkat(e.arti, e.kata))}</button>`;
+  }
+
+  const foto = (k, kelas) => `
+    <div class="${kelas}${k.kecil ? ' kecil' : ''}" style="--foto:url('${esc(k.foto)}')">
+      <img src="${esc(k.foto)}" alt="${esc(k.alt)}" loading="lazy" decoding="async">
+    </div>`;
+
+  function kartu(k, i) {
+    return `
+    <article class="food-card glass reveal${i === 0 ? ' sm:col-span-2' : ''}${i % 4 ? ` d${i % 4}` : ''}">
+      <div class="relative">
+        ${foto(k, 'food-photo')}
+        <span class="tag food-jenis">${esc(k.jenis)}</span>
+      </div>
+      <div class="p-5 flex flex-col flex-1">
+        <h3 class="font-display text-xl font-bold text-white">${esc(k.nama)}</h3>
+        <p class="text-sm text-emas-300 font-semibold">${esc(k.alias)}</p>
+        <p class="text-sm leading-relaxed mt-2 flex-1" style="color:var(--teks-redup)">${esc(k.teaser)}</p>
+        <button type="button" class="food-more" data-food="${i}" aria-haspopup="dialog">Baca kisahnya ${icon('arrow')}</button>
+      </div>
+    </article>`;
+  }
+
+  function isiDialog(i) {
+    current = (i + items.length) % items.length;
+    const k = items[current];
+    const entri = k.kamus ? KAMUS.id(k.kamus) : null;
+    const contoh = entri?.contoh[0];
+    const prev = items[(current - 1 + items.length) % items.length];
+    const next = items[(current + 1) % items.length];
+    dlg.innerHTML = `
+      <div class="food-dialog-inner glass-strong">
+        ${foto(k, 'food-dialog-photo')}
+        <button type="button" class="icon-btn food-close" data-tutup aria-label="Tutup">${icon('x')}</button>
+        <div class="p-6 sm:p-8">
+          <span class="tag">${esc(k.jenis)}</span>
+          <h3 id="kulinerJudul" class="font-display text-3xl font-bold text-white mt-3">${esc(k.nama)}</h3>
+          <p class="text-emas-300 font-semibold">${esc(k.alias)}</p>
+          ${k.cerita.map((p) => `<p class="leading-relaxed mt-4" style="color:var(--teks-redup)">${esc(p)}</p>`).join('')}
+
+          <div class="grid sm:grid-cols-2 gap-4 mt-6">
+            <div class="food-box">
+              <p class="eyebrow">Bahan Utama</p>
+              <ul class="mt-3 space-y-1.5 text-sm" style="color:var(--teks-redup)">
+                ${k.bahan.map((b) => `<li class="flex gap-2"><span class="text-emas-400">◆</span>${esc(b)}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="food-box">
+              <p class="eyebrow">Cara Menikmati</p>
+              <p class="mt-3 text-sm leading-relaxed" style="color:var(--teks-redup)">${esc(k.sajian)}</p>
+            </div>
           </div>
-          <div class="flip-face flip-back glass-strong">
-            <p class="eyebrow">Bahan</p>
-            <ul class="mt-3 space-y-1.5 text-sm" style="color:var(--teks-redup)">
-              ${k.bahan.map((b) => `<li class="flex gap-2"><span class="text-emas-400">◆</span>${esc(b)}</li>`).join('')}
-            </ul>
-            <p class="eyebrow mt-5">Cara Singkat</p>
-            <p class="text-sm leading-relaxed mt-2" style="color:var(--teks-redup)">${esc(k.cara)}</p>
+
+          <div class="food-fakta mt-4">
+            <p class="eyebrow">💡 Tahukah Kamu?</p>
+            <p class="mt-2 text-sm leading-relaxed" style="color:var(--teks-redup)">${esc(k.fakta)}</p>
+          </div>
+
+          <p class="eyebrow mt-6">Kosakata di Pawon</p>
+          <div class="flex flex-wrap gap-2 mt-3">${(k.kosakata || []).map((w) => tagKata(w)).join('')}</div>
+
+          ${entri ? `
+          <div class="food-box mt-6">
+            <p class="eyebrow">Dari Kamus · ${esc(entri.id)}</p>
+            <p class="text-sm leading-relaxed mt-2" style="color:var(--teks-redup)"><strong class="text-emas-200">${esc(entri.kata)}</strong> — ${esc(entri.arti)}</p>
+            ${contoh ? `<p class="text-xs italic mt-2" style="color:var(--teks-samar)">“${esc(contoh[0])}” — ${esc(contoh[1])}</p>` : ''}
+          </div>` : ''}
+
+          <div class="flex justify-between gap-3 mt-8">
+            <button type="button" class="chip" data-geser="-1">← ${esc(prev.nama)}</button>
+            <button type="button" class="chip" data-geser="1">${esc(next.nama)} →</button>
           </div>
         </div>
-      </article>`).join('');
+      </div>`;
+    dlg.scrollTop = 0;
+    dlg.querySelector('.food-dialog-inner').scrollTop = 0;
+  }
 
-    const flip = (card) => {
-      const on = card.classList.toggle('flipped');
-      card.setAttribute('aria-pressed', String(on));
-    };
+  function buka(i, tombol) {
+    pemicu = tombol || null;
+    isiDialog(i);
+    if (!dlg.open) dlg.showModal();
+    dlg.querySelector('[data-tutup]').focus();
+  }
+
+  function geser(n, fokus) {
+    isiDialog(current + n);
+    dlg.querySelector(fokus).focus();
+  }
+
+  function init() {
+    const grid = $('#kulinerGrid');
+    grid.innerHTML = items.map(kartu).join('');
+    dlg = $('#kulinerDialog');
+
     grid.addEventListener('click', (e) => {
-      const c = e.target.closest('.flip-card');
-      if (c) flip(c);
+      const card = e.target.closest('.food-card');
+      if (!card) return;
+      const b = card.querySelector('[data-food]');
+      buka(Number(b.dataset.food), b);
     });
-    grid.addEventListener('keydown', (e) => {
-      const c = e.target.closest('.flip-card');
-      if (c && (e.key === 'Enter' || e.key === ' ')) {
-        e.preventDefault();
-        flip(c);
+
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg || e.target.closest('[data-tutup]')) {
+        dlg.close();
+        return;
+      }
+      const g = e.target.closest('[data-geser]');
+      if (g) {
+        geser(Number(g.dataset.geser), `[data-geser="${g.dataset.geser}"]`);
+        return;
+      }
+      // Tautan kamus: tutup dialog dulu, lalu handler global [data-cari] membuka kamus
+      if (e.target.closest('[data-cari]')) {
+        pemicu = null;
+        dlg.close();
       }
     });
-  },
-};
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') geser(e.key === 'ArrowLeft' ? -1 : 1, '[data-tutup]');
+    });
+    dlg.addEventListener('close', () => {
+      pemicu?.focus({ preventScroll: true });
+    });
+
+    $('#kulinerPenganan').innerHTML = DATA.penganan.map(([w, arti]) => tagKata(w, arti)).join('');
+  }
+
+  return { init };
+})();
 
 /* =============================================================================
-   PEMUTAR LAGU — musik disintesis dengan Web Audio API
-   Melodi petik (tangga nada pentatonik), bas, gendang "dum" & rebana "tak",
-   dijadwalkan dengan lookahead scheduler; lirik tersorot mengikuti waktu.
+   PEMUTAR LAGU — rekaman "Dang Lupa ko Komering" (assets/lagu/)
+   Lirik tersorot mengikuti waktu tiap baris (DATA.lagu…t); reff yang
+   dinyanyikan berulang menyala setiap kali muncul.
    ============================================================================= */
 const Lagu = (() => {
   const L = DATA.lagu;
-  const BEAT = 60 / L.bpm;
-  const NADA = [293.66, 329.63, 349.23, 440.0, 466.16, 587.33, 659.26, 698.46, 880.0]; // D E F A Bb D' E' F' A'
-  const AKAR = [73.42, 87.31, 110.0, 116.54]; // D F A Bb (oktaf rendah)
-  const events = [];
-  const lines = [];
-  let total = 0;
-
-  let ctx = null;
-  let comp = null;
-  let bus = null;
-  let noise = null;
-  let playing = false;
-  let startAt = 0;
-  let offset = 0;
-  let next = 0;
-  let timer = 0;
-  let raf = 0;
+  const lines = []; // baris tampil
+  const occ = []; // tiap kali sebuah baris dinyanyikan: { start, end, line }
+  let audio = null;
   let activeLine = -1;
+  let ikuti = true;
+  let raf = 0;
 
-  function compose() {
-    let t = 0;
-    const melodi = (mel, t0) => {
-      let tt = t0;
-      mel.forEach(([n, b]) => {
-        events.push({ t: tt, k: 'petik', f: NADA[n], d: b * BEAT });
-        tt += b * BEAT;
-      });
-    };
-    const iringan = (t0, beats, akar) => {
-      events.push({ t: t0, k: 'bas', f: AKAR[akar], d: beats * BEAT });
-      for (let i = 0; i < beats; i++) {
-        const tt = t0 + i * BEAT;
-        if (i % 4 === 0) events.push({ t: tt, k: 'dum', v: 1 });
-        else if (i % 4 === 2) events.push({ t: tt, k: 'dum', v: 0.55 });
-        else events.push({ t: tt, k: 'tak', v: 0.9 });
-        events.push({ t: tt + BEAT / 2, k: 'tak', v: 0.35 });
-      }
-    };
-
-    melodi(L.intro, t);
-    iringan(t, 8, 0);
-    t += 8 * BEAT;
-
-    L.urutan.forEach((bi) => {
-      const bag = L.bagian[bi];
-      bag.baris.forEach((b, j) => {
-        lines.push({ start: t, end: t + 8 * BEAT, km: b.km, id: b.id, label: j === 0 ? bag.label : null });
-        melodi(b.mel, t);
-        iringan(t, 8, b.akar);
-        t += 8 * BEAT;
-      });
+  function build() {
+    L.bagian.forEach((bag, bi) => bag.baris.forEach((b, j) => {
+      const li = lines.length;
+      lines.push({ ...b, bi, label: j === 0 ? bag.label : null, ulang: j === 0 ? bag.ulang : null });
+      b.t.forEach((start) => occ.push({ start, line: li }));
+    }));
+    occ.sort((a, b) => a.start - b.start);
+    // Baris menyala sampai baris berikutnya, jeda musik, atau akhir nyanyian
+    occ.forEach((o, i) => {
+      const next = i + 1 < occ.length ? occ[i + 1].start : Infinity;
+      const jeda = L.jeda.find(([a]) => a > o.start);
+      o.end = Math.min(next, jeda ? jeda[0] : Infinity, L.selesai);
     });
-
-    // Penutup
-    events.push({ t, k: 'petik', f: NADA[0], d: 4 * BEAT }, { t, k: 'petik', f: NADA[5], d: 4 * BEAT });
-    events.push({ t, k: 'bas', f: AKAR[0], d: 4 * BEAT }, { t, k: 'dum', v: 1 });
-    t += 4 * BEAT;
-    total = t;
-    events.sort((a, b) => a.t - b.t);
   }
 
-  function ensureCtx() {
-    if (ctx) return true;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) {
-      Toast.show('Browser ini belum mendukung Web Audio.');
-      return false;
-    }
-    ctx = new AC();
-    comp = ctx.createDynamicsCompressor();
-    comp.connect(ctx.destination);
-    noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.3), ctx.sampleRate);
-    const ch = noise.getChannelData(0);
-    for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-    return true;
+  const occAt = (pos) => occ.findIndex((o) => pos >= o.start && pos < o.end);
+  const durasi = () => (audio && Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : L.durasi);
+
+  function status(pos, oi) {
+    if (oi >= 0) return L.bagian[lines[occ[oi].line].bi].label;
+    if (pos < occ[0].start) return '♪ Intro musik';
+    if (pos >= L.selesai) return '♪ Penutup';
+    return '♪ Interlude musik';
   }
 
-  function env(g, when, peak, attack, release) {
-    g.gain.setValueAtTime(0.0001, when);
-    g.gain.exponentialRampToValueAtTime(peak, when + attack);
-    g.gain.exponentialRampToValueAtTime(0.0001, when + attack + release);
-  }
-
-  function petik(f, when, d) {
-    const o = ctx.createOscillator();
-    const o2 = ctx.createOscillator();
-    const g2 = ctx.createGain();
-    const lp = ctx.createBiquadFilter();
-    const g = ctx.createGain();
-    o.type = 'triangle';
-    o.frequency.value = f;
-    o2.type = 'sine';
-    o2.frequency.value = f * 2.005;
-    g2.gain.value = 0.3;
-    lp.type = 'lowpass';
-    lp.frequency.setValueAtTime(f * 8, when);
-    lp.frequency.exponentialRampToValueAtTime(f * 2, when + 0.4);
-    const rel = clamp(d * 1.2, 0.4, 1.6);
-    env(g, when, 0.22, 0.008, rel);
-    o.connect(lp);
-    o2.connect(g2).connect(lp);
-    lp.connect(g).connect(bus);
-    o.start(when);
-    o2.start(when);
-    o.stop(when + rel + 0.05);
-    o2.stop(when + rel + 0.05);
-  }
-
-  function bas(f, when, d) {
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = 'sine';
-    o.frequency.value = f;
-    g.gain.setValueAtTime(0.0001, when);
-    g.gain.exponentialRampToValueAtTime(0.16, when + 0.05);
-    g.gain.setValueAtTime(0.16, when + d * 0.75);
-    g.gain.exponentialRampToValueAtTime(0.0001, when + d);
-    o.connect(g).connect(bus);
-    o.start(when);
-    o.stop(when + d + 0.05);
-  }
-
-  function dum(when, v) {
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.frequency.setValueAtTime(150, when);
-    o.frequency.exponentialRampToValueAtTime(55, when + 0.18);
-    env(g, when, 0.55 * v, 0.004, 0.28);
-    o.connect(g).connect(bus);
-    o.start(when);
-    o.stop(when + 0.35);
-  }
-
-  function tak(when, v) {
-    const s = ctx.createBufferSource();
-    const bp = ctx.createBiquadFilter();
-    const g = ctx.createGain();
-    s.buffer = noise;
-    bp.type = 'bandpass';
-    bp.frequency.value = 2600;
-    bp.Q.value = 1.2;
-    env(g, when, 0.12 * v, 0.002, 0.07);
-    s.connect(bp).connect(g).connect(bus);
-    s.start(when);
-    s.stop(when + 0.1);
-  }
-
-  function schedule() {
-    const horizon = ctx.currentTime + 0.15;
-    while (next < events.length && startAt + events[next].t < horizon) {
-      const e = events[next++];
-      const when = Math.max(ctx.currentTime, startAt + e.t);
-      if (e.k === 'petik') petik(e.f, when, e.d);
-      else if (e.k === 'bas') bas(e.f, when, e.d);
-      else if (e.k === 'dum') dum(when, e.v);
-      else tak(when, e.v);
-    }
-  }
-
-  const position = () => (playing ? clamp(ctx.currentTime - startAt, 0, total) : offset);
-
-  async function play() {
-    if (playing || !ensureCtx()) return;
-    playing = true; // diklaim lebih awal agar klik ganda tidak memulai dua kali
-    Suara.stop();
-    if (ctx.state === 'suspended') await ctx.resume();
-    if (offset >= total) offset = 0;
-    bus = ctx.createGain();
-    bus.gain.value = 0.9;
-    bus.connect(comp);
-    startAt = ctx.currentTime + 0.05 - offset;
-    next = events.findIndex((e) => e.t >= offset - 1e-3);
-    if (next < 0) next = events.length;
-    schedule();
-    timer = setInterval(schedule, 25);
-    tick();
-  }
-
-  function halt() {
-    playing = false;
-    clearInterval(timer);
-    cancelAnimationFrame(raf);
-    if (bus) {
-      const b = bus;
-      b.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
-      setTimeout(() => b.disconnect(), 300);
-      bus = null;
-    }
-    updateUI();
-  }
-
-  function pause() {
-    if (!playing) return;
-    offset = position();
-    halt();
-  }
-
-  function seek(sec) {
-    const was = playing;
-    if (playing) halt();
-    offset = clamp(sec, 0, total);
-    if (was) play();
-    else updateUI();
-  }
-
-  function tick() {
-    if (position() >= total) {
-      halt();
-      offset = 0;
-      updateUI();
-      return;
-    }
-    updateUI();
-    raf = requestAnimationFrame(tick);
-  }
-
-  function lineAt(pos) {
-    return lines.findIndex((l) => pos >= l.start && pos < l.end);
+  function scrollKe(li) {
+    const box = $('#lyrics');
+    const el = box.querySelectorAll('.lyric-line')[li];
+    box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
   }
 
   function updateUI() {
-    const pos = position();
+    const pos = audio.currentTime;
+    const d = durasi();
     const seekEl = $('#laguSeek');
+    seekEl.max = d.toFixed(1);
     seekEl.value = pos.toFixed(1);
-    seekEl.style.setProperty('--pct', `${(pos / total) * 100}%`);
+    seekEl.style.setProperty('--pct', `${(pos / d) * 100}%`);
     $('#laguNow').textContent = fmtTime(pos);
-    $('#vinyl').classList.toggle('playing', playing);
+    $('#laguDur').textContent = fmtTime(d);
+
+    const oi = occAt(pos);
+    $('#laguStatus').textContent = status(pos, oi);
+    const li = oi >= 0 ? occ[oi].line : -1;
+    if (li !== activeLine) {
+      activeLine = li;
+      $$('#lyrics .lyric-line').forEach((el, i) => {
+        el.classList.toggle('active', i === li);
+        if (i === li) el.setAttribute('aria-current', 'true');
+        else el.removeAttribute('aria-current');
+      });
+      if (li >= 0 && ikuti) scrollKe(li);
+    }
+  }
+
+  function tombolPutar() {
+    const playing = !audio.paused;
     const btn = $('#laguPlay');
     btn.innerHTML = icon(playing ? 'pause' : 'play');
     btn.setAttribute('aria-label', playing ? 'Jeda lagu' : 'Putar lagu');
+    $('#vinyl').classList.toggle('playing', playing);
+  }
 
-    const idx = lineAt(pos);
-    if (idx !== activeLine) {
-      activeLine = idx;
-      $$('#lyrics .lyric-line').forEach((el, i) => el.classList.toggle('active', i === idx));
-      if (idx >= 0) {
-        const box = $('#lyrics');
-        const el = box.querySelectorAll('.lyric-line')[idx];
-        box.scrollTo({ top: el.offsetTop - box.clientHeight / 2 + el.clientHeight / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
-      }
-    }
+  function loop() {
+    updateUI();
+    if (!audio.paused) raf = requestAnimationFrame(loop);
+  }
+
+  function play() {
+    Suara.stop();
+    audio.play().catch(() => Toast.show('Lagu belum bisa diputar. Coba ketuk tombol putar sekali lagi.'));
+  }
+
+  function seek(sec) {
+    audio.currentTime = clamp(sec, 0, durasi());
+    updateUI();
   }
 
   function renderLyrics() {
     $('#lyrics').innerHTML = lines.map((l, i) => `
-      ${l.label ? `<p class="lyric-label">${esc(l.label)}</p>` : ''}
+      ${l.label ? `<p class="lyric-label">${esc(l.label)}${l.ulang ? ` <span class="lyric-ulang">${esc(l.ulang)}</span>` : ''}</p>` : ''}
       <button type="button" class="lyric-line" data-line="${i}">
         <span class="km">${esc(l.km)}</span>
         <span class="id">${esc(l.id)}</span>
       </button>`).join('');
   }
 
-  function init() {
-    compose();
-    renderLyrics();
-    $('#laguKet').textContent = L.keterangan;
-    $('#laguDur').textContent = fmtTime(total);
-    $('#laguSeek').max = total.toFixed(1);
-    updateUI();
+  /* Kata-kata lirik yang ada di kamus (kecuali yang artinya sama dengan bahasa Indonesia) */
+  function renderKosakata() {
+    const seen = new Set(L.abaikan || []);
+    const chips = [];
+    lines.forEach((l) => norm(l.km).split(/[^a-z]+/).forEach((w) => {
+      if (!w || seen.has(w)) return;
+      seen.add(w);
+      const akar = (L.akarKata || {})[w] || w;
+      const e = KAMUS.cari(akar).find((x) => !x.sensitif);
+      if (!e || seen.has(e.id)) return;
+      seen.add(e.id);
+      const arti = artiSingkat(e.arti);
+      if (arti === norm(e.kata)) return;
+      chips.push(`<button type="button" class="tag tag-link" data-cari="${esc(e.kata)}" title="${esc(e.arti)}"><strong>${esc(w)}</strong>&nbsp;· ${esc(arti)}</button>`);
+    }));
+    $('#laguKata').innerHTML = chips.join('');
+  }
 
-    $('#laguPlay').addEventListener('click', () => (playing ? pause() : play()));
+  function init() {
+    build();
+    audio = $('#laguAudio');
+    renderLyrics();
+    renderKosakata();
+    $('#laguKet').textContent = L.keterangan;
+    updateUI();
+    tombolPutar();
+
+    audio.addEventListener('play', () => {
+      tombolPutar();
+      cancelAnimationFrame(raf);
+      loop();
+    });
+    audio.addEventListener('pause', () => {
+      tombolPutar();
+      updateUI();
+    });
+    audio.addEventListener('loadedmetadata', updateUI);
+    audio.addEventListener('seeked', updateUI);
+    audio.addEventListener('error', () => Toast.show('File lagu tidak ditemukan atau gagal dimuat.'));
+
+    $('#laguPlay').addEventListener('click', () => (audio.paused ? play() : audio.pause()));
     $('#laguSeek').addEventListener('input', (e) => seek(Number(e.target.value)));
     $('#laguPrev').addEventListener('click', () => {
-      const i = lineAt(position());
-      seek(i > 0 ? lines[i - 1].start : 0);
+      // Kembali ke awal baris ini; bila baru saja dimulai, ke baris sebelumnya
+      const pos = audio.currentTime;
+      const prev = [...occ].reverse().find((o) => o.start < pos - 1.5);
+      seek(prev ? prev.start : 0);
     });
     $('#laguNext').addEventListener('click', () => {
-      const i = lineAt(position());
-      if (i < lines.length - 1) seek(lines[i + 1].start);
+      const next = occ.find((o) => o.start > audio.currentTime + 0.25);
+      if (next) seek(next.start);
     });
     $('#lyrics').addEventListener('click', (e) => {
       const b = e.target.closest('[data-line]');
       if (!b) return;
-      seek(lines[Number(b.dataset.line)].start);
-      if (!playing) play();
+      // Reff muncul berkali-kali: lompat ke kemunculan berikutnya, atau yang pertama
+      const t = lines[Number(b.dataset.line)].t;
+      seek(t.find((s) => s > audio.currentTime + 0.5) ?? t[0]);
+      if (audio.paused) play();
     });
 
     const toggleId = $('#laguToggleId');
@@ -1187,21 +1469,12 @@ const Lagu = (() => {
       $('#lyrics').classList.toggle('hide-id', !on);
     });
 
-    const tts = $('#laguTts');
-    tts.addEventListener('click', () => {
-      if (tts.getAttribute('aria-pressed') === 'true') {
-        Suara.stop();
-        tts.setAttribute('aria-pressed', 'false');
-        return;
-      }
-      pause();
-      tts.setAttribute('aria-pressed', 'true');
-      const lirik = [...new Set(lines.map((l) => l.km))].join('. ');
-      Suara.speak(lirik, { rate: 0.85, onend: () => tts.setAttribute('aria-pressed', 'false') });
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) pause();
+    const ikutiBtn = $('#laguIkuti');
+    ikutiBtn.addEventListener('click', () => {
+      ikuti = !ikuti;
+      ikutiBtn.setAttribute('aria-pressed', String(ikuti));
+      ikutiBtn.classList.toggle('active', ikuti);
+      if (ikuti && activeLine >= 0) scrollKe(activeLine);
     });
   }
 
@@ -1214,17 +1487,20 @@ const Jajuluk = (() => {
   let salt = 0;
   let last = null;
 
+  /* Pola kamus (KOM-K01424): dua kata seperti "Mangku Alam" / "Satria Bangsawan";
+     gelar istri = "Nai" + gelar suami ("Nai Mangku Alam"). */
   function generate(nama, gender, sifatKey) {
     const h = hashStr(`${norm(nama)}|${gender}|${sifatKey}|${salt}`);
-    const gelar = J.gelar[gender][h % J.gelar[gender].length];
-    const sifat = J.sifat[sifatKey].kata[(h >>> 8) % J.sifat[sifatKey].kata.length];
-    const penutup = J.penutup[(h >>> 16) % J.penutup.length];
+    const sifat = J.sifat[sifatKey].kata[h % J.sifat[sifatKey].kata.length];
+    const penutup = J.penutup[(h >>> 8) % J.penutup.length];
+    const inti = `${sifat.kata} ${penutup.kata}`;
+    const makna = [sifat, penutup];
+    if (gender === 'P') makna.unshift({ kata: 'Nai', arti: 'penanda gelar istri, pasangan dari gelar suami' });
     return {
       nama,
-      gelar,
-      sifat,
-      penutup,
-      judul: `${gelar.kata} ${sifat.kata} ${penutup.kata}`,
+      makna,
+      judul: gender === 'P' ? `Nai ${inti}` : inti,
+      pasangan: gender === 'P' ? `Gelar suami: ${inti}` : `Gelar istri kelak: Nai ${inti}`,
       doa: `Semoga ${nama} tumbuh menjadi pribadi yang ${sifat.arti}, dan selalu ingat akan ${penutup.arti}.`,
     };
   }
@@ -1239,8 +1515,9 @@ const Jajuluk = (() => {
       <p class="text-sm mt-5" style="color:var(--teks-redup)">Dianugerahkan kepada</p>
       <p class="font-display italic text-2xl text-white mt-1">${esc(r.nama)}</p>
       <h3 class="jj-title text-emas-gradient mt-5">${esc(r.judul)}</h3>
+      <p class="text-xs font-semibold mt-2" style="color:var(--teks-samar)">${esc(r.pasangan)}</p>
       <ul class="mt-6 space-y-2 text-sm max-w-sm mx-auto text-left" style="color:var(--teks-redup)">
-        ${[r.gelar, r.sifat, r.penutup].map((p) => `<li class="flex gap-2"><span class="text-emas-400">◆</span><span><strong class="text-emas-200">${esc(p.kata)}</strong> — ${esc(p.arti)}</span></li>`).join('')}
+        ${r.makna.map((p) => `<li class="flex gap-2"><span class="text-emas-400">◆</span><span><strong class="text-emas-200">${esc(p.kata)}</strong> — ${esc(p.arti)}</span></li>`).join('')}
       </ul>
       <p class="font-display italic mt-6 max-w-sm mx-auto" style="color:var(--teks-redup)">“${esc(r.doa)}”</p>
       <div class="flex flex-wrap justify-center gap-2 mt-7">
@@ -1365,10 +1642,14 @@ const Jajuluk = (() => {
       y += 104;
     });
 
-    y += 20;
+    g.font = '600 26px "Plus Jakarta Sans", sans-serif';
+    g.fillStyle = 'rgba(253,246,234,0.55)';
+    g.fillText(r.pasangan, W / 2, y - 40);
+
+    y += 30;
     g.font = '500 30px "Plus Jakarta Sans", sans-serif';
     g.fillStyle = 'rgba(253,246,234,0.8)';
-    [r.gelar, r.sifat, r.penutup].forEach((p) => {
+    r.makna.forEach((p) => {
       wrap(g, `${p.kata} — ${p.arti}`, W - 260).forEach((ln) => {
         g.fillText(ln, W / 2, y);
         y += 44;
@@ -1465,8 +1746,8 @@ const Kuis = (() => {
 
   function peringkat(s) {
     if (s === N) return { gelar: 'Ulun Kumoring Sejati', ikon: '👑', pesan: 'Sempurna! Niku benar-benar menjaga budaya Komering.' };
-    if (s >= 8) return { gelar: 'Muli Meranai Pandai', ikon: '🌟', pesan: 'Hebat! Pengetahuanmu tentang Komering sangat baik.' };
-    if (s >= 5) return { gelar: 'Sanak Rajin Belajar', ikon: '📚', pesan: 'Bagus! Sedikit lagi menuju gelar tertinggi.' };
+    if (s >= 8) return { gelar: 'Morli Maranai Pandai', ikon: '🌟', pesan: 'Hebat! Pengetahuanmu tentang Komering sangat baik.' };
+    if (s >= 5) return { gelar: 'Sanak Rajin Belajar', ikon: '📚', pesan: 'Holau! Sedikit lagi menuju gelar tertinggi.' };
     return { gelar: 'Ayo Belajar Lagi', ikon: '🌱', pesan: 'Dang lupa — jelajahi bab-bab di atas lalu coba lagi!' };
   }
 
@@ -1476,14 +1757,44 @@ const Kuis = (() => {
       <div class="text-center">
         <div class="text-6xl" aria-hidden="true">🏆</div>
         <h3 class="font-display text-3xl font-bold text-white mt-5">Siap diuji, Sanak?</h3>
-        <p class="mt-3" style="color:var(--teks-redup)">${N} soal pilihan ganda diambil acak dari ${DATA.kuis.length} soal. Tiap jawaban disertai penjelasan.</p>
+        <p class="mt-3" style="color:var(--teks-redup)">${N} soal acak: budaya Komering, ditambah kosakata yang diambil langsung dari ${fmtAngka(KAMUS.meta.jumlahKata)} kata kamus. Tiap jawaban disertai penjelasan.</p>
         ${best !== null ? `<p class="mt-4 text-sm text-emas-300 font-semibold">Skor terbaikmu: ${best}/${N}</p>` : ''}
         <button type="button" class="btn-emas mt-8" data-q="start">Mulai Kuis ${icon('arrow')}</button>
       </div>`;
   }
 
+  /* Soal kosakata dari kamus: separuh "apa arti X?", separuh "apa Basa Kumoring dari Y?" */
+  function soalKosakata(n) {
+    const kap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const pool = KAMUS.layakAcak
+      .filter((e) => ['n', 'v', 'a'].includes(e.kelas) && /^[a-z-]+$/.test(e.kata))
+      .map((e) => ({ e, g: glosa(e.arti)[0] }))
+      .filter(({ e, g }) => g && g.split(' ').length <= 2 && g !== norm(e.kata));
+    if (pool.length < 8) return [];
+    return shuffle(pool).slice(0, n).map(({ e, g }, i) => {
+      const balik = i % 2 === 1;
+      const benar = balik ? e.kata : g;
+      const salah = [];
+      for (const p of shuffle(pool)) {
+        const v = balik ? p.e.kata : p.g;
+        if (p.g !== g && p.e.kelas === e.kelas && v !== benar && !salah.includes(v)) salah.push(v);
+        if (salah.length === 3) break;
+      }
+      const [k, terj] = e.contoh[0];
+      return {
+        q: balik ? `Apa Basa Kumoring dari kata “${g}”?` : `Apa arti kata “${e.kata}” dalam Basa Kumoring?`,
+        opsi: [benar, ...salah].map(kap),
+        benar: 0,
+        info: `Kamus (${e.id}): ${e.kata} = ${e.arti}. Contoh: “${k}” — ${terj}.`,
+        jenis: 'Kosakata kamus',
+      };
+    });
+  }
+
   function start() {
-    soal = shuffle(DATA.kuis).slice(0, N).map((q) => ({
+    const kosakata = soalKosakata(4);
+    const budaya = shuffle(DATA.kuis).slice(0, N - kosakata.length).map((q) => ({ ...q, jenis: 'Budaya' }));
+    soal = shuffle([...budaya, ...kosakata]).map((q) => ({
       ...q,
       opsi: shuffle(q.opsi.map((t, i) => ({ t, benar: i === q.benar }))),
     }));
@@ -1496,7 +1807,7 @@ const Kuis = (() => {
     const q = soal[idx];
     box().innerHTML = `
       <div class="flex items-center justify-between text-xs font-bold mb-3">
-        <span class="text-emas-400 tracking-widest">SOAL ${idx + 1} / ${N}</span>
+        <span class="text-emas-400 tracking-widest">SOAL ${idx + 1} / ${N} <span class="tag ml-2 tracking-normal">${esc(q.jenis)}</span></span>
         <span style="color:var(--teks-samar)">Skor: ${skor}</span>
       </div>
       <div class="progress"><span style="width:${(idx / N) * 100}%"></span></div>
@@ -1518,7 +1829,7 @@ const Kuis = (() => {
     btns[q.opsi.findIndex((o) => o.benar)].classList.add('benar');
     $('#quizFeedback').innerHTML = `
       <div class="rounded-2xl p-4 info-swap" style="background:${benar ? 'rgba(127,214,155,.1)' : 'rgba(255,138,138,.08)'};border:1px solid ${benar ? 'rgba(127,214,155,.35)' : 'rgba(255,138,138,.3)'}">
-        <p class="font-bold ${benar ? 'text-green-300' : 'text-red-300'}">${benar ? '✓ Betik nihan! Benar.' : '✗ Belum tepat.'}</p>
+        <p class="font-bold ${benar ? 'text-green-300' : 'text-red-300'}">${benar ? '✓ Holau nihan! Benar.' : '✗ Belum tepat.'}</p>
         <p class="text-sm mt-1" style="color:var(--teks-redup)">${esc(q.info)}</p>
       </div>
       <div class="text-right mt-4">
@@ -1597,7 +1908,7 @@ const Chat = (() => {
     const avatar = who === 'user' ? '' : `<span class="avatar avatar-${who}" aria-hidden="true"></span>`;
     const name = who === 'user' ? '' : `<span class="msg-name">${NAMA[who]}</span>`;
     const links = aksi.length
-      ? `<div class="msg-actions">${aksi.map((a) => `<a href="${esc(a.href)}" data-close>${esc(a.label)} →</a>`).join('')}</div>`
+      ? `<div class="msg-actions">${aksi.map((a) => `<a href="${esc(a.href)}" data-close${a.cari ? ` data-cari="${esc(a.cari)}"` : ''}>${esc(a.label)} →</a>`).join('')}</div>`
       : '';
     wrap.innerHTML = `${avatar}<div class="msg-body">${name}${formatTeks(text)}${links}</div>`;
     const list = $('#chatMsgs');
@@ -1618,6 +1929,17 @@ const Chat = (() => {
     return s.replace(/^[\s"'“”‘’:]+|[\s"'“”‘’?!.:]+$/g, '');
   }
 
+  /* Entri kamus lengkap untuk satu kata Komering (maks. 3 arti) */
+  function entriKamus(w) {
+    const hits = KAMUS.cari(w);
+    if (!hits.length) return null;
+    return hits.slice(0, 3).map((e) => {
+      const kelas = e.kelas ? ` (${DATA.kelasKata[e.kelas]})` : '';
+      const contoh = e.contoh[0] ? `\nContoh: “${e.contoh[0][0]}” — ${e.contoh[0][1]}` : '';
+      return `📖 **${e.kata}**${kelas} — ${e.arti}${contoh}`;
+    }).join('\n\n');
+  }
+
   function cobaTerjemah(q) {
     for (const re of POLA_TERJEMAH) {
       const m = q.match(re);
@@ -1629,9 +1951,20 @@ const Chat = (() => {
       const res = Penerjemah.translate(frasa, from);
       const pct = Math.round((res.conf ?? 0) * 100);
       const asing = res.segs.filter((s) => s.type === 'unknown').map((s) => s.src);
+      const aksi = [{ label: 'Buka Penerjemah', href: '#penerjemah' }];
       let teks = `“${frasa}” dalam ${Penerjemah.LABEL[to]}:\n**${res.text}**\n(keyakinan ${pct}%)`;
       if (asing.length) teks += `\nKata yang belum ada di kamus: ${asing.join(', ')}.`;
-      return { oleh: 'ratih', teks, aksi: [{ label: 'Buka Penerjemah', href: '#penerjemah' }], say: to === 'km' ? res.text : null };
+
+      // Satu kata: tampilkan juga entri kamusnya
+      if (!/\s/.test(frasa)) {
+        const kataKm = from === 'km' ? frasa : res.text;
+        const entri = entriKamus(kataKm);
+        if (entri) {
+          teks = from === 'km' ? entri : `“${frasa}” dalam Basa Kumoring: **${res.text}**\n\n${entri}`;
+          aksi.unshift({ label: 'Buka di kamus', href: '#kamus', cari: kataKm });
+        }
+      }
+      return { oleh: 'ratih', teks, aksi, say: to === 'km' ? res.text : null };
     }
     return null;
   }
@@ -1664,8 +1997,14 @@ const Chat = (() => {
     const tr = cobaTerjemah(q);
     if (tr) return tr;
     const it = cariNiat(q);
-    if (it) return { oleh: it.oleh, teks: pick(it.jawab), aksi: it.aksi || [] };
-    return { oleh: 'ratih', teks: pick(DATA.chatbot.fallback), aksi: [], saran: true };
+    if (it) return { oleh: it.oleh, teks: isiAngka(pick(it.jawab)), aksi: it.aksi || [] };
+    // Satu kata Komering tanpa kata tanya: langsung tampilkan entri kamusnya
+    const kata = bersihkan(q);
+    if (!/\s/.test(kata) && Penerjemah.detect(kata) === 'km') {
+      const entri = entriKamus(kata);
+      if (entri) return { oleh: 'ratih', teks: entri, aksi: [{ label: 'Buka di kamus', href: '#kamus', cari: kata }] };
+    }
+    return { oleh: 'ratih', teks: isiAngka(pick(DATA.chatbot.fallback)), aksi: [], saran: true };
   }
 
   function send(q) {
@@ -1690,7 +2029,7 @@ const Chat = (() => {
     if (open) {
       if (!opened) {
         opened = true;
-        addMsg(DATA.chatbot.sapaanAwal, 'ratih');
+        addMsg(isiAngka(DATA.chatbot.sapaanAwal), 'ratih');
       }
       setTimeout(() => $('#chatInput').focus(), 200);
     } else {

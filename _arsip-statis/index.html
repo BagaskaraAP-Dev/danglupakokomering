@@ -13,8 +13,7 @@
     <meta property="og:description" content="Portal budaya Suku Komering berbasis AI — Vibe Coding IT Festival 2026.">
     <meta property="og:image" content="assets/maskot-pasangan-hero.jpg">
     <meta property="og:type" content="website">
-    <link rel="icon"
-        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233B0D16'/%3E%3Cpath d='M16 4 28 16 16 28 4 16Z' fill='%23F2C661'/%3E%3Cpath d='M16 10 22 16 16 22 10 16Z' fill='%233B0D16'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/jpeg" href="assets/logokomering.jpeg">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +22,13 @@
         rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+
+    <!-- Hero: GSAP (animasi), Lottie gelombang suara, dotLottie web component, Alpine.js (interaksi).
+         Semua defer/module sehingga berjalan berurutan setelah app.js mendaftarkan komponen Alpine. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="assets/lottie/gelombang-suara.js" defer></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -74,18 +80,21 @@
     <header id="navbar" class="fixed top-0 inset-x-0 z-50">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 h-16 lg:h-[4.5rem] flex items-center justify-between gap-4"
             aria-label="Navigasi utama">
-            <a href="#beranda" class="flex items-center gap-2.5 shrink-0">
-                <span class="logo-mark" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 32 32"><path d="M16 2 30 16 16 30 2 16Z" fill="#240A10" /><path d="M16 9 23 16 16 23 9 16Z" fill="#F6D58B" /></svg>
-                </span>
-                <span class="leading-tight">
-                    <span class="block font-display font-bold text-white text-[1.05rem]">Dang Lupa ko <span class="text-emas-gradient">Komering</span></span>
-                    <span class="block text-[0.65rem] tracking-[0.18em] uppercase text-emas-400/80 font-semibold">Portal Budaya & AI</span>
-                </span>
+            <a href="#beranda" class="flex items-center gap-3 shrink-0" style="gap:12px;">
+                <!-- Logo bulat -->
+                <div role="img" aria-label="Logo Dang Lupa Ko Komering"
+                     style="width:46px;height:46px;border-radius:50%;flex-shrink:0;background:#3B0D16 url('assets/logokomering.jpeg') no-repeat center 46%/auto 120%;"></div>
+                <!-- Teks brand 3 baris -->
+                <div style="line-height:1.15;">
+                    <span style="display:block;color:#FFFFFF;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:12px;font-weight:500;letter-spacing:1.5px;">DANG LUPA KO</span>
+                    <span style="display:block;color:#D4AF37;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:18px;font-weight:800;letter-spacing:1px;">KOMERING</span>
+                    <span style="display:block;color:#A89070;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;">PORTAL BUDAYA &amp; AI</span>
+                </div>
             </a>
 
             <div class="hidden xl:flex items-center gap-0.5">
                 <a href="#penerjemah" class="nav-link" data-nav>Penerjemah</a>
+                <a href="#kamus" class="nav-link">Kamus</a>
                 <a href="#sejarah" class="nav-link" data-nav>Sejarah</a>
                 <a href="#peta" class="nav-link" data-nav>Peta</a>
                 <a href="#marga" class="nav-link" data-nav>Marga</a>
@@ -108,6 +117,7 @@
             <div>
                 <div class="glass-strong mx-4 mb-3 rounded-2xl p-3 grid grid-cols-2 sm:grid-cols-3 gap-1">
                     <a href="#penerjemah" class="nav-link" data-nav>🗣️ Penerjemah</a>
+                    <a href="#kamus" class="nav-link">📖 Kamus</a>
                     <a href="#sejarah" class="nav-link" data-nav>📜 Sejarah</a>
                     <a href="#peta" class="nav-link" data-nav>🗺️ Peta</a>
                     <a href="#marga" class="nav-link" data-nav>🏛️ Marga</a>
@@ -161,27 +171,51 @@
                     </div>
 
                     <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
-                        <div class="stat glass"><dt>Kosakata & frasa</dt><dd data-stat="kamus">0</dd></div>
+                        <div class="stat glass"><dt>Kata di kamus</dt><dd data-stat="kamus">0</dd></div>
+                        <div class="stat glass"><dt>Contoh kalimat</dt><dd data-stat="contoh">0</dd></div>
                         <div class="stat glass"><dt>Kebuayan/marga</dt><dd data-stat="marga">0</dd></div>
-                        <div class="stat glass"><dt>Soal kuis</dt><dd data-stat="kuis">0</dd></div>
                         <div class="stat glass"><dt>Kabupaten</dt><dd data-stat="kab">0</dd></div>
                     </dl>
                 </div>
 
-                <div class="relative flex justify-center hero-in d2">
+                <!-- Maskot: animasi masuk & melayang oleh GSAP, interaksi Raka oleh Alpine.js (komponen heroMaskot di app.js) -->
+                <div class="relative flex justify-center" x-data="heroMaskot">
                     <div class="hero-glow -top-10 left-1/2 -translate-x-1/2"></div>
 
                     <div class="relative w-full max-w-[25rem]">
-                        <div class="frame-arch animasi-maskot">
-                            <img src="assets/maskot-pasangan-hero.jpg" fetchpriority="high" decoding="async"
-                                alt="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas"
-                                style="mix-blend-mode:normal" />
+                        <div class="frame-arch gsap-masuk" x-ref="frame">
+                            <!-- Video maskot dipakai bila assets/video/raka-ratih.mp4 tersedia; selain itu tampil poster (gambar statis) -->
+                            <video class="maskot-media" autoplay loop muted playsinline preload="metadata"
+                                poster="assets/maskot-pasangan-hero.jpg"
+                                aria-label="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas">
+                                <source src="assets/video/raka-ratih.mp4" type="video/mp4">
+                                <img src="assets/maskot-pasangan-hero.jpg"
+                                    alt="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas" />
+                            </video>
                         </div>
 
-                        <span class="float-chip glass-strong -left-10 top-[22%]">🗣️ AI Penerjemah</span>
-                        <span class="float-chip b glass-strong -right-8 top-[48%]">🎵 Lagu Daerah</span>
+                        <!-- Badge AI Penerjemah: Raka mengucapkan "Tabik Pun!" -->
+                        <div class="ai-badge-wrap gsap-masuk" x-ref="melayang">
+                            <div class="raka-bubble glass-strong" x-show="bicara" x-cloak
+                                x-transition:enter.scale.70.origin.bottom.duration.350ms
+                                x-transition:leave.opacity.duration.250ms
+                                role="status" aria-live="polite">
+                                <span class="raka-bubble-nama">Raka</span>
+                                Tabik Pun! 👋
+                            </div>
+                            <button type="button" class="ai-badge glass-strong" x-ref="badge"
+                                @click="sapa(true)" @mouseenter="sapa()" @focus="sapa()"
+                                :class="{ 'bicara': bicara }"
+                                aria-label="AI Penerjemah — ketuk untuk mendengar Raka mengucapkan Tabik Pun">
+                                <dotlottie-player x-ref="wave" class="ai-wave" loop speed="1.1"
+                                    @ready="bicara && $el.play()" aria-hidden="true"></dotlottie-player>
+                                AI Penerjemah
+                            </button>
+                            <audio id="audio-tabikpun" x-ref="audio" src="tabik-pun.mp3" preload="auto"
+                                @playing="suaraMain = true" @ended="suaraMain = false; selesai(700)"></audio>
+                        </div>
 
-                        <div class="bubble tail-top glass-strong mt-7 mx-2" id="heroBubble">
+                        <div class="bubble tail-top glass-strong mt-7 mx-2 gsap-masuk" id="heroBubble" x-ref="kartu">
                             <div class="flex items-start gap-3">
                                 <div class="flex -space-x-3 shrink-0">
                                     <span class="avatar avatar-raka"></span>
@@ -212,8 +246,10 @@
                 <div class="text-center max-w-2xl mx-auto mb-12 reveal">
                     <p class="eyebrow">Bab 01 · Ratih Menerjemahkan</p>
                     <h2 class="section-title">AI Penerjemah <span class="text-emas-gradient">Basa Kumoring</span></h2>
-                    <p class="section-desc">Ketik kalimat Bahasa Indonesia atau Basa Kumoring. Mesin NLP lokal mencocokkan
-                        frasa, mengenali imbuhan, memperbaiki salah ketik, lalu membacakan hasilnya.</p>
+                    <p class="section-desc">Ketik kalimat Bahasa Indonesia atau Basa Kumoring. Mesin NLP lokal belajar dari
+                        <strong class="text-emas-200"><span data-meta="jumlahKata">3.700+</span> kata</strong> dan
+                        <strong class="text-emas-200"><span data-meta="jumlahContoh">3.600+</span> contoh kalimat</strong> Kamus
+                        Basa Kumoring, mengenali imbuhan, memperbaiki salah ketik, lalu membacakan hasilnya.</p>
                 </div>
 
                 <div class="grid lg:grid-cols-[0.8fr_1.2fr] gap-8 items-start">
@@ -225,8 +261,8 @@
                         </div>
                         <div class="bubble tail-top glass-strong">
                             <p class="text-sm leading-relaxed" style="color:var(--teks-redup)">
-                                <strong class="text-emas-300">Ratih:</strong> “Tabik pun! Nyak Ratih. Coba ketik
-                                <em>‘Saya mau makan’</em>, nanti nyak terjemahkan jadi <em class="text-emas-200">‘Nyak haga mangan’</em>.”
+                                <strong class="text-emas-300">Ratih:</strong> “Tabik! Nyak Ratih. Coba ketik
+                                <em>‘Saya mau makan’</em>, nanti nyak terjemahkan jadi <em class="text-emas-200">‘Nyak haga mongan’</em>.”
                             </p>
                         </div>
 
@@ -237,7 +273,7 @@
                                     <svg class="ic"><use href="#i-volume" /></svg>
                                 </button>
                             </div>
-                            <p class="font-display text-3xl font-bold text-emas-300 mt-3" id="wotdKm">—</p>
+                            <p class="font-display text-3xl font-bold text-emas-300 mt-3 cursor-pointer hover:underline" id="wotdKm" title="Buka di kamus">—</p>
                             <p class="text-sm mt-1" id="wotdId" style="color:var(--teks-redup)"></p>
                             <p class="text-sm mt-3 italic" id="wotdContoh" style="color:var(--teks-samar)"></p>
                         </div>
@@ -292,6 +328,7 @@
                             <div id="trBreakdown" class="flex flex-wrap gap-2 mt-4"></div>
                             <p class="text-[0.72rem] mt-4 flex flex-wrap gap-x-4 gap-y-1" style="color:var(--teks-samar)">
                                 <span><i class="legend-dot" style="background:#7FD69B"></i>Cocok di kamus</span>
+                                <span><i class="legend-dot" style="background:#C9A7FF"></i>Dipelajari dari korpus</span>
                                 <span><i class="legend-dot" style="background:#8CBEFF"></i>Dari kata dasar</span>
                                 <span><i class="legend-dot" style="background:#F2C661"></i>Koreksi ejaan</span>
                                 <span><i class="legend-dot" style="background:rgba(255,255,255,.3)"></i>Belum dikenal</span>
@@ -305,28 +342,34 @@
                     </div>
                 </div>
 
-                <!-- Kamus mini -->
-                <div class="mt-16 reveal">
+                <!-- Kamus Basa Kumoring -->
+                <div id="kamus" class="mt-16 reveal">
                     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
                         <div>
-                            <p class="eyebrow">Kamus Mini</p>
-                            <h3 class="font-display text-2xl sm:text-3xl font-bold text-white mt-2">Jelajahi Kosakata
-                                Basa Kumoring</h3>
+                            <p class="eyebrow">Kamus Basa Kumoring</p>
+                            <h3 class="font-display text-2xl sm:text-3xl font-bold text-white mt-2">
+                                <span data-meta="jumlahKata">3.700+</span> Kata, Lengkap dengan Contoh</h3>
+                            <p class="text-sm mt-2" style="color:var(--teks-redup)">
+                                <span data-meta="jumlahKataDasar">1.800</span> kata dasar &
+                                <span data-meta="jumlahTurunan">1.900</span> kata turunan — cari dalam Bahasa Indonesia atau Komering.</p>
                         </div>
                         <div class="relative md:w-80">
                             <svg class="ic absolute left-3.5 top-1/2 -translate-y-1/2 text-emas-400"><use href="#i-search" /></svg>
                             <label for="kamusSearch" class="sr-only">Cari kata</label>
                             <input id="kamusSearch" type="search" class="field" style="padding-left:2.6rem"
-                                placeholder="Cari kata (Indonesia/Komering)…">
+                                placeholder="Cari: makan, lombahan, rumah…" autocomplete="off">
                         </div>
                     </div>
-                    <div id="kamusFilter" class="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter kategori"></div>
-                    <div id="kamusList" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                    <div id="kamusFilter" class="flex flex-wrap gap-2 mb-4" role="group" aria-label="Filter kelas kata"></div>
+                    <p id="kamusInfo" class="text-xs font-semibold mb-4" style="color:var(--teks-samar)" aria-live="polite"></p>
+                    <div id="kamusList" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start"></div>
                     <div class="text-center mt-8">
                         <button id="kamusMore" class="btn-ghost">Tampilkan lebih banyak</button>
                     </div>
-                    <p class="text-xs text-center mt-6 max-w-2xl mx-auto" style="color:var(--teks-samar)">
-                        Kosakata disusun dari kosakata umum rumpun Lampungik dan bisa berbeda antar-marga. Bantu kami
+                    <p class="text-xs text-center mt-6 max-w-2xl mx-auto leading-relaxed" style="color:var(--teks-samar)">
+                        Sumber: <code>data/kamus_komering.json</code>, dirapikan otomatis oleh <code>tools/build-kamus.js</code>
+                        (spasi, kelas kata, varian ejaan, rujukan “lihat”, duplikat) — rinciannya di
+                        <code>data/laporan-perbaikan.md</code>. Ejaan dan arti bisa berbeda antar-marga; bantu kami
                         menyempurnakannya bersama penutur asli Komering.
                     </p>
                 </div>
@@ -449,11 +492,12 @@
                 </div>
 
                 <div class="mt-16 reveal">
-                    <h3 class="font-display text-2xl sm:text-3xl font-bold text-white text-center">Rangkaian Adat
-                        Pernikahan</h3>
-                    <p class="text-sm text-center mt-2" style="color:var(--teks-samar)">Urutan dan istilah dapat berbeda di
+                    <h3 class="font-display text-2xl sm:text-3xl font-bold text-white text-center">Tahapan Adat
+                        Pernikahan Komering</h3>
+                    <p class="text-sm text-center mt-2 max-w-2xl mx-auto" style="color:var(--teks-samar)">Istilah dan
+                        maknanya diambil dari Kamus Basa Kumoring — ketuk 📖 untuk membuka entrinya. Urutan dapat berbeda di
                         setiap marga.</p>
-                    <ol id="adatSteps" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8"></ol>
+                    <ol id="adatSteps" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8"></ol>
                 </div>
             </div>
         </section>
@@ -462,32 +506,44 @@
         <section id="kuliner" class="py-20 lg:py-28">
             <div class="max-w-7xl mx-auto px-4 sm:px-6">
                 <div class="text-center max-w-2xl mx-auto mb-12 reveal">
-                    <p class="eyebrow">Bab 06 · Lemak Nihan!</p>
+                    <p class="eyebrow">Bab 06 · Bangik Nihan!</p>
                     <h2 class="section-title">Kuliner Khas <span class="text-emas-gradient">Tanah Komering</span></h2>
-                    <p class="section-desc">Way Komering kaya ikan — dan dapurnya kaya rasa. Ketuk kartu untuk melihat bahan
-                        dan cara membuatnya.</p>
+                    <p class="section-desc">Way Komering kaya iwak (ikan), dan pawon (dapur)-nya kaya rasa: asam, pedas,
+                        gurih, hingga legit. Ketuk kartu untuk membaca kisah tiap hidangan, bahan, cara menikmatinya,
+                        dan kosakata dapurnya. Ada pula tradisi <em>katodan</em>: membagi nasi dan lauk pauk kepada tetangga.</p>
                 </div>
-                <div id="kulinerGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="kulinerGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+
+                <div class="glass rounded-3xl p-6 mt-8 reveal">
+                    <p class="eyebrow">Penganan Lain di Kamus</p>
+                    <p class="text-sm mt-2" style="color:var(--teks-redup)">Kamus Basa Kumoring juga mencatat kue dan
+                        minuman berikut. Ketuk untuk membuka entrinya.</p>
+                    <div id="kulinerPenganan" class="flex flex-wrap gap-2 mt-4"></div>
+                </div>
             </div>
+            <dialog id="kulinerDialog" class="food-dialog" aria-labelledby="kulinerJudul"></dialog>
         </section>
 
         <!-- ================= LAGU ================= -->
         <section id="lagu" class="py-20 lg:py-28 songket-band">
             <div class="max-w-7xl mx-auto px-4 sm:px-6">
                 <div class="text-center max-w-2xl mx-auto mb-12 reveal">
-                    <p class="eyebrow">Bab 07 · Bebalang Basa</p>
+                    <p class="eyebrow">Bab 07 · Lagu Daerah</p>
                     <h2 class="section-title">Lagu <span class="text-emas-gradient">“Dang Lupa ko Komering”</span></h2>
-                    <p class="section-desc">Bernyanyi sambil belajar! Lirik Basa Kumoring tersorot mengikuti irama, lengkap
-                        dengan terjemahannya.</p>
+                    <p class="section-desc">Lagu yang menjadi nama aplikasi ini. Dengarkan rekamannya dan ikuti lirik Basa
+                        Kumoring yang tersorot baris demi baris, lengkap dengan terjemahannya. Ketuk satu baris untuk
+                        langsung memutar bagian itu.</p>
                 </div>
 
                 <div class="grid lg:grid-cols-[0.85fr_1.15fr] gap-8 items-stretch">
                     <div class="glass rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center reveal">
                         <div id="vinyl" class="vinyl" role="img" aria-label="Piringan hitam berlabel maskot Raka & Ratih"></div>
                         <h3 class="font-display text-2xl font-bold text-white mt-8">Dang Lupa ko Komering</h3>
-                        <p class="text-sm mt-1" style="color:var(--teks-samar)">Raka & Ratih · Melodi pentatonik</p>
+                        <p class="text-sm mt-1" style="color:var(--teks-samar)">Lagu daerah Komering · Sumatera Selatan</p>
+                        <p id="laguStatus" class="lagu-status mt-3" aria-live="off">♪ Intro musik</p>
+                        <audio id="laguAudio" src="assets/lagu/dang-lupa-ko-komering.mp3" preload="metadata"></audio>
 
-                        <div class="w-full mt-6">
+                        <div class="w-full mt-5">
                             <label for="laguSeek" class="sr-only">Posisi lagu</label>
                             <input id="laguSeek" type="range" class="range" min="0" max="100" step="0.1" value="0">
                             <div class="flex justify-between text-xs mt-2 font-semibold" style="color:var(--teks-samar)">
@@ -505,15 +561,17 @@
 
                         <div class="flex flex-wrap justify-center gap-2 mt-6">
                             <button id="laguToggleId" class="chip active" aria-pressed="true">Terjemahan</button>
-                            <button id="laguTts" class="chip" aria-pressed="false">
-                                <svg class="ic"><use href="#i-volume" /></svg> Bacakan lirik
-                            </button>
+                            <button id="laguIkuti" class="chip active" aria-pressed="true">Ikuti lirik</button>
                         </div>
                         <p class="text-xs mt-6 leading-relaxed" style="color:var(--teks-samar)" id="laguKet"></p>
                     </div>
 
-                    <div class="glass rounded-3xl p-4 sm:p-6 reveal d1">
+                    <div class="glass rounded-3xl p-4 sm:p-6 reveal d1 flex flex-col">
                         <div id="lyrics" class="lyrics"></div>
+                        <div class="border-t mt-4 pt-4 px-1" style="border-color:var(--garis)">
+                            <p class="eyebrow">Kosakata dari Lagu</p>
+                            <div id="laguKata" class="flex flex-wrap gap-2 mt-3"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -525,8 +583,10 @@
                 <div class="text-center max-w-2xl mx-auto mb-12 reveal">
                     <p class="eyebrow">Bab 08 · Juluk & Adok</p>
                     <h2 class="section-title">Generator <span class="text-emas-gradient">Jajuluk</span></h2>
-                    <p class="section-desc">Dalam tradisi Lampungik, <em>juluk</em> adalah nama kehormatan semasa muda,
-                        sedangkan <em>adok</em> diberikan saat menikah. Ciptakan jajuluk kreasimu sendiri!</p>
+                    <p class="section-desc">Menurut kamus, <em>jajuluk</em> adalah gelar atau nama panggilan yang diberikan
+                        setelah menikah. Bila gelar pengantin laki-laki <strong class="text-emas-200">Mangku Alam</strong>,
+                        gelar pengantin perempuannya <strong class="text-emas-200">Nai Mangku Alam</strong>. Ciptakan
+                        jajuluk kreasimu!</p>
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-8 items-start">
@@ -549,9 +609,9 @@
                         <button type="submit" class="btn-emas w-full">
                             <svg class="ic"><use href="#i-sparkles" /></svg> Anugerahkan Jajuluk
                         </button>
-                        <p class="text-xs leading-relaxed" style="color:var(--teks-samar)">Jajuluk di sini adalah kreasi untuk
-                            edukasi. Juluk dan adok yang sesungguhnya diberikan oleh keluarga dan tetua adat melalui
-                            musyawarah.</p>
+                        <p class="text-xs leading-relaxed" style="color:var(--teks-samar)">“Amon niku kahwin rik jolma
+                            kumoring bujajuluk” — kalau kamu menikah dengan orang Komering, kamu akan bergelar. Jajuluk di
+                            sini adalah kreasi untuk edukasi; jajuluk yang sesungguhnya diberikan keluarga dan tetua adat.</p>
                     </form>
 
                     <div id="jjResult" class="piagam reveal d1" aria-live="polite">
@@ -595,6 +655,7 @@
                 <p class="eyebrow">Jelajahi</p>
                 <ul class="mt-4 grid grid-cols-2 gap-2 text-sm" style="color:var(--teks-redup)">
                     <li><a class="hover:text-emas-300" href="#penerjemah">Penerjemah</a></li>
+                    <li><a class="hover:text-emas-300" href="#kamus">Kamus</a></li>
                     <li><a class="hover:text-emas-300" href="#sejarah">Sejarah</a></li>
                     <li><a class="hover:text-emas-300" href="#peta">Peta</a></li>
                     <li><a class="hover:text-emas-300" href="#marga">Marga</a></li>
@@ -607,9 +668,10 @@
             <div>
                 <p class="eyebrow">Catatan Kurasi</p>
                 <p class="text-xs mt-4 leading-relaxed" style="color:var(--teks-samar)">
-                    Konten kebahasaan dan budaya disusun dari sumber umum dan tradisi lisan, dan dapat berbeda antar-marga.
-                    Mohon verifikasi bersama penutur asli dan tokoh adat Komering. Lagu dan jajuluk adalah kreasi untuk
-                    edukasi.
+                    Kosakata, istilah adat, dan kuliner bersumber dari Kamus Basa Kumoring
+                    (<span data-meta="jumlahKata">3.700+</span> kata). Sejarah dan wilayah disusun dari sumber umum dan
+                    tradisi lisan, dan dapat berbeda antar-marga. Lagu “Dang Lupa ko Komering” adalah lagu daerah
+                    Komering; terjemahannya bersifat bebas. Jajuluk adalah kreasi untuk edukasi.
                 </p>
             </div>
         </div>
@@ -651,6 +713,7 @@
 
     <div id="toast" role="status" aria-live="polite"></div>
 
+    <script src="data/kamus-komering.js"></script>
     <script src="data.js"></script>
     <script src="app.js"></script>
 </body>
