@@ -47,6 +47,12 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 88px;
+    /* Kontrol bawaan browser (panah scrollbar, audio, select) ikut bertema gelap */
+    color-scheme: dark;
+    /* Ruang scrollbar tetap ada saat gulir dikunci (mode layar penuh) → halaman tidak bergeser */
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #8a6d24 var(--kayu-950);
   }
 
   body {
@@ -92,9 +98,26 @@
     border-radius: 8px;
   }
 
-  * {
+  /* Area gulir di dalam halaman (lirik, obrolan): tipis dan lembut */
+  body * {
     scrollbar-width: thin;
-    scrollbar-color: var(--kayu-600) transparent;
+    scrollbar-color: rgba(212, 175, 55, 0.4) transparent;
+  }
+
+  /* Safari belum mendukung scrollbar-color */
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--kayu-950);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8a6d24;
+      border: 2px solid var(--kayu-950);
+      border-radius: 999px;
+    }
   }
 
   button,
