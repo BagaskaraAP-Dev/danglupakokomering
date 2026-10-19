@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Dang Lupa ko Komering',
     description: 'Portal budaya Suku Komering berbasis AI — Vibe Coding IT Festival 2026.',
-    // 1200×630, 58 KB (maskot-pasangan-hero.jpg 2,4 MB terlalu besar untuk pratinjau WhatsApp)
+    // 1200×630 (rasio pratinjau tautan), 58 KB: cukup kecil untuk pratinjau WhatsApp
     images: [{ url: '/og-beranda.jpg', width: 1200, height: 630, alt: 'Maskot Raka dan Ratih berbusana adat pengantin Komering' }],
     type: 'website',
     locale: 'id_ID',

@@ -2,7 +2,7 @@
 /* Kuliner sebagai halaman menu majalah: daftar hidangan bernomor di satu sisi, satu
    hidangan disorot di sisi lain. Kisah lengkapnya ada di halaman /kuliner/[slug]. */
 import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
 import { useState, type CSSProperties } from 'react';
 import { DATA, type Hidangan } from '@/lib/konten';
@@ -28,8 +28,10 @@ function TagKosakata({ kata, arti }: { kata: string; arti?: string }) {
 
 /** Foto ditampilkan utuh di ukuran aslinya (tidak diperbesar), di atas latar buram fotonya sendiri */
 function FotoHidangan({ h }: { h: Hidangan }) {
+  // Latar diburamkan 18 px, jadi cukup versi 128 px teroptimasi (±3 KB), bukan JPEG asli (hingga 84 KB)
+  const latar = getImageProps({ src: h.foto, alt: '', width: 64, height: Math.round((64 * h.ukuran[1]) / h.ukuran[0]) }).props.src;
   return (
-    <span className="foto-hidangan block h-[clamp(15rem,40vw,24rem)]" data-utuh data-piring={h.piring ? 'true' : undefined} style={{ '--foto': `url('${h.foto}')` } as CSSProperties}>
+    <span className="foto-hidangan block h-[clamp(15rem,40vw,24rem)]" data-utuh data-piring={h.piring ? 'true' : undefined} style={{ '--foto': `url('${latar}')` } as CSSProperties}>
       {h.piring ? (
         <span className="piring-hidangan block">
           <Image src={h.foto} alt={h.alt} width={h.ukuran[0]} height={h.ukuran[1]} sizes="(min-width: 1024px) 320px, 60vw" />
