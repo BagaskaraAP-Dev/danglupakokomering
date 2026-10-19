@@ -20,8 +20,12 @@ export function Footer() {
             </p>
           </div>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-gading/75">
-            Karya untuk <strong className="text-emas-300">{DATA.meta.acara}</strong> bertema <em>“{DATA.meta.tema}”</em>. Kamus dan penerjemah kata per kata
-            berjalan di browser; chatbot dan terjemahan kalimat disusun Google Gemini dari data kamus situs ini.
+            Dari tanah Komering, untuk generasi hari ini. Dang Lupa ko Komering lahir agar bahasa dan budaya warisan leluhur tetap hidup,
+            tidak hanya dikenang, tapi juga dipakai, dipelajari, dan dibanggakan. Lewat kamus, penerjemah, dan teman ngobrol berbasis AI,
+            mengenal Komering kini terasa lebih dekat, lebih seru, dan selalu dalam genggaman.
+          </p>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-gading/75">
+            Dipersembahkan untuk <strong className="text-emas-300">{DATA.meta.acara}</strong> <em>“{DATA.meta.tema}”</em>.
           </p>
         </div>
         <nav aria-label="Jelajahi">

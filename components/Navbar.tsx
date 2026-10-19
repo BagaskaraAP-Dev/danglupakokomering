@@ -76,7 +76,6 @@ export function Navbar() {
           <span className="leading-[1.15]">
             <span className="block text-[0.72rem] font-medium tracking-[0.2em] text-white">DANG LUPA KO</span>
             <span className="block text-lg font-extrabold tracking-[0.08em] text-[#D4AF37]">KOMERING</span>
-            <span className="block text-[0.6rem] uppercase tracking-[0.14em] text-pasir">Portal Budaya &amp; AI</span>
           </span>
         </a>
 
