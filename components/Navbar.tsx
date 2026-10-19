@@ -3,7 +3,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+
+/* Tautan bab memakai <Link href="#…">, bukan <a> biasa: lompatan hash lewat <a> membuat entri riwayat
+   tanpa state router, sehingga tombol Back dari halaman mandiri (mis. /kuliner/tumpi) tidak memulihkan beranda */
 
 export const MENU = [
   { id: 'penerjemah', label: 'Penerjemah' },
@@ -22,8 +26,9 @@ export const MENU = [
 export function LogoBulat({ ukuran = 'w-12 h-12' }: { ukuran?: string }) {
   return (
     <span className={`${ukuran} flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/40 bg-kayu-800`}>
-      {/* Lingkaran logo ±78% tinggi gambar & sedikit di bawah tengah → diperbesar 1,3× lalu digeser naik */}
-      <Image src="/logokomering.jpeg" alt="" width={1024} height={498} sizes="64px" loading="eager" className="h-full w-full -translate-y-1 scale-[1.3] object-cover" />
+      {/* Lingkaran logo ±78% tinggi gambar & sedikit di bawah tengah → diperbesar 1,3× lalu digeser naik.
+          object-cover pada wadah 48 px membuat gambar selebar ±99 px, ×1,3 = ±128 px, jadi sizes 128px agar tajam di layar retina */}
+      <Image src="/logokomering.jpeg" alt="" width={1024} height={498} sizes="128px" loading="eager" className="h-full w-full -translate-y-1 scale-[1.3] object-cover" />
     </span>
   );
 }
@@ -71,18 +76,18 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6" aria-label="Navigasi utama">
-        <a href="#beranda" className="flex shrink-0 items-center gap-3" aria-label="Dang Lupa ko Komering — ke beranda">
+        <Link href="#beranda" className="flex shrink-0 items-center gap-3" aria-label="Dang Lupa ko Komering — ke beranda">
           <LogoBulat />
           <span className="leading-[1.15]">
             <span className="block text-[0.72rem] font-medium tracking-[0.2em] text-white">DANG LUPA KO</span>
             <span className="block text-lg font-extrabold tracking-[0.08em] text-[#D4AF37]">KOMERING</span>
           </span>
-        </a>
+        </Link>
 
         <ul className="hidden items-center gap-0.5 xl:flex">
           {MENU.map((m) => (
             <li key={m.id}>
-              <a
+              <Link
                 href={`#${m.id}`}
                 aria-current={aktif === m.id ? 'true' : undefined}
                 className={`relative isolate block rounded-full px-3 py-2 text-[0.84rem] font-semibold transition-colors ${
@@ -97,7 +102,7 @@ export function Navbar() {
                   />
                 )}
                 {m.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -127,15 +132,15 @@ export function Navbar() {
             <ul className="permukaan-kuat mx-4 mb-4 grid grid-cols-2 gap-1 rounded-2xl p-3 sm:grid-cols-3">
               {MENU.map((m) => (
                 <li key={m.id}>
-                  <a
+                  <Link
                     href={`#${m.id}`}
                     onClick={() => setBuka(false)}
-                    className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ${
+                    className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ${
                       aktif === m.id ? 'bg-emas/10 text-emas-200' : 'text-gading/75 hover:bg-white/5 hover:text-gading'
                     }`}
                   >
                     {m.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

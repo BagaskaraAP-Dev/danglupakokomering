@@ -5,6 +5,7 @@ import { useReducedMotion } from 'framer-motion';
 import { Maximize2, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { useJebakFokus } from '@/lib/fokus';
 import { DATA } from '@/lib/konten';
 import { suara } from '@/lib/suara';
 import { artiSingkat, clamp, fmtWaktu, norm } from '@/lib/teks';
@@ -53,6 +54,8 @@ export function LaguSection() {
   const [panggung, setPanggung] = useState(false);
   const panggungRef = useRef<HTMLDivElement>(null);
   const pemicuPanggung = useRef<HTMLButtonElement>(null);
+
+  useJebakFokus(panggungRef, panggung);
 
   // Mode layar penuh: kunci gulir halaman, Esc menutup, dan pakai Fullscreen API bila tersedia
   useEffect(() => {

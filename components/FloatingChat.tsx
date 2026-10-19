@@ -7,6 +7,7 @@ import { Send, X } from 'lucide-react';
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { tanyaAi } from '@/lib/ai';
 import { jawab, isiAngka, type Pembicara } from '@/lib/chatbot';
+import { useJebakFokus } from '@/lib/fokus';
 import { DATA, type AksiChat } from '@/lib/konten';
 import { suara } from '@/lib/suara';
 import { useKamus } from './providers/KamusProvider';
@@ -42,6 +43,7 @@ export function FloatingChat() {
   const daftarRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const laciRef = useRef<HTMLDivElement>(null);
   const nomor = useRef(0);
   const batal = useRef<AbortController>(undefined);
 
@@ -53,6 +55,8 @@ export function FloatingChat() {
     if (pesan.length === 0) tambah({ oleh: 'ratih', teks: isiAngka(DATA.chatbot.sapaanAwal, meta) });
   };
   const tutupLaci = () => setBuka(false);
+
+  useJebakFokus(laciRef, buka);
 
   // Kembalikan fokus ke tombol mengambang setelah laci ditutup
   const pernahBuka = useRef(false);
@@ -148,6 +152,7 @@ export function FloatingChat() {
               aria-hidden
             />
             <motion.div
+              ref={laciRef}
               id="laci-obrolan"
               role="dialog"
               aria-modal="true"

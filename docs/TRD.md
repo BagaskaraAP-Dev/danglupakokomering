@@ -121,6 +121,7 @@ DOKUMENTASIITFEST2026/       Dokumentasi lomba tim (tidak ikut deploy)
 | `/kuliner/[slug]` | Halaman + OG | 7 halaman statis saat build, `dynamicParams = false` |
 | `/lagu/[slug]` | Halaman + OG | 1 halaman statis saat build, `dynamicParams = false` |
 | `/sumber` | Halaman | Statis |
+| (404) | `app/not-found.tsx` | Alamat tak dikenal dan `notFound()` dari `/kamus/[kata]` |
 | `/sitemap.xml` | Metadata | Beranda, `/sumber`, lagu, 7 hidangan, semua kata nonsensitif (3.647 alamat) |
 | `/robots.txt` | Metadata | Izinkan semua kecuali `/api/` |
 | `/api/chat` | Route Handler | Dinamis, `maxDuration = 30` |
@@ -288,8 +289,11 @@ Klien (`lib/ai.ts`) mengembalikan `{ ok: false }` pada galat apa pun, dan kompon
 ## 10. SEO dan metadata
 
 - Metadata global di `app/layout.tsx`: judul bertemplat `%s · Dang Lupa ko Komering`, deskripsi, Open Graph `id_ID`, `themeColor #140706`.
-- Halaman mandiri mengisi `generateMetadata` (judul, deskripsi, canonical, Open Graph). JSON-LD: `DefinedTerm` (dalam `DefinedTermSet` "Kamus Basa Kumoring", `inLanguage: kge`) untuk kata dan `Article` untuk kuliner. Halaman lagu belum punya JSON-LD.
-- Gambar pratinjau dibuat oleh `opengraph-image.tsx` per rute dengan `kartuOg()` (`lib/server/kartu-og.tsx`), ukuran 1200×630.
+- Beranda dan halaman mandiri punya canonical. Halaman mandiri mengisi `generateMetadata` (judul, deskripsi, canonical, Open Graph). JSON-LD: `DefinedTerm` (dalam `DefinedTermSet` "Kamus Basa Kumoring", `inLanguage: kge`) untuk kata, `Article` untuk kuliner, dan `MusicComposition` beserta lirik untuk lagu.
+- `app/not-found.tsx` menangani alamat yang tidak ada dan kata yang belum tercatat (status 404, `noindex` otomatis).
+- Gambar pratinjau halaman mandiri dibuat oleh `opengraph-image.tsx` per rute dengan `kartuOg()` (`lib/server/kartu-og.tsx`), ukuran 1200×630. Beranda dan `/sumber` memakai `public/og-beranda.jpg` (1200×630, 58 KB). Jangan memakai gambar maskot ukuran asli (2,4 MB) karena WhatsApp tidak menampilkan pratinjau sebesar itu.
+- Verifikasi mesin pencari: `GOOGLE_SITE_VERIFICATION` dan `BING_SITE_VERIFICATION` (lihat §12) dirender sebagai `<meta name="google-site-verification">` dan `<meta name="msvalidate.01">`. Properti Search Console bertipe **URL prefix**, karena subdomain memakai CNAME sehingga record TXT tidak bisa dipasang di nama yang sama.
+- IndexNow: kunci publik di `public/e7ffb4fa3a50b3c7f297139cb7763b3b.txt`. `npm run indexnow` mengirim semua alamat sitemap ke `api.indexnow.org` (dipakai Bing, Yandex, Seznam, Naver). Google tidak memakai IndexNow; kirim sitemap lewat Search Console.
 
 ## 11. Performa
 
@@ -309,6 +313,8 @@ Hasil terakhir (situs produksi, 18 Okt 2026): Lighthouse HP Performance 86–93,
 | --- | --- | --- |
 | `GEMINI_API_KEY` | Ya, untuk fitur Gemini | Kunci Google AI Studio. Tanpa kunci, API mengembalikan galat dan situs memakai mesin lokal |
 | `GEMINI_MODEL` | Tidak | Model pertama yang dicoba sebelum rantai bawaan |
+| `GOOGLE_SITE_VERIFICATION` | Tidak | Isi `content` tag verifikasi Google Search Console. Perlu deploy ulang setelah diubah |
+| `BING_SITE_VERIFICATION` | Tidak | Isi `content` tag `msvalidate.01` Bing Webmaster (tidak perlu bila properti diimpor dari Search Console) |
 | `VERCEL_PROJECT_PRODUCTION_URL` | Otomatis | Diisi Vercel; dipakai untuk `metadataBase`, canonical, sitemap |
 
 Lokal: simpan di `.env.local` (tidak ikut git).
@@ -325,6 +331,7 @@ npm run lint       # eslint .
 npm run build      # next build
 npm start          # jalankan hasil build
 npm run kamus      # bangun ulang kamus dari data/sumber/
+npm run indexnow   # kirim alamat sitemap ke IndexNow (setelah deploy)
 ```
 
 ### Deploy
@@ -341,12 +348,19 @@ npm run kamus      # bangun ulang kamus dari data/sumber/
 1. Kerjakan di branch fitur, buka pull request ke `main`.
 2. Wajib lolos `npm run typecheck`, `npm run lint`, `npm run build`.
 3. Deploy produksi, lalu periksa halaman utama, satu halaman kata, chat, dan terjemahan di situs produksi.
+4. Bila ada halaman baru atau berubah, jalankan `npm run indexnow`.
 
 ### Catatan operasional
 
 - Folder proyek berada di OneDrive. Bila `npm run build` gagal dengan `EPERM … .next`, hapus folder `.next` lalu build ulang.
 - Log galat Gemini tercatat di log fungsi Vercel dengan awalan `[gemini]`, `[api/chat]`, `[api/translate]`.
 - `AGENTS.md` ditulis ulang otomatis oleh `next dev`; biarkan ikut ter-commit agar pohon kerja bersih.
+
+### Konvensi navigasi
+
+- Tautan ke bab di beranda wajib memakai `<Link href="#bab">`, bukan `<a href="#bab">`. Lompatan hash lewat `<a>` membuat entri riwayat tanpa state router, sehingga Back dari halaman mandiri menampilkan alamat beranda tetapi isi halaman sebelumnya tetap tertinggal. Pengecualian: `TautanLewati` (memindahkan fokus tanpa entri riwayat) dan tombol aksi chat (`preventDefault` + `scrollIntoView`).
+- Bab Penerjemah, Kamus, Busana, Kuliner, dan Lagu memanjang setelah kamus termuat. `KamusProvider` mencatat lompatan `#bab` terakhir dan meluruskannya sekali saat kamus siap, kecuali pengunjung sudah menggulir sendiri.
+- Dialog modal (laci chat, lirik layar penuh) memakai `useJebakFokus` (`lib/fokus.ts`) agar Tab tidak keluar dialog; Esc menutup dan fokus kembali ke tombol pemicu.
 
 ## 14. Pengujian dan QA
 

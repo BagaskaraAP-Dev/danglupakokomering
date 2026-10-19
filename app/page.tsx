@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { BusanaSection } from '@/components/BusanaSection';
 import { FloatingChat } from '@/components/FloatingChat';
 import { Footer } from '@/components/Footer';
@@ -15,12 +16,16 @@ import { SejarahSection } from '@/components/SejarahSection';
 import { TranslatorSection } from '@/components/TranslatorSection';
 import { Tumpal } from '@/components/ui/Tumpal';
 
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 export default function Beranda() {
   // Kamus (±520 KB) hanya dimuat di beranda; halaman mandiri dirender di server
   return (
     <KamusProvider>
       <Navbar />
-      <main id="utama">
+      <main id="utama" tabIndex={-1} className="outline-none">
         <HeroSection />
         <Tumpal />
         <TranslatorSection />

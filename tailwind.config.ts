@@ -46,20 +46,6 @@ const config: Config = {
         songket: 'var(--pola-songket)',
         tumpal: 'var(--pola-tumpal)',
       },
-      keyframes: {
-        kilau: {
-          '0%': { backgroundPosition: '200% 0' },
-          '100%': { backgroundPosition: '-200% 0' },
-        },
-        kelip: {
-          '0%, 100%': { opacity: '0', transform: 'rotate(45deg) scale(0.4)' },
-          '50%': { opacity: '0.9', transform: 'rotate(45deg) scale(1)' },
-        },
-      },
-      animation: {
-        kilau: 'kilau 4.5s linear infinite',
-        kelip: 'kelip 4s ease-in-out infinite',
-      },
     },
   },
 };

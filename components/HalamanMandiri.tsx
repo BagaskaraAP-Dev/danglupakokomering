@@ -5,6 +5,14 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { LogoBulat } from './Navbar';
 
+const TAUTAN_KAKI = [
+  ['/', 'Beranda'],
+  ['/#kamus', 'Kamus'],
+  ['/#kuliner', 'Kuliner'],
+  ['/#lagu', 'Lagu'],
+  ['/sumber', 'Sumber & kredit'],
+] as const;
+
 export function HalamanMandiri({ children, kembali }: { children: ReactNode; kembali: { href: string; label: string } }) {
   return (
     <>
@@ -21,26 +29,16 @@ export function HalamanMandiri({ children, kembali }: { children: ReactNode; kem
           </Link>
         </nav>
       </header>
-      <main id="utama" className="mx-auto max-w-5xl px-4 pb-24 pt-10 sm:px-6 lg:pt-14">
+      <main id="utama" tabIndex={-1} className="mx-auto max-w-5xl px-4 pb-24 pt-10 outline-none sm:px-6 lg:pt-14">
         {children}
       </main>
       <footer className="border-t border-emas/15 px-4 py-8 text-center text-xs text-pasir">
-        <nav aria-label="Tautan kaki" className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-          <Link href="/" className="hover:text-emas-300">
-            Beranda
-          </Link>
-          <Link href="/#kamus" className="hover:text-emas-300">
-            Kamus
-          </Link>
-          <Link href="/#kuliner" className="hover:text-emas-300">
-            Kuliner
-          </Link>
-          <Link href="/#lagu" className="hover:text-emas-300">
-            Lagu
-          </Link>
-          <Link href="/sumber" className="hover:text-emas-300">
-            Sumber &amp; kredit
-          </Link>
+        <nav aria-label="Tautan kaki" className="flex flex-wrap justify-center gap-x-5">
+          {TAUTAN_KAKI.map(([href, label]) => (
+            <Link key={href} href={href} className="inline-flex min-h-11 items-center hover:text-emas-300">
+              {label}
+            </Link>
+          ))}
         </nav>
       </footer>
     </>

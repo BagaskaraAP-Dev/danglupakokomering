@@ -225,9 +225,12 @@ export function KamusSection() {
           </div>
         )}
         <p className="mx-auto mt-6 max-w-2xl text-center text-xs leading-relaxed text-pasir">
-          Sumber: <code>data/kamus_komering.json</code>, dirapikan otomatis oleh <code>tools/build-kamus.cjs</code> (spasi, kelas kata,
-          varian ejaan, rujukan “lihat”, duplikat) — rinciannya di <code>data/laporan-perbaikan.md</code>. Ejaan dan arti bisa berbeda
-          antar-marga; bantu kami menyempurnakannya bersama penutur asli Komering.
+          Sumber: Kamus Basa Kumoring, dirapikan otomatis (spasi, kelas kata, varian ejaan, rujukan “lihat”, entri ganda). Asal data
+          dan catatannya ada di halaman{' '}
+          <Link href="/sumber" className="font-semibold text-emas-300 underline-offset-2 hover:underline">
+            Sumber &amp; kredit
+          </Link>
+          . Ejaan dan arti bisa berbeda antar-marga; bantu kami menyempurnakannya bersama penutur asli Komering.
         </p>
       </div>
     </section>

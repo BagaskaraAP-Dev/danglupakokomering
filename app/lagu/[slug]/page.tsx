@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { HalamanMandiri } from '@/components/HalamanMandiri';
 import { DATA } from '@/lib/konten';
+import { jsonLd } from '@/lib/situs';
 import { urlLagu } from '@/lib/tautan';
 import { slug } from '@/lib/teks';
 
@@ -27,6 +28,24 @@ export default async function HalamanLagu({ params }: Props) {
 
   return (
     <HalamanMandiri kembali={{ href: '/#lagu', label: 'Lagu' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLd({
+            '@context': 'https://schema.org',
+            '@type': 'MusicComposition',
+            name: L.judul,
+            description: L.keterangan,
+            inLanguage: 'kge',
+            genre: 'Lagu daerah',
+            lyrics: {
+              '@type': 'CreativeWork',
+              inLanguage: 'kge',
+              text: L.bagian.map((b) => b.baris.map((x) => x.km).join('\n')).join('\n\n'),
+            },
+          }),
+        }}
+      />
       <p className="penanda-bab">{L.asal}</p>
       <h1 className="mt-3 font-display text-5xl font-extrabold leading-[1.02] text-gading sm:text-6xl">“{L.judul}”</h1>
       <p className="mt-4 max-w-2xl text-gading/75">{L.keterangan}</p>

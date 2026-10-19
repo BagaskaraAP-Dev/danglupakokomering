@@ -222,7 +222,7 @@ Pembatas antarbab: deret tumpal. Bab berselang memakai pita songket (`pita`) aga
 
 Aturan:
 
-- **Tidak ada animasi tak berujung** yang berjalan tanpa interaksi. Kelas `animate-kilau` dan `animate-kelip` di `tailwind.config.ts` adalah sisa lama dan tidak boleh dipakai di elemen baru.
+- **Tidak ada animasi tak berujung** yang berjalan tanpa interaksi. Animasi lama `kilau` dan `kelip` sudah dihapus dari `tailwind.config.ts`.
 - `prefers-reduced-motion: reduce` mematikan semua animasi dan transisi (durasi 0,01 ms), mengganti gulir halus dengan lompatan langsung, dan `useReducedMotion()` dipakai di komponen Framer Motion.
 - Animasi tidak boleh menyembunyikan teks sampai JavaScript selesai.
 
@@ -243,7 +243,7 @@ Aturan:
 | ≥ 1024 px (`lg`) | Hero dua kolom, kepala bab `belah`, garis waktu sejarah zig-zag, menu kuliner vertikal |
 | ≥ 1280 px (`xl`) | Menu navbar penuh; di bawahnya memakai menu seluler |
 
-Syarat: tidak ada geser horizontal di 360 px dan target sentuh minimal 44 px. Diuji di 390 px dan 1440 px.
+Syarat: tidak ada geser horizontal di 360 px dan target sentuh minimal 44 px. Pada layar sentuh (`@media (pointer: coarse)`), `.chip`, `.btn-kecil`, dan `.ikon-btn` dinaikkan ke 44 px; di desktop ukurannya tetap ringkas. Tautan footer memakai `min-h-11`. Footer beranda diberi ruang bawah ekstra di bawah `lg` agar tombol chat tidak menutupi baris terakhir. Diuji di 390 px dan 1440 px.
 
 Pengecualian yang diketahui: di bawah 640 px label titik peta disembunyikan dan titiknya mengecil (area sentuh ±22 px). Daftar lokasi di bawah peta menjadi cara utama memilih tempat di HP. Peta vektor (PRD 2.3) harus menghapus pengecualian ini.
 
@@ -254,7 +254,8 @@ Pengecualian yang diketahui: di bawah 640 px label titik peta disembunyikan dan 
 - `lang="id"` di dokumen. Data terstruktur kata memakai `inLanguage: kge`.
 - Tombol ikon wajib `aria-label`; teks tombol yang disembunyikan di HP tetap ada sebagai `sr-only`.
 - Status pilihan memakai `aria-pressed` (menu kuliner, tombol tempat di peta).
-- Laci chat, menu seluler, dan mode layar penuh lagu bisa ditutup dengan `Esc`.
+- Laci chat, menu seluler, dan mode layar penuh lagu bisa ditutup dengan `Esc`. Laci chat dan layar penuh lagu menjebak fokus Tab di dalam dialog, lalu mengembalikan fokus ke tombol pemicu saat ditutup.
+- "Lewati ke konten utama" memindahkan fokus ke `<main>` (bukan hanya menggulir).
 - Warna tidak menjadi satu-satunya penanda: segmen terjemahan juga punya legenda dan keterangan teks.
 - Seleksi teks: latar emas, teks `kayu-950`.
 

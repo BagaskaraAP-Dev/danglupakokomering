@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { DATA } from '@/lib/konten';
 import { fmtAngka } from '@/lib/teks';
 import { LogoBulat, MENU } from './Navbar';
@@ -9,7 +10,8 @@ import { Tumpal } from './ui/Tumpal';
 export function Footer() {
   const { meta } = useKamus();
   return (
-    <footer className="pb-10 pt-4">
+    // pb-28 di bawah lg: ruang untuk tombol "Tanya Raka & Ratih" agar baris terakhir tidak tertutup
+    <footer className="pb-28 pt-4 lg:pb-10">
       <Tumpal balik />
       <div className="mx-auto grid max-w-7xl gap-10 px-4 pt-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
@@ -30,14 +32,19 @@ export function Footer() {
         </div>
         <nav aria-label="Jelajahi">
           <p className="eyebrow">Jelajahi</p>
-          <ul className="mt-4 grid grid-cols-2 gap-2 text-sm text-gading/75">
+          <ul className="mt-2 grid grid-cols-2 gap-x-4 text-sm text-gading/75">
             {MENU.map((m) => (
               <li key={m.id}>
-                <a className="hover:text-emas-300" href={`#${m.id}`}>
+                <Link className="inline-flex min-h-11 items-center hover:text-emas-300" href={`#${m.id}`}>
                   {m.label}
-                </a>
+                </Link>
               </li>
             ))}
+            <li>
+              <Link className="inline-flex min-h-11 items-center hover:text-emas-300" href="/sumber">
+                Sumber &amp; kredit
+              </Link>
+            </li>
           </ul>
         </nav>
         <div>

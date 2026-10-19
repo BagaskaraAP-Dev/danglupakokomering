@@ -6,7 +6,7 @@ Portal budaya Suku Komering berbasis AI untuk **Vibe Coding IT Festival 2026** b
 
 Dibangun dengan **Next.js 16 (App Router)**, **TypeScript**, **Tailwind CSS 4**, **Framer Motion**, **Lucide React**, dan **Google Gemini API**.
 
-Situs produksi: https://danglupakokomering.vercel.app
+Situs produksi: https://danglupakokomering.mooncrust.my.id
 
 ## Dokumentasi
 
@@ -59,6 +59,7 @@ npm start          # jalankan hasil build
 npm run lint       # ESLint
 npm run typecheck  # pemeriksaan TypeScript
 npm run kamus      # bangun ulang kamus dari data/sumber/
+npm run indexnow   # beri tahu Bing dkk. isi sitemap.xml (jalankan setelah deploy)
 ```
 
 ## Struktur

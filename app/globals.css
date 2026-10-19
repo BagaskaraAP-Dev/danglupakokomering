@@ -342,6 +342,19 @@
     outline-offset: 2px;
   }
 
+  /* Layar sentuh: target ketuk minimal 44 px; di desktop (mouse) ukuran visual tetap ringkas */
+  @media (pointer: coarse) {
+    .btn-kecil,
+    .chip {
+      min-height: 2.75rem;
+    }
+    .ikon-btn,
+    .ikon-btn.kecil {
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+  }
+
   .tag {
     display: inline-flex;
     align-items: center;

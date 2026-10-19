@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { ToastProvider } from '@/components/providers/ToastProvider';
+import { TautanLewati } from '@/components/ui/TautanLewati';
 import { SITUS } from '@/lib/situs';
 import './globals.css';
 
@@ -31,9 +32,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Dang Lupa ko Komering',
     description: 'Portal budaya Suku Komering berbasis AI — Vibe Coding IT Festival 2026.',
-    images: ['/maskot-pasangan-hero.jpg'],
+    // 1200×630, 58 KB (maskot-pasangan-hero.jpg 2,4 MB terlalu besar untuk pratinjau WhatsApp)
+    images: [{ url: '/og-beranda.jpg', width: 1200, height: 630, alt: 'Maskot Raka dan Ratih berbusana adat pengantin Komering' }],
     type: 'website',
     locale: 'id_ID',
+    siteName: 'Dang Lupa ko Komering',
+  },
+  twitter: { card: 'summary_large_image' },
+  // Kode verifikasi Google Search Console & Bing Webmaster dari Environment Variable Vercel; kosong = tidak dipasang
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.BING_SITE_VERIFICATION ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } : undefined,
   },
 };
 
@@ -44,14 +53,8 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id" className={`${playfair.variable} ${jakarta.variable}`} suppressHydrationWarning>
-      <head>
-        {/* Penanda JS aktif: elemen maskot baru disembunyikan bila animasi GSAP bisa berjalan */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
-      </head>
       <body className="font-sans antialiased">
-        <a href="#utama" className="skip-link">
-          Lewati ke konten utama
-        </a>
+        <TautanLewati />
         <ToastProvider>
           {children}
         </ToastProvider>

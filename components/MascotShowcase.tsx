@@ -10,7 +10,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, Volume2 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { DATA } from '@/lib/konten';
 import { suara, useSedangBicara } from '@/lib/suara';
 import { Avatar } from './ui/Avatar';
@@ -85,10 +85,11 @@ function KartuSapaan() {
   const sorot = (j: number) => bicara && j === kataAktif;
   const kata = (daftar: string[], geser: number) =>
     daftar.map((k, j) => (
-      <span key={j} className={`rounded transition-colors duration-150 ${sorot(j + geser) ? 'bg-emas/20 text-emas-200' : ''}`}>
-        {k}
+      // nowrap: kata ulang seperti "jama-jama" tidak terpotong di tanda hubung; spasi di luar span tetap jadi titik lipat baris
+      <Fragment key={j}>
+        <span className={`whitespace-nowrap rounded transition-colors duration-150 ${sorot(j + geser) ? 'bg-emas/20 text-emas-200' : ''}`}>{k}</span>
         {j < daftar.length - 1 ? ' ' : ''}
-      </span>
+      </Fragment>
     ));
 
   return (
@@ -177,7 +178,8 @@ export function MascotShowcase() {
             src="/maskot-pasangan-hero.jpg"
             alt="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas"
             fill
-            preload
+            loading="eager"
+            fetchPriority="high"
             sizes="(min-width: 1024px) 400px, (min-width: 640px) 400px, 72vw"
           />
         </div>

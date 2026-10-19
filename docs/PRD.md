@@ -7,7 +7,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal | 19 Oktober 2026 |
 | Pemilik produk | Bagaskara Amukti Palapa (BagaskaraAP-Dev) |
-| Situs produksi | https://danglupakokomering.vercel.app |
+| Situs produksi | https://danglupakokomering.mooncrust.my.id (alamat lama `danglupakokomering.vercel.app` dialihkan ke sini) |
 | Repositori | `BagaskaraAP-Dev/danglupakokomering` |
 | Dokumen terkait | [TRD](TRD.md) (teknis) · [DRD](DRD.md) (desain) · [`prd.md`](../prd.md) (rencana revitalisasi) · [`LAPORAN-PENGEMBANGAN.md`](../LAPORAN-PENGEMBANGAN.md) (log pengerjaan) |
 
