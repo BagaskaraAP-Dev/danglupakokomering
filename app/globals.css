@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @config '../tailwind.config.ts';
-@source not '../_arsip-statis';
 @source not '../DOKUMENTASIITFEST2026';
 
 /* =============================================================================
@@ -412,8 +411,7 @@
   }
 
   /* ---------- Bingkai maskot ---------- */
-  .bingkai-lengkung,
-  .bingkai-persegi {
+  .bingkai-lengkung {
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -428,10 +426,6 @@
     border-radius: 999px 999px 1.75rem 1.75rem;
     aspect-ratio: 4 / 5;
   }
-  .bingkai-persegi {
-    border-radius: 1.75rem;
-    aspect-ratio: 1 / 1;
-  }
   /* Pola pucuk rebung di dalam lengkungan, di belakang maskot */
   .bingkai-lengkung::before {
     content: '';
@@ -444,8 +438,7 @@
     -webkit-mask-image: radial-gradient(ellipse at 50% 25%, #000 25%, transparent 75%);
     pointer-events: none;
   }
-  .bingkai-lengkung::after,
-  .bingkai-persegi::after {
+  .bingkai-lengkung::after {
     content: '';
     position: absolute;
     left: 0;
@@ -457,13 +450,6 @@
     background-size: 28px 16px;
     background-repeat: repeat-x;
     background-position: bottom;
-  }
-  .bingkai-persegi img {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
   /* Lapisan gambar maskot: dibaurkan (multiply) agar pola pucuk rebung tampak di latar
      putih ilustrasi; lapisan inilah yang membesar sedikit saat Raka disentuh */
@@ -856,39 +842,6 @@
     }
   }
 
-  /* ---------- Linimasa sejarah ---------- */
-  .linimasa {
-    position: relative;
-    padding-left: 2.4rem;
-  }
-  .linimasa::before {
-    content: '';
-    position: absolute;
-    left: 0.95rem;
-    top: 0.5rem;
-    bottom: 0.5rem;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--emas), rgba(142, 36, 41, 0.6), transparent);
-  }
-  .titik-linimasa {
-    position: absolute;
-    left: -2.4rem;
-    top: 1.1rem;
-    width: 2rem;
-    height: 2rem;
-    display: grid;
-    place-items: center;
-    border-radius: 0.6rem;
-    font-size: 0.95rem;
-    background: var(--kayu-700);
-    border: 1px solid var(--emas);
-    transform: rotate(45deg);
-    box-shadow: 0 0 0 4px var(--kayu-950);
-  }
-  .titik-linimasa > span {
-    transform: rotate(-45deg);
-  }
-
   /* ---------- Peta & titik interaktif ---------- */
   .titik-peta {
     position: absolute;
@@ -1016,17 +969,6 @@
     color: var(--kayu-950);
     background: var(--emas-terang);
     clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-  }
-
-  .angka-tahap {
-    width: 2.6rem;
-    height: 2.6rem;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    font-size: 1.15rem;
-    background: linear-gradient(135deg, #f0d98a, var(--emas));
-    box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.14);
   }
 
   /* ---------- Kuliner ---------- */

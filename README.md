@@ -15,8 +15,9 @@ Situs produksi: https://danglupakokomering.mooncrust.my.id
 | [PRD](docs/PRD.md) | Product Requirements: masalah, tujuan, persona, kebutuhan fungsional & nonfungsional beserta statusnya, peta jalan, risiko |
 | [TRD](docs/TRD.md) | Technical Requirements: arsitektur, rute & strategi render, alur data kamus, kontrak `/api/chat` & `/api/translate`, keamanan, performa, deploy |
 | [DRD](docs/DRD.md) | Design Requirements: arah desain, palet & kontras, tipografi, motif songket/tumpal, maskot, komponen, gerak, aksesibilitas |
-| [`prd.md`](prd.md) | Rencana revitalisasi Tahap 1–3 |
-| [`LAPORAN-PENGEMBANGAN.md`](LAPORAN-PENGEMBANGAN.md) | Log pengerjaan dan hasil pengujian |
+| [PRD Revitalisasi](docs/PRD-REVITALISASI.md) | Rencana revitalisasi Tahap 1–3 |
+| [Laporan Pengembangan](docs/LAPORAN-PENGEMBANGAN.md) | Log pengerjaan dan hasil pengujian |
+| [Dokumentasi lomba](DOKUMENTASIITFEST2026/README.md) | 31 tangkapan layar proses pengerjaan, urut menurut waktu |
 
 ## Fitur
 
@@ -84,18 +85,21 @@ npm run indexnow   # beri tahu Bing dkk. isi sitemap.xml (jalankan setelah deplo
 │   ├── konten.ts               Konten situs bertipe (sejarah, marga, adat, kuliner, lagu, kuis, chatbot)
 │   ├── kamus.ts                Tipe & indeks kamus
 │   ├── penerjemah.ts           Mesin NLP penerjemah
-│   ├── chatbot.ts  kuis.ts  jajuluk.ts  suara.ts  teks.ts  ai.ts
+│   ├── chatbot.ts  kuis.ts  jajuluk.ts  suara.ts  teks.ts  ai.ts  fokus.ts
 │   └── server/                 Basis pengetahuan RAG, klien Gemini, penjaga permintaan, cache
-├── docs/                       PRD, TRD, DRD
-├── public/                     Gambar maskot, peta, busana, logo, kuliner/, lagu/, data/kamus.json
+├── docs/                       PRD, TRD, DRD, PRD revitalisasi, laporan pengembangan
+├── public/                     Gambar maskot, peta, busana, logo, og-beranda.jpg, kuliner/, lagu/, data/kamus.json,
+│                               berkas kunci IndexNow (<kunci>.txt)
 ├── data/
 │   ├── sumber/                 Kamus & lirik asli (tidak pernah diubah) + kamus_tambahan.json
 │   ├── kamus_komering.json/csv Kamus yang sudah dibersihkan
 │   ├── kamus-meta.json         Jumlah kata & contoh (diimpor saat build)
 │   └── laporan-perbaikan.md    Daftar perbaikan & entri yang perlu ditinjau
-├── tools/build-kamus.cjs       Pembersih & pembangun kamus
-├── tailwind.config.ts          Token warna, font, dan animasi
-└── _arsip-statis/              Versi HTML/CSS/JS lama sebelum migrasi (cadangan, tidak dipakai)
+├── tools/
+│   ├── build-kamus.cjs         Pembersih & pembangun kamus
+│   └── indexnow.cjs            Pengirim alamat sitemap ke IndexNow
+├── tailwind.config.ts          Token warna dan font
+└── DOKUMENTASIITFEST2026/      Dokumentasi lomba: 00-bahan/ + satu folder per tanggal, urut waktu (tidak ikut deploy)
 ```
 
 ## Palet & Desain

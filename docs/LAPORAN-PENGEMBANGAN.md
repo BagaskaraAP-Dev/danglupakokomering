@@ -3,6 +3,8 @@
 Tanggal laporan: 18 Oktober 2026
 Repositori: `BagaskaraAP-Dev/danglupakokomering` (privat) · situs produksi: https://danglupakokomering.vercel.app
 
+> **Catatan 20 Oktober 2026:** laporan ini dipindah ke `docs/`. `prd.md` yang disebut di bawah kini [`docs/PRD-REVITALISASI.md`](PRD-REVITALISASI.md). Situs produksi kini https://danglupakokomering.mooncrust.my.id (alamat `vercel.app` dialihkan otomatis). Folder `_arsip-statis/` sudah dihapus dan tetap ada di riwayat git. Kondisi terbaru ada di [PRD](PRD.md), [TRD](TRD.md), dan [DRD](DRD.md).
+
 > **Status singkat:** situs berjalan di **Next.js 16 + TypeScript + Tailwind CSS 4 + Framer Motion** dan sudah online di Vercel. Pembaruan 18 Oktober 2026 menjalankan `prd.md` Tahap 1 dan sebagian besar Tahap 2: halaman jauh lebih ringan (484 KB, Lighthouse HP 86–93), tampilan bebas jejak "template AI", chatbot dan penerjemah memakai **Google Gemini** berbasis kamus, serta halaman mandiri per kata, hidangan, dan lagu. Rincian ada di bagian pertama di bawah.
 
 ---

@@ -9,7 +9,7 @@
 | Pemilik produk | Bagaskara Amukti Palapa (BagaskaraAP-Dev) |
 | Situs produksi | https://danglupakokomering.mooncrust.my.id (alamat lama `danglupakokomering.vercel.app` dialihkan ke sini) |
 | Repositori | `BagaskaraAP-Dev/danglupakokomering` |
-| Dokumen terkait | [TRD](TRD.md) (teknis) · [DRD](DRD.md) (desain) · [`prd.md`](../prd.md) (rencana revitalisasi) · [`LAPORAN-PENGEMBANGAN.md`](../LAPORAN-PENGEMBANGAN.md) (log pengerjaan) |
+| Dokumen terkait | [TRD](TRD.md) (teknis) · [DRD](DRD.md) (desain) · [PRD Revitalisasi](PRD-REVITALISASI.md) (rencana revitalisasi) · [Laporan Pengembangan](LAPORAN-PENGEMBANGAN.md) (log pengerjaan) |
 
 ---
 
@@ -153,7 +153,7 @@ Status: **Selesai** = berjalan di produksi · **Sebagian** = berjalan dengan ket
 
 ## 8. Peta jalan
 
-Rencana rinci beserta latar belakang masalahnya ada di [`prd.md`](../prd.md). Ringkasan statusnya:
+Rencana rinci beserta latar belakang masalahnya ada di [PRD Revitalisasi](PRD-REVITALISASI.md). Ringkasan statusnya:
 
 | Tahap | Poin | Status |
 | --- | --- | --- |

@@ -106,9 +106,9 @@ data/
   kamus-meta.json            Angka ringkas kamus (diimpor saat build)
   laporan-perbaikan.md       Perbaikan otomatis & entri yang perlu ditinjau
 tools/build-kamus.cjs        Pembersih & pembangun kamus
-public/                      Gambar, maskot/, kuliner/, lagu/, data/kamus.json
-docs/                        PRD, TRD, DRD
-_arsip-statis/               Versi HTML lama (tidak ikut deploy)
+tools/indexnow.cjs           Pengirim alamat sitemap ke IndexNow
+public/                      Gambar, maskot/, kuliner/, lagu/, data/kamus.json, og-beranda.jpg, kunci IndexNow
+docs/                        PRD, TRD, DRD, PRD-REVITALISASI, LAPORAN-PENGEMBANGAN
 DOKUMENTASIITFEST2026/       Dokumentasi lomba tim (tidak ikut deploy)
 ```
 
@@ -303,7 +303,7 @@ Klien (`lib/ai.ts`) mengembalikan `{ ok: false }` pada galat apa pun, dan kompon
 | LCP | Teks hero langsung | Hero Server Component; animasi masuk tidak menyembunyikan teks; `next/font` dengan `display: swap` |
 | CLS | 0 | Ukuran gambar eksplisit; `scrollbar-gutter: stable` agar mode layar penuh tidak menggeser halaman |
 | JS utama | Seminimal mungkin | GSAP dicabut; animasi memakai CSS dan Framer Motion seperlunya |
-| Gambar | AVIF/WebP | `next/image` dengan `formats: ['image/avif', 'image/webp']` |
+| Gambar | AVIF/WebP | `next/image` dengan `formats: ['image/avif', 'image/webp']`. Latar buram foto kuliner memakai versi 128 px dari `getImageProps` (±2 KB, sebelumnya JPEG asli 41 KB yang termuat sejak awal). Sumber hero `maskot-pasangan-hero.jpg` 1200 px, 118 KB (tampil maks. 400 px; sebelumnya 2400 px, 2,4 MB) |
 
 Hasil terakhir (situs produksi, 18 Okt 2026): Lighthouse HP Performance 86–93, Accessibility/Best Practices/SEO 100, halaman 484 KB, LCP 3,1–3,4 dtk, TBT 100–150 ms, CLS 0.
 
@@ -340,7 +340,7 @@ npm run indexnow   # kirim alamat sitemap ke IndexNow (setelah deploy)
   ```bash
   npx vercel deploy --prod
   ```
-  `.vercelignore` mengecualikan `node_modules`, `.next`, `.env*`, `_arsip-statis`, dan `DOKUMENTASIITFEST2026`.
+  `.vercelignore` mengecualikan `node_modules`, `.next`, `.env*`, dan `DOKUMENTASIITFEST2026`.
 - **Target (PRD 1.4):** integrasi Git Vercel. Beri akses repo ke aplikasi Vercel di github.com/settings/installations → Vercel → Configure. Setelah itu setiap push ke `main` terdeploy ke produksi dan setiap pull request mendapat Preview.
 
 ### Alur rilis
@@ -385,7 +385,6 @@ Belum ada tes unit otomatis; mesin penerjemah adalah kandidat pertama.
 | Tidak ada tes unit | Regresi penerjemah tidak terdeteksi otomatis | Tambah tes untuk `lib/penerjemah.ts` dan `lib/server/basis.ts` |
 | Peta berupa gambar raster | Label kecil di HP, akurasi tidak terjamin | Peta vektor GeoJSON (PRD 2.3) |
 | TTS peramban | Lafal tidak autentik dan berbeda antarperamban | Rekaman penutur asli (PRD 2.2) |
-| `_arsip-statis/` masih di repo | Menambah ukuran repo | Hapus setelah versi Next.js dinyatakan final |
 
 ## 16. Riwayat dokumen
 
