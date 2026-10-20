@@ -2,9 +2,9 @@ import type { CSSProperties } from 'react';
 import { Languages, MapPin } from 'lucide-react';
 import { KAMUS_META } from '@/lib/kamus';
 import { DATA } from '@/lib/konten';
-import { MascotShowcase } from './MascotShowcase';
-import { StatCounter } from './StatCounter';
-import { TautanMagnet } from './ui/TautanMagnet';
+import { MascotShowcase } from '../maskot/MascotShowcase';
+import { StatCounter } from '../ui/StatCounter';
+import { TautanMagnet } from '../ui/TautanMagnet';
 
 /* Hero dirender di server: judul & teks langsung ada di HTML dan terlihat sejak cat
    pertama. Di HP urutannya judul → maskot → isi, supaya Raka & Ratih tampil di layar

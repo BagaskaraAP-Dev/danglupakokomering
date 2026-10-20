@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { HalamanMandiri } from '@/components/HalamanMandiri';
+import { HalamanMandiri } from '@/components/tata-letak/HalamanMandiri';
 import { Mahkota } from '@/components/ui/Mahkota';
 
 /* Halaman 404 untuk alamat yang tidak ada dan kata yang belum tercatat di kamus (/kamus/[kata]) */

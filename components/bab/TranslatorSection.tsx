@@ -8,12 +8,12 @@ import { DATA } from '@/lib/konten';
 import { LABEL_BAHASA, type Bahasa, type HasilTerjemahan, type Segmen } from '@/lib/penerjemah';
 import { suara, useBacaanAktif } from '@/lib/suara';
 import { fmtAngka, glosa, norm } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { useToast } from './providers/ToastProvider';
-import { Bab } from './ui/Bab';
-import { MaskotHidup } from './ui/MaskotHidup';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { useKamus } from '../providers/KamusProvider';
+import { useToast } from '../providers/ToastProvider';
+import { Bab } from '../ui/Bab';
+import { MaskotHidup } from '../maskot/MaskotHidup';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const MAKS = 400;
 const SAPAAN_RATIH = 'Tabik! Nyak Ratih. Coba ketik, saya mau makan. Nanti nyak terjemahkan jadi, nyak haga mongan.';

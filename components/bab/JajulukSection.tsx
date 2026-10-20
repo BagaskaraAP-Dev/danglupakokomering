@@ -6,11 +6,11 @@ import { useRef, useState, type FormEvent } from 'react';
 import { buatJajuluk, gambarKartu, type Gender, type HasilJajuluk } from '@/lib/jajuluk';
 import { DATA } from '@/lib/konten';
 import { norm } from '@/lib/teks';
-import { useToast } from './providers/ToastProvider';
-import { Bab } from './ui/Bab';
-import { Mahkota } from './ui/Mahkota';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { useToast } from '../providers/ToastProvider';
+import { Bab } from '../ui/Bab';
+import { Mahkota } from '../ui/Mahkota';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const SIFAT = Object.entries(DATA.jajuluk.sifat);
 

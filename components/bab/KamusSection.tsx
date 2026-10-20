@@ -8,10 +8,10 @@ import type { Entri, Kamus } from '@/lib/kamus';
 import { DATA } from '@/lib/konten';
 import { urlKata } from '@/lib/tautan';
 import { fmtAngka, glosa, norm, pick } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { PemuatKamus } from './ui/PemuatKamus';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { useKamus } from '../providers/KamusProvider';
+import { PemuatKamus } from '../ui/PemuatKamus';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const PER_HALAMAN = 12;
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { HalamanMandiri } from '@/components/HalamanMandiri';
+import { HalamanMandiri } from '@/components/tata-letak/HalamanMandiri';
 import { KAMUS_META } from '@/lib/kamus';
 import { DATA } from '@/lib/konten';
 import { urlHidangan } from '@/lib/tautan';

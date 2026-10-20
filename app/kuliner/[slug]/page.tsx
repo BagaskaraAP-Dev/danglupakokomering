@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { HalamanMandiri } from '@/components/HalamanMandiri';
+import { HalamanMandiri } from '@/components/tata-letak/HalamanMandiri';
 import { DATA } from '@/lib/konten';
 import { ambilBasis } from '@/lib/server/basis';
 import { jsonLd } from '@/lib/situs';

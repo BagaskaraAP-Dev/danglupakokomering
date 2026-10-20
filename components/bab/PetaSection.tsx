@@ -3,10 +3,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { DATA } from '@/lib/konten';
-import { Bab } from './ui/Bab';
-import { GambarBertitik } from './ui/GambarBertitik';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { Bab } from '../ui/Bab';
+import { GambarBertitik } from '../ui/GambarBertitik';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const AWAL = Math.max(0, DATA.wilayah.findIndex((w) => w.key === 'martapura'));
 

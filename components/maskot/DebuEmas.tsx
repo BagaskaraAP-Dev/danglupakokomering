@@ -3,7 +3,7 @@
    lebih deras saat maskot berbicara, berputar mengelilingi kepala saat maskot berpikir,
    dan memercik dari satu titik setiap kali `percik` berganti. */
 import { useRef, type RefObject } from 'react';
-import { useKanvas } from './useKanvas';
+import { useKanvas } from '../ui/useKanvas';
 
 export type Suasana = 'tenang' | 'bicara' | 'berpikir';
 

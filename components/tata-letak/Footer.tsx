@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { DATA } from '@/lib/konten';
 import { fmtAngka } from '@/lib/teks';
 import { LogoBulat, MENU } from './Navbar';
-import { useKamus } from './providers/KamusProvider';
-import { Tumpal } from './ui/Tumpal';
+import { useKamus } from '../providers/KamusProvider';
+import { Tumpal } from '../ui/Tumpal';
 
 export function Footer() {
   const { meta } = useKamus();

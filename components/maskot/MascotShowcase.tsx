@@ -19,7 +19,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { preload } from 'react-dom';
 import { DATA } from '@/lib/konten';
 import { suara, useBacaanAktif, useSedangBicara } from '@/lib/suara';
-import { Avatar } from './ui/Avatar';
+import { Avatar } from './Avatar';
 
 const UCAPAN_RAKA = 'Tabik pun!';
 /** Titik tengah tubuh Raka di dalam bingkai (persen) — asal skala saat disentuh */

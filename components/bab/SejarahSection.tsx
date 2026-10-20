@@ -5,11 +5,11 @@
 import { Volume2 } from 'lucide-react';
 import { DATA } from '@/lib/konten';
 import { suara, useBacaanAktif, useSedangBicara } from '@/lib/suara';
-import { useToast } from './providers/ToastProvider';
-import { Bab } from './ui/Bab';
-import { MaskotHidup } from './ui/MaskotHidup';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { useToast } from '../providers/ToastProvider';
+import { Bab } from '../ui/Bab';
+import { MaskotHidup } from '../maskot/MaskotHidup';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const CERITA = DATA.sejarah.map((s) => `${s.judul}. ${s.isi}`).join(' ');
 const SAPAAN_RAKA = 'Nyak Raka. Ayo ram susuri sejarah Way Kumoring jama-jama, dari hulu sampai ke hilir!';
