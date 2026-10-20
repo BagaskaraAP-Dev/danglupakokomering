@@ -36,6 +36,7 @@ Beberapa hal dibuat lalu diubah atas permintaan pemilik produk, dicatat agar ala
 | Bug | Perbaikan |
 | --- | --- |
 | Tulisan "Memuat kamus…" muncul sebentar setiap kali hendak mencari kata | Kamus dimuat lebih awal; tulisan dan pemuat baru tampak bila pemuatan > 0,5 detik |
+| Tombol hero "Coba Penerjemah" dan "Jelajahi Peta & Budaya" terasa menabrak saat disentuh: efek magnetik menggeser tombol sampai ±30 px padahal jaraknya 12 px | Tombol biasa yang diam, sedikit lebih gelap saat ditekan; komponen `TautanMagnet` dihapus |
 | Halaman 404 (alamat salah, kata yang tidak ada) berjudul sama dengan beranda | Judul "Halaman tidak ditemukan" |
 | `/favicon.ico` mengembalikan 404 untuk peramban dan crawler yang memintanya langsung | `app/favicon.ico` (PNG RGBA 48×48 di dalam ICO; ICO berformat BMP membuat build Turbopack gagal) |
 | Video hero bisa berhenti sendiri bila beberapa perubahan visibilitas datang sekaligus | IntersectionObserver membaca entri terakhir, bukan entri pertama |

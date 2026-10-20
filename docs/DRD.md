@@ -218,7 +218,7 @@ Pembatas antarbab: deret tumpal. Bab berselang memakai pita songket (`pita`) aga
 | Masuk saat digulir | `.muncul` (CSS `animation-timeline: view()`), tanpa JavaScript | Memberi tanda bab baru tanpa menunda isi |
 | Masuk hero | `.geser-masuk` 0,7 dtk dengan `--tunda` bertingkat | Urutan baca judul → isi |
 | Penanda menu aktif | Framer Motion `layoutId` | Menunjukkan posisi baca |
-| Tombol magnetik | `<TautanMagnet>` mengikuti kursor sedikit | Umpan balik arah pada CTA hero |
+| Tombol CTA hero | Tombol diam; saat ditekan sedikit lebih gelap (`filter: brightness(0.9)`) | Umpan balik tekan tanpa menggeser tombol. Efek magnetik `<TautanMagnet>` dihapus 21 Okt 2026 karena tombol bergeser sampai ±30 px dan menabrak tombol di sebelahnya |
 | Bicara | Riak (`.riak-suara`) dan sorotan kata hanya selama suara berbunyi | Menunjukkan apa yang sedang dibacakan |
 | Laci chat, toast | Framer Motion masuk/keluar | Menjaga konteks saat panel muncul |
 | Video hero | Berputar tanpa suara selama bingkai terlihat, berhenti di luar layar | Menghidupkan sapaan pembuka; berhenti saat tidak dilihat agar hemat daya |
@@ -293,6 +293,7 @@ Dibuat otomatis oleh `kartuOg()` (`lib/server/kartu-og.tsx`), 1200×630:
 | Blur kaca di panel isi | Membebani GPU HP dan menurunkan keterbacaan |
 | Animasi berulang otomatis (bernapas, kilau, riak titik peta) | Mengalihkan perhatian dan menguras baterai (pengecualian tercatat di §8) |
 | Maskot yang miring, melompat, atau bergoyang saat disentuh/berbicara | Terasa tidak wajar; reaksi maskot cukup lewat cahaya |
+| Tombol magnetik yang bergeser mengikuti kursor | Tombol saling menabrak dan meloncat balik saat kursor tertinggal |
 | Tombol dengan emoji 🔊/🔇 | Emoji bukan ikon; tombol di atas maskot juga melanggar aturan §5 |
 | Maskot berlatar putih | Memecah tema gelap |
 | Kepala bab seragam "◆ BAB 0X ◆" | Membuat semua bab terasa sama |

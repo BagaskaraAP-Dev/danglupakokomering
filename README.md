@@ -25,7 +25,7 @@ Situs produksi: https://danglupakokomering.mooncrust.my.id
 | Bab | Fitur |
 | --- | --- |
 | Navbar | Logo bundar, teks brand dua baris, penanda bab aktif yang bergeser (Framer Motion `layoutId`), kaca buram saat halaman digulir |
-| Hero | Teks tampil tanpa menunggu JavaScript, tombol CTA magnetik, statistik kamus yang menghitung naik saat terlihat |
+| Hero | Teks tampil tanpa menunggu JavaScript, dua tombol CTA ke Penerjemah dan Peta, statistik kamus yang menghitung naik saat terlihat |
 | Maskot hero | Video 3D Raka & Ratih menunduk lalu mengucapkan "Tabik pun" di bingkai lengkung bermotif pucuk rebung. Video berputar tanpa suara; setelah pengunjung pertama kali mengetuk/mengklik halaman, Raka menyapa dengan suara asli setiap kali selesai menunduk. Sentuh Raka → video melompat ke sapaannya sehingga gerak bibir pas dengan suara. Kartu "Raka & Ratih menyapa" membacakan sapaan + artinya dengan sorotan kata |
 | Maskot pemandu | Raka (Sejarah) dan Ratih (Penerjemah) diam seperti gambar biasa, hidup lewat cahaya: debu emas songket yang menyingkir dari kursor, pendar yang menguat saat mereka berbicara, dan percikan emas saat disentuh atau saat Ratih selesai menyusun terjemahan |
 | Penerjemah AI | Terjemahan dua arah Indonesia ⇄ Basa Kumoring. Mesin lokal menerjemahkan kata per kata saat mengetik (stemming imbuhan, koreksi salah ketik, skor keyakinan); tombol **Terjemahkan** meminta Gemini menyusun kalimat alami hanya dari entri dan contoh kalimat kamus, lalu kata yang tidak ada di kamus ditandai "periksa" |
@@ -84,7 +84,7 @@ npm run indexnow   # beri tahu Bing dkk. isi sitemap.xml (jalankan setelah deplo
 │   ├── maskot/                 MascotShowcase (video hero), MaskotHidup (panggung bercahaya), DebuEmas, Avatar
 │   ├── tata-letak/             Navbar, Footer, FloatingChat (Tanya Raka & Ratih), HalamanMandiri
 │   ├── providers/              KamusProvider (kamus + mesin penerjemah), ToastProvider
-│   └── ui/                     Bab, Reveal, TombolDengar, TautanMagnet, StatCounter, PemuatKamus, useKanvas, …
+│   └── ui/                     Bab, Reveal, TombolDengar, StatCounter, PemuatKamus, useKanvas, …
 ├── lib/
 │   ├── konten.ts               Konten situs bertipe (sejarah, marga, adat, kuliner, lagu, kuis, chatbot)
 │   ├── kamus.ts                Tipe & indeks kamus

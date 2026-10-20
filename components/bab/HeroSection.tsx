@@ -1,10 +1,10 @@
 import type { CSSProperties } from 'react';
 import { Languages, MapPin } from 'lucide-react';
+import Link from 'next/link';
 import { KAMUS_META } from '@/lib/kamus';
 import { DATA } from '@/lib/konten';
 import { MascotShowcase } from '../maskot/MascotShowcase';
 import { StatCounter } from '../ui/StatCounter';
-import { TautanMagnet } from '../ui/TautanMagnet';
 
 /* Hero dirender di server: judul & teks langsung ada di HTML dan terlihat sejak cat
    pertama. Di HP urutannya judul → maskot → isi, supaya Raka & Ratih tampil di layar
@@ -31,15 +31,18 @@ export function HeroSection() {
             <strong className="text-emas-200">Raka &amp; Ratih</strong>.
           </p>
 
+          {/* Link (bukan <a>) agar lompatan ke #bab tercatat di router dan tombol Back tetap memulihkan halaman.
+              prefetch={false}: tujuannya bab di halaman yang sama. Tombol diam (tanpa efek magnetik): dulu tombol
+              bergeser mengikuti kursor sampai ±30 px dan menabrak tombol di sebelahnya */}
           <div className="flex flex-wrap gap-3 pt-1">
-            <TautanMagnet href="#penerjemah" className="btn-emas">
+            <Link href="#penerjemah" prefetch={false} className="btn-emas">
               <Languages className="size-[1.1rem]" aria-hidden />
               Coba Penerjemah
-            </TautanMagnet>
-            <TautanMagnet href="#peta" className="btn-kaca" kekuatan={0.2}>
+            </Link>
+            <Link href="#peta" prefetch={false} className="btn-kaca">
               <MapPin className="size-[1.1rem]" aria-hidden />
               Jelajahi Peta &amp; Budaya
-            </TautanMagnet>
+            </Link>
           </div>
 
           <dl className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-4">
