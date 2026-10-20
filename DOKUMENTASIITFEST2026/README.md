@@ -8,7 +8,8 @@ Situs: https://danglupakokomering.mooncrust.my.id
 
 | Berkas | Isi |
 | --- | --- |
-| [tema-lomba-dan-tautan-gambar.txt](00-bahan/tema-lomba-dan-tautan-gambar.txt) | Tema lomba *Empowering Culture Through AI-Driven Innovation* dan tautan obrolan Gemini untuk membuat gambar maskot |
+| [tema-lomba-dan-tautan-gambar.txt](00-bahan/tema-lomba-dan-tautan-gambar.txt) | Tema lomba *Empowering Culture Through AI-Driven Innovation*, tautan obrolan Gemini untuk membuat gambar maskot, dan tautan Google Flow untuk video 3D |
+| [video-maskot-3d-asli.mp4](00-bahan/video-maskot-3d-asli.mp4) | Video asli Raka & Ratih memberi salam "Tabik pun" dari Google Flow (1080×1920, 8 detik). Versi web yang dipotong dan dikecilkan ada di `public/maskot/` |
 
 ## Urutan pengerjaan
 
@@ -67,6 +68,11 @@ Situs: https://danglupakokomering.mooncrust.my.id
 | --- | --- | --- |
 | 30 | 00.09 | [AI agent melakukan optimalisasi SEO](2026-10-20/30-0009-ai-agent-optimalisasi-seo.png) |
 | 31 | 00.11 | [Setelah optimalisasi SEO](2026-10-20/31-0011-setelah-optimalisasi-seo.png) |
+| 32 | 22.37 | [Membuat animasi 3D Raka & Ratih memberi salam di Google Flow](2026-10-20/32-2237-proses-pembuatan-animasi-3d.png) |
+| 33 | 22.40 | [Memasukkan video yang sudah diunduh ke folder public](2026-10-20/33-2240-memasukkan-video-ke-folder-public.png) |
+| 34 | 22.49 | [AI agent memasang video 3D di hero website](2026-10-20/34-2249-proses-membuat-web-3d.png) |
+| 35 | 23.27 | [Laporan anti AI-slop untuk video hero](2026-10-20/35-2327-laporan-anti-ai-slop.png) |
+| 36 | 23.41 | [Hero website dengan video 3D selesai](2026-10-20/36-2341-web-3d-sudah-jadi.png) |
 
 ## Menambah tangkapan layar baru
 
