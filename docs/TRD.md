@@ -110,7 +110,7 @@ data/
   laporan-perbaikan.md       Perbaikan otomatis & entri yang perlu ditinjau
 tools/build-kamus.cjs        Pembersih & pembangun kamus
 tools/indexnow.cjs           Pengirim alamat sitemap ke IndexNow
-public/                      Gambar, maskot/ (termasuk video hero + poster), kuliner/, lagu/, data/kamus.json, og-beranda.jpg, kunci IndexNow
+public/                      Gambar, maskot/ (termasuk video hero + poster), kuliner/, lagu/, data/kamus.json, og-raka-ratih.jpg, logo-dang-lupa-ko-komering.jpg, kunci IndexNow
 docs/                        PRD, TRD, DRD, PRD-REVITALISASI, PRD-VIDEO-HERO, LAPORAN-PENGEMBANGAN
 DOKUMENTASIITFEST2026/       Dokumentasi lomba tim + 00-bahan/ (tautan, video maskot asli 1080×1920); tidak ikut deploy
 ```
@@ -292,9 +292,9 @@ Klien (`lib/ai.ts`) mengembalikan `{ ok: false }` pada galat apa pun, dan kompon
 ## 10. SEO dan metadata
 
 - Metadata global di `app/layout.tsx`: judul bertemplat `%s · Dang Lupa ko Komering`, deskripsi, Open Graph `id_ID`, `themeColor #140706`.
-- Beranda dan halaman mandiri punya canonical. Halaman mandiri mengisi `generateMetadata` (judul, deskripsi, canonical, Open Graph). JSON-LD: `DefinedTerm` (dalam `DefinedTermSet` "Kamus Basa Kumoring", `inLanguage: kge`) untuk kata, `Article` untuk kuliner, dan `MusicComposition` beserta lirik untuk lagu.
+- Beranda dan halaman mandiri punya canonical. Halaman mandiri mengisi `generateMetadata` (judul, deskripsi, canonical, Open Graph). JSON-LD: `WebSite` + `Organization` (nama situs dan logo `public/logo-dang-lupa-ko-komering.jpg` 512×512) di beranda, `DefinedTerm` (dalam `DefinedTermSet` "Kamus Basa Kumoring", `inLanguage: kge`) untuk kata, `Article` untuk kuliner, dan `MusicComposition` beserta lirik untuk lagu.
 - `app/not-found.tsx` menangani alamat yang tidak ada dan kata yang belum tercatat (status 404, `noindex` otomatis).
-- Gambar pratinjau halaman mandiri dibuat oleh `opengraph-image.tsx` per rute dengan `kartuOg()` (`lib/server/kartu-og.tsx`), ukuran 1200×630. Beranda dan `/sumber` memakai `public/og-beranda.jpg` (1200×630, 58 KB). Jangan memakai gambar maskot ukuran asli (2,4 MB) karena WhatsApp tidak menampilkan pratinjau sebesar itu.
+- Gambar pratinjau halaman mandiri dibuat oleh `opengraph-image.tsx` per rute dengan `kartuOg()` (`lib/server/kartu-og.tsx`), ukuran 1200×630. Beranda dan `/sumber` memakai `public/og-raka-ratih.jpg` (1200×630, 84 KB): logo lengkap Dang Lupa ko Komering di kiri, Raka & Ratih menangkupkan tangan di kanan, latar krem seperti video hero; juga dipasang eksplisit sebagai `twitter:image`. Jangan memakai gambar maskot ukuran asli (2,4 MB) karena WhatsApp tidak menampilkan pratinjau sebesar itu. Saat gambar pratinjau diganti, pakai **nama berkas baru** agar WhatsApp/Facebook tidak terus memakai gambar lama dari cache; pratinjau tautan yang sudah pernah dikirim baru berubah setelah cache platform kedaluwarsa (Facebook bisa dipaksa lewat Sharing Debugger).
 - Verifikasi mesin pencari: `GOOGLE_SITE_VERIFICATION` dan `BING_SITE_VERIFICATION` (lihat §12) dirender sebagai `<meta name="google-site-verification">` dan `<meta name="msvalidate.01">`. Properti Search Console bertipe **URL prefix**, karena subdomain memakai CNAME sehingga record TXT tidak bisa dipasang di nama yang sama.
 - IndexNow: kunci publik di `public/e7ffb4fa3a50b3c7f297139cb7763b3b.txt`. `npm run indexnow` mengirim semua alamat sitemap ke `api.indexnow.org` (dipakai Bing, Yandex, Seznam, Naver). Google tidak memakai IndexNow; kirim sitemap lewat Search Console.
 
@@ -307,7 +307,7 @@ Klien (`lib/ai.ts`) mengembalikan `{ ok: false }` pada galat apa pun, dan kompon
 | CLS | 0 | Ukuran gambar eksplisit; `scrollbar-gutter: stable` agar mode layar penuh tidak menggeser halaman |
 | JS utama | Seminimal mungkin | GSAP dicabut; animasi memakai CSS dan Framer Motion seperlunya |
 | Gambar | AVIF/WebP | `next/image` dengan `formats: ['image/avif', 'image/webp']`. Latar buram foto kuliner memakai versi 128 px dari `getImageProps` (±2 KB, sebelumnya JPEG asli 41 KB yang termuat sejak awal) |
-| Video hero | Tidak menunda muatan awal | `maskot/video3d-maskot-pasangan-hero.mp4` dipotong ke area bingkai 4:5 (640×800, 647 KB, `faststart`, keyframe di detik 4,5 untuk lompatan ke sapaan) dari video asli 1080×1920 5,1 MB. Poster `maskot/poster-video-hero.webp` (bingkai pertama, 51 KB) di-*preload* `fetchpriority=high` dan menjadi elemen LCP. Video `preload="none"`: unduhan mulai saat diputar setelah hidrasi; berhenti di luar layar; tidak diputar otomatis bila gerak dikurangi atau mode hemat data |
+| Video hero | Langsung berputar, juga di HP | `maskot/video3d-maskot-pasangan-hero.mp4` dipotong ke area bingkai 4:5 (640×800, 647 KB, `faststart`, keyframe di detik 4,5 untuk lompatan ke sapaan) dari video asli 1080×1920 5,1 MB. Poster `maskot/poster-video-hero.webp` (bingkai pertama, 51 KB) di-*preload* `fetchpriority=high` dan menjadi elemen LCP. Video `autoPlay` + `preload="auto"`: peramban mengunduh dan memutarnya sejak HTML dimuat tanpa menunggu hidrasi (HP kelas menengah: mulai 3,6 dtk, sebelumnya 8,8 dtk dengan `preload="none"`); berhenti di luar layar; gerak dikurangi = dihentikan di bingkai pertama setelah hidrasi; autoplay yang diblokir mulai pada sentuhan pertama |
 | Kanvas cahaya | Tanpa beban saat tak terlihat | Debu emas maskot dan pemuat kamus memakai `useKanvas`: loop `requestAnimationFrame` hanya berjalan selama kanvas terlihat (IntersectionObserver) dan tab aktif; kerapatan piksel dibatasi 2×; mati bila gerak dikurangi |
 
 Hasil terakhir:

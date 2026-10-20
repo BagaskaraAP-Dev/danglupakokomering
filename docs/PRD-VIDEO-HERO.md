@@ -5,7 +5,7 @@
 > - Gambar maskot hero ternyata ada di `MascotShowcase`, bukan di `HeroSection` (bingkainya `.bingkai-lengkung`, bukan `figure.bingkai-hero`), jadi `HeroSection` tetap Server Component.
 > - Tinggi tetap 380–480 px diganti bingkai lengkung 4:5 yang sudah ada dengan `object-position: top`, sehingga mahkota tidak terpotong lengkungan.
 > - Poster memakai bingkai pertama video (`/maskot/poster-video-hero.webp`, 51 KB), bukan `/maskot-pasangan-hero.jpg`, agar gambar tidak melompat saat video mulai. Gambar lama dihapus.
-> - Video dipotong ke area bingkai dan dikecilkan: 640×800, 647 KB (dari 5,1 MB). Berkas asli disimpan di `DOKUMENTASIITFEST2026/00-bahan/video-maskot-3d-asli.mp4`. `preload="none"`; pemutaran dimulai setelah hidrasi; tidak diputar otomatis bila gerak dikurangi atau mode hemat data.
+> - Video dipotong ke area bingkai dan dikecilkan: 640×800, 647 KB (dari 5,1 MB). Berkas asli disimpan di `DOKUMENTASIITFEST2026/00-bahan/video-maskot-3d-asli.mp4`. Semula `preload="none"` dan diputar setelah hidrasi; sejak 21 Okt memakai `autoPlay` + `preload="auto"` karena di HP hidrasi memakan 5–8 detik sehingga video tampak diam. Gerak dikurangi: dihentikan di bingkai pertama begitu halaman siap.
 > - Tombol Suara/Bisu (dan tombol jeda) sempat dibuat lalu **dihapus atas permintaan pemilik**. Suara kini terdengar saat Raka disentuh (video melompat ke sapaan sehingga bibir pas dengan suara) dan otomatis setiap Raka selesai menunduk, setelah pengunjung pertama kali berinteraksi dengan halaman (aturan autoplay peramban).
 > - Tanpa tombol jeda, WCAG 2.2.2 (jeda gerak > 5 detik) dan 1.4.2 (kontrol audio otomatis) tidak terpenuhi; video berhenti saat tergulir keluar layar.
 

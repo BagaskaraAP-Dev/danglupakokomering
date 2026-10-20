@@ -275,7 +275,9 @@ Pengecualian yang diketahui: di bawah 640 px label titik peta disembunyikan dan 
 
 ## 13. Gambar pratinjau tautan (Open Graph)
 
-Dibuat otomatis oleh `kartuOg()` (`lib/server/kartu-og.tsx`), 1200×630:
+**Beranda dan `/sumber`:** `public/og-raka-ratih.jpg` (1200×630, 84 KB). Logo lengkap Dang Lupa ko Komering (lingkaran mahkota + "DANG LUPA KO / KOMERING") di sepertiga kiri; Raka & Ratih menangkupkan tangan memberi salam di kanan, sama dengan pose video hero; latar krem `#EDDFC5` yang menyatu dengan latar gambar maskot (tepi gambar dipudarkan 140 px, latar putih logo dilebur *multiply*). Tanpa teks tambahan, karena judul situs sudah tampil di bawah gambar pada pratinjau.
+
+**Halaman mandiri** dibuat otomatis oleh `kartuOg()` (`lib/server/kartu-og.tsx`), 1200×630:
 
 - Latar gradasi `#140706 → #2A0D0C → #4A1418`, bingkai garis emas 55% bersudut 28 px.
 - Label kecil huruf kapital emas di atas, judul besar `#E5C158` (ukuran menyesuaikan panjang), sub-judul gading, isi gading 72%.
