@@ -451,16 +451,21 @@
     background-repeat: repeat-x;
     background-position: bottom;
   }
-  /* Lapisan gambar maskot: dibaurkan (multiply) agar pola pucuk rebung tampak di latar
-     putih ilustrasi; lapisan inilah yang membesar sedikit saat Raka disentuh */
+  /* Lapisan video maskot: dibaurkan (multiply) agar pola pucuk rebung tampak di latar
+     krem video; lapisan inilah yang membesar sedikit saat Raka disentuh.
+     object-position top: mahkota Raka & Ratih selalu utuh di bawah lengkungan */
   .lapis-maskot {
     position: absolute;
     inset: 0;
     z-index: 1;
     mix-blend-mode: multiply;
   }
-  .lapis-maskot img {
+  .lapis-maskot video {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: top;
   }
 
   /* Cahaya emas lembut di tubuh Raka selama ia berbicara */
@@ -469,7 +474,7 @@
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    background: radial-gradient(ellipse 30% 42% at 33% 50%, rgba(246, 231, 180, 0.75), rgba(229, 193, 88, 0.28) 55%, transparent 75%);
+    background: radial-gradient(ellipse 28% 40% at 27% 60%, rgba(246, 231, 180, 0.75), rgba(229, 193, 88, 0.28) 55%, transparent 75%);
     mix-blend-mode: soft-light;
     opacity: 0;
     transition: opacity 0.45s ease;
@@ -487,10 +492,10 @@
   /* Area sentuh transparan di tubuh Raka (sisi kiri bingkai) */
   .sentuh-raka {
     position: absolute;
-    left: 12%;
-    top: 6%;
-    width: 42%;
-    height: 89%;
+    left: 3%;
+    top: 19%;
+    width: 48%;
+    height: 77%;
     z-index: 3;
     border-radius: 45% 45% 30% 30%;
     cursor: pointer;

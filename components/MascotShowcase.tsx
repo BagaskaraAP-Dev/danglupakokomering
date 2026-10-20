@@ -1,23 +1,40 @@
 'use client';
 /* =============================================================================
    Maskot Raka & Ratih di bingkai lengkung bermotif pucuk rebung.
-   - Tampil langsung (tanpa menunggu JS); tidak ada gerak berulang tanpa pemicu.
-   - Sentuh/klik Raka: Raka membesar sedikit (Web Animations API) lalu mengucapkan
-     "Tabik pun!" (suara pria, Web Speech API id-ID). Tanpa tulisan apa pun di atas maskot.
+   - Video 3D Raka & Ratih memberi salam "Tabik pun" berputar tanpa suara selama bingkai
+     terlihat. Poster (bingkai pertama video) tampil sejak HTML pertama.
+     Gerak dikurangi atau mode hemat data: video tidak diputar otomatis.
+   - Setelah pengunjung pernah klik/ketuk/menekan tombol di halaman (syarat peramban untuk
+     suara), Raka menyapa "Tabik pun" dengan suara asli setiap kali selesai menunduk.
+   - Sentuh/klik Raka: Raka membesar sedikit (Web Animations API) dan video melompat ke
+     saat Raka mengucapkan "Tabik pun" dengan suara aslinya, jadi gerak bibir pas dengan
+     suara; suara mati lagi saat video berputar ulang. Bila video gagal dimuat, ucapan
+     memakai Web Speech API (suara pria id-ID). Tanpa tulisan apa pun di atas maskot.
    - Kartu "Raka & Ratih menyapa": speaker membacakan sapaan beserta artinya; kata
      tersorot mengikuti suara. Sapaan berganti hanya lewat tombol "berikutnya".
    ============================================================================= */
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, Volume2 } from 'lucide-react';
-import Image from 'next/image';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { preload } from 'react-dom';
 import { DATA } from '@/lib/konten';
-import { suara, useSedangBicara } from '@/lib/suara';
+import { suara, useBacaanAktif, useSedangBicara } from '@/lib/suara';
 import { Avatar } from './ui/Avatar';
 
 const UCAPAN_RAKA = 'Tabik pun!';
 /** Titik tengah tubuh Raka di dalam bingkai (persen) — asal skala saat disentuh */
-const PUSAT_RAKA = '33% 52%';
+const PUSAT_RAKA = '27% 60%';
+/* Versi web dipotong ke area yang terlihat di bingkai 4:5 (640×800, ±650 KB); video asli
+   1080×1920 disimpan di DOKUMENTASIITFEST2026/00-bahan/ */
+const VIDEO = '/maskot/video3d-maskot-pasangan-hero.mp4';
+const POSTER = '/maskot/poster-video-hero.webp';
+/* Di video, Raka selesai menunduk lalu mulutnya terbuka "Ta-" pada detik 4,71 dan "pun" usai
+   di 5,7. Versi web punya keyframe tepat di 4,5 agar lompatan ke sapaan instan, juga di HP */
+const AWAL_SAPAAN = 4.5;
+const MULAI_UCAPAN = 4.7;
+const AKHIR_UCAPAN = 5.8;
+/** Sebelum detik ini video dianggap sudah berputar ulang (awal video hening ±0,75 dtk) */
+const BATAS_ULANG = 1;
 /** Perkiraan lama satu kata bila suara tidak mengirim event batas kata (ms) */
 const MS_PER_KATA = 430;
 
@@ -147,13 +164,106 @@ function KartuSapaan() {
 
 /* ---------- Bingkai maskot ---------- */
 export function MascotShowcase() {
+  const bingkaiRef = useRef<HTMLDivElement>(null);
   const gambarRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  /** Video diputar otomatis setiap kali bingkai terlihat (false: gerak dikurangi/hemat data) */
+  const putarSaatTerlihat = useRef(false);
+  /** Peramban baru mengizinkan video bersuara setelah pengunjung pernah klik/ketuk/menekan tombol */
+  const izinSuara = useRef(false);
   const diam = useReducedMotion();
   const rakaBicara = useSedangBicara('raka');
+  // Suara video dibisukan sementara selama peramban membacakan teks lain, agar tidak bertumpuk
+  const adaBacaan = useBacaanAktif() !== null;
+  /** Suara video menyala: sejak Raka disentuh sampai video berputar ulang */
+  const [bersuara, setBersuara] = useState(false);
+  /** Raka sedang mengucapkan "Tabik pun" di video */
+  const [menyapa, setMenyapa] = useState(false);
+  const [gagal, setGagal] = useState(false);
 
-  // Raka disentuh: langsung bersuara, lalu membesar sedikit dan memantul kembali
+  // Poster adalah gambar terbesar di layar pertama (LCP)
+  preload(POSTER, { as: 'image', type: 'image/webp', fetchPriority: 'high' });
+
+  // Jeda saat bingkai keluar layar; putar lagi saat kembali
+  useEffect(() => {
+    const video = videoRef.current;
+    const bingkai = bingkaiRef.current;
+    if (!video || !bingkai) return;
+    const hematData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    putarSaatTerlihat.current = !diam && !hematData;
+    // Satu panggilan bisa membawa beberapa perubahan sekaligus; entri terakhir = keadaan terkini
+    const pengamat = new IntersectionObserver((entri) => {
+      if (!entri[entri.length - 1].isIntersecting) video.pause();
+      else if (putarSaatTerlihat.current) video.play().catch(() => {});
+    });
+    pengamat.observe(bingkai);
+    return () => pengamat.disconnect();
+  }, [diam]);
+
+  // Interaksi pertama di mana pun membuka izin suara. Safari iOS juga mensyaratkan elemen video
+  // itu sendiri pernah diubah suaranya di dalam gestur, maka muted dibalik sesaat (tak terdengar)
+  useEffect(() => {
+    if (navigator.userActivation?.hasBeenActive) izinSuara.current = true;
+    const buka = () => {
+      izinSuara.current = true;
+      const video = videoRef.current;
+      if (video?.muted) {
+        video.muted = false;
+        video.muted = true;
+      }
+      window.removeEventListener('pointerup', buka, true);
+      window.removeEventListener('keydown', buka, true);
+    };
+    window.addEventListener('pointerup', buka, true);
+    window.addEventListener('keydown', buka, true);
+    return () => {
+      window.removeEventListener('pointerup', buka, true);
+      window.removeEventListener('keydown', buka, true);
+    };
+  }, []);
+
+  const pantauWaktu = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const t = video.currentTime;
+    // Raka selesai menunduk: menyapa dengan suara asli setiap putaran, bila suara sudah diizinkan.
+    // Jendela 0,5 dtk sebelum mulut terbuka cukup karena timeupdate datang paling lambat tiap 250 ms
+    if (izinSuara.current && !bersuara && !adaBacaan && !video.paused && t >= MULAI_UCAPAN - 0.5 && t < MULAI_UCAPAN) {
+      video.muted = false;
+      video.play().then(
+        () => {
+          setBersuara(true);
+          setMenyapa(true);
+        },
+        // Peramban tetap menolak suara: lanjutkan tanpa suara
+        () => {
+          video.muted = true;
+          video.play().catch(() => {});
+        },
+      );
+    }
+    // Ucapan selesai: cahaya padam. Video berputar ulang: suara mati (dan diam lagi bila tak boleh putar otomatis)
+    if (menyapa && t >= AKHIR_UCAPAN) setMenyapa(false);
+    if (bersuara && t < BATAS_ULANG) {
+      setBersuara(false);
+      setMenyapa(false);
+      if (!putarSaatTerlihat.current) video.pause();
+    }
+  };
+
+  // Raka disentuh: video melompat ke sapaannya dengan suara asli, lalu Raka membesar sedikit dan memantul kembali
   const sentuhRaka = () => {
-    suara.ucapkan(UCAPAN_RAKA, { id: 'raka', jenis: 'pria', rate: 0.88 });
+    const video = videoRef.current;
+    if (video && !gagal) {
+      suara.berhenti();
+      video.currentTime = AWAL_SAPAAN;
+      video.muted = false;
+      video.play().catch(() => {});
+      setBersuara(true);
+      setMenyapa(true);
+    } else {
+      suara.ucapkan(UCAPAN_RAKA, { id: 'raka', jenis: 'pria', rate: 0.88 });
+    }
     const el = gambarRef.current;
     if (diam || !el) return;
     el.style.transformOrigin = PUSAT_RAKA;
@@ -172,24 +282,31 @@ export function MascotShowcase() {
   return (
     <div className="relative mx-auto w-full max-w-[25rem]">
       {/* Di HP bingkai sedikit lebih kecil agar maskot muat di layar pertama */}
-      <div className="bingkai-lengkung mx-auto w-[min(17rem,72vw)] sm:w-full">
+      <div ref={bingkaiRef} className="bingkai-lengkung mx-auto w-[min(17rem,72vw)] sm:w-full">
         <div ref={gambarRef} className="lapis-maskot">
-          <Image
-            src="/maskot-pasangan-hero.jpg"
-            alt="Maskot Raka dan Ratih mengenakan busana adat pengantin Komering berwarna merah marun dan emas"
-            fill
-            loading="eager"
-            fetchPriority="high"
-            sizes="(min-width: 1024px) 400px, (min-width: 640px) 400px, 72vw"
-          />
+          {/* preload="none": unduhan video menunggu hidrasi agar tidak berebut dengan CSS/JS halaman */}
+          <video
+            ref={videoRef}
+            poster={POSTER}
+            muted={!bersuara || adaBacaan}
+            loop
+            playsInline
+            preload="none"
+            disablePictureInPicture
+            disableRemotePlayback
+            aria-label="Animasi Raka dan Ratih berbusana adat pengantin Komering merah marun dan emas, menangkupkan tangan dan membungkuk memberi salam Tabik pun"
+            onTimeUpdate={pantauWaktu}
+          >
+            <source src={VIDEO} type="video/mp4" onError={() => setGagal(true)} />
+          </video>
         </div>
         {/* Cahaya emas di tubuh Raka selama ia berbicara */}
-        <span className="cahaya-raka" data-aktif={rakaBicara} aria-hidden />
+        <span className="cahaya-raka" data-aktif={rakaBicara || menyapa} aria-hidden />
         {/* Area sentuh transparan tepat di tubuh Raka (sisi kiri bingkai) */}
         <button
           type="button"
           className="sentuh-raka"
-          data-bicara={rakaBicara}
+          data-bicara={rakaBicara || menyapa}
           aria-label="Sentuh Raka untuk mendengar sapaan Tabik pun"
           onClick={sentuhRaka}
         />
