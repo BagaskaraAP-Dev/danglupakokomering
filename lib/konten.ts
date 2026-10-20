@@ -535,7 +535,7 @@ export const DATA: Konten = {
       { id: 'maskot', oleh: 'raka', kata: ['raka', 'ratih', 'maskot', 'siapa kamu', 'kamu siapa'],
         jawab: 'Nyak Raka, pemandu sejarah, dan ini Ratih, pemandu bahasa. Kami mengenakan busana adat Komering: kawai beludru merah bersulam emas, kopiah emas untuk Raka, dan mahkota emas untuk Ratih.' },
       { id: 'ai', oleh: 'ratih', kata: ['ai', 'kecerdasan buatan', 'cara kerja', 'teknologi', 'algoritma'],
-        jawab: 'Ada dua lapis. Mesin lokal di browser-mu memakai {jumlahKata} kata kamus dan {jumlahContoh} contoh kalimat untuk mencocokkan kata, mengenali imbuhan, dan memperbaiki salah ketik. Lalu Google Gemini menyusun jawaban atau kalimat yang alami hanya dari entri kamus dan bab situs yang relevan, dan menyebutkan sumbernya. Bila Gemini sedang tidak tersedia, mesin lokal tetap menjawab.' },
+        jawab: 'Ada dua lapis. Mesin lokal di browser-mu memakai {jumlahKata} kata kamus dan {jumlahContoh} contoh kalimat untuk mencocokkan kata, mengenali imbuhan, dan memperbaiki salah ketik. Lalu AI di server situs ini menyusun jawaban atau kalimat yang alami hanya dari entri kamus dan bab situs yang relevan, dan menyebutkan sumbernya. Bila AI sedang tidak tersedia, mesin lokal tetap menjawab.' },
     ],
     fallback: [
       'Maaf, nyak mak pacak — aku belum tahu jawabannya. Coba tanya tentang sejarah, bahasa, marga, kuliner, atau ketik **arti [kata]** untuk mencari di kamus.',

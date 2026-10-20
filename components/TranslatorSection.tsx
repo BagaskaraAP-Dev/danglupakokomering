@@ -150,7 +150,7 @@ export function TranslatorSection() {
     if (c.signal.aborted) return;
     setMenunggu(null);
     if (r.ok) setAi({ kunci, data: r.data });
-    else toast(r.status === 429 ? 'Kuota Gemini sedang penuh, jadi ditampilkan hasil mesin lokal.' : 'Gemini sedang tidak tersedia, jadi ditampilkan hasil mesin lokal.');
+    else toast(r.status === 429 ? 'Penerjemah kalimat sedang ramai, jadi ditampilkan terjemahan kata per kata.' : 'Penerjemah kalimat sedang tidak tersedia, jadi ditampilkan terjemahan kata per kata.');
   };
 
   useEffect(() => () => batal.current?.abort(), []);
@@ -191,7 +191,7 @@ export function TranslatorSection() {
         <>
           Saat kamu mengetik, mesin lokal mencocokkan tiap kata dengan{' '}
           <strong className="text-emas-200">{fmtAngka(meta.jumlahKata)} kata</strong> Kamus Basa Kumoring. Tekan{' '}
-          <strong className="text-emas-200">Terjemahkan</strong>, dan Gemini menyusun kalimat yang alami dari entri kamus serta{' '}
+          <strong className="text-emas-200">Terjemahkan</strong>, dan Ratih menyusun kalimat yang alami dari entri kamus serta{' '}
           {fmtAngka(meta.jumlahContoh)} contoh kalimatnya.
         </>
       }
@@ -286,7 +286,7 @@ export function TranslatorSection() {
                   Hasil · {LABEL_BAHASA[ke]}
                   {tampil && (
                     <span className="ml-2 font-semibold normal-case tracking-normal text-pasir">
-                      {hasilAi ? '· disusun Gemini dari kamus' : '· kata per kata (mesin lokal)'}
+                      {hasilAi ? '· disusun Ratih dari kamus' : '· kata per kata'}
                     </span>
                   )}
                 </p>
@@ -301,7 +301,7 @@ export function TranslatorSection() {
                             <i />
                             <i />
                           </span>
-                          Gemini sedang menyusun kalimat…
+                          Ratih sedang menyusun kalimat…
                         </p>
                       )}
                       {hasilAi && hasil?.text && hasil.text !== hasilAi.terjemahan && (

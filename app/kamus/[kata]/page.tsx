@@ -150,7 +150,7 @@ export default async function HalamanKata({ params }: Props) {
           )}
           <section className="rounded-3xl border border-emas/20 p-6 text-sm leading-relaxed text-gading/75">
             <h2 className="font-bold text-emas-400">Pakai dalam kalimat</h2>
-            <p className="mt-2">Coba susun kalimat dengan kata ini di penerjemah. Gemini merangkainya dari entri dan contoh kalimat kamus.</p>
+            <p className="mt-2">Coba susun kalimat dengan kata ini di penerjemah. Ratih merangkainya dari entri dan contoh kalimat kamus.</p>
             <Link href="/#penerjemah" className="btn-emas btn-kecil mt-4">
               Buka penerjemah
             </Link>

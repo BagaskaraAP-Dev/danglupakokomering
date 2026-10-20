@@ -105,8 +105,8 @@ export default function HalamanSumber() {
             memperbaiki salah ketik.
           </p>
           <p>
-            <strong className="text-emas-200">Google Gemini</strong> dipanggil lewat server situs untuk chatbot Raka &amp; Ratih dan terjemahan
-            kalimat. Server lebih dulu mencari entri kamus dan bab yang relevan, lalu Gemini diminta menjawab hanya dari bahan itu dan
+            <strong className="text-emas-200">AI di server situs</strong> dipakai untuk chatbot Raka &amp; Ratih dan terjemahan
+            kalimat. Server lebih dulu mencari entri kamus dan bab yang relevan, lalu AI diminta menjawab hanya dari bahan itu dan
             menyebutkan sumbernya. Kata Komering yang tidak ditemukan di kamus ditandai &quot;periksa&quot;.
           </p>
           <p>

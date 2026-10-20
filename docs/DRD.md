@@ -27,7 +27,7 @@ Situs ini harus terasa seperti **kain songket Komering yang dibentangkan di laya
 2. **Isi lebih dulu.** Kata Komering, contoh kalimat, dan lirik mendapat tipografi terbesar dan paling kontras.
 3. **Satu titik fokus per layar.** Emas dipakai hemat untuk hal yang paling penting: judul aksen, tombol utama, kata Komering.
 4. **Gerak hanya untuk menjawab interaksi.** Raka bergerak saat disentuh, lirik bergeser saat lagu berjalan. Tidak ada "bernapas" atau kilau otomatis.
-5. **Jujur secara visual.** Label "arti dugaan", "periksa", "Gemini", dan "mesin lokal" selalu terlihat, tidak disembunyikan demi kerapian.
+5. **Jujur secara visual.** Label "arti dugaan", "periksa", "dari kamus", dan "kata per kata" selalu terlihat, tidak disembunyikan demi kerapian. Merek AI tidak ditampilkan; yang bekerja di mata pengunjung adalah Raka & Ratih.
 
 ## 2. Warna
 
@@ -265,7 +265,7 @@ Pengecualian yang diketahui: di bawah 640 px label titik peta disembunyikan dan 
 - Sapaan dan penanda bab memakai Basa Kumoring bila ada padanannya, selalu dengan artinya di dekatnya.
 - Hindari klaim berlebihan tentang AI. Tulis apa yang dilakukan ("Gemini merangkainya dari entri dan contoh kalimat kamus"), bukan label pemasaran.
 - Keterbatasan disebut terus terang: "Suara dibacakan mesin Text-to-Speech browser, bukan rekaman penutur asli."
-- Label status wajib: **arti dugaan**, **periksa**, **Gemini**, **mesin lokal**.
+- Label status wajib: **arti dugaan**, **periksa**, **dari kamus** (jawaban chat cadangan), **kata per kata** / **disusun Ratih dari kamus** (penerjemah). Jangan menampilkan nama merek AI di antarmuka.
 - Jawaban chat: tanpa judul, tabel, daftar bertingkat, atau emoji; kata Komering ditebalkan; maks. ±120 kata.
 
 ## 13. Gambar pratinjau tautan (Open Graph)

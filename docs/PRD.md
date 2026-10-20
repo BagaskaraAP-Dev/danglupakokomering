@@ -64,7 +64,7 @@ Empat kekuatan inti ini tidak boleh hilang dalam pengembangan apa pun:
 1. **Identitas visual berakar budaya.** Palet marun-emas songket, motif tumpal dan pucuk rebung, maskot Raka & Ratih berbusana adat. Rincian di [DRD](DRD.md).
 2. **Kedalaman konten.** Kamus 3.739 kata beserta 3.658 contoh kalimat, lirik yang berjalan bersama lagu, kuis yang mengambil soal dari kamus.
 3. **Teknis rapi dan menjaga privasi.** Konsol tanpa galat, tata letak tidak bergeser saat dimuat (CLS 0), tidak ada data pribadi yang disimpan.
-4. **Kejujuran data.** AI hanya boleh memakai kata yang ada di kamus. Arti yang belum pasti selalu ditandai. Setiap jawaban diberi label asalnya ("Gemini" atau "mesin lokal").
+4. **Kejujuran data.** AI hanya boleh memakai kata yang ada di kamus. Arti yang belum pasti selalu ditandai. Jawaban cadangan dari kamus selalu diberi label ("dari kamus", "kata per kata"). Nama merek AI tidak ditampilkan di antarmuka; catatan di laci obrolan tetap memberi tahu bahwa pertanyaan diproses AI.
 
 ## 6. Kebutuhan fungsional
 
@@ -89,7 +89,7 @@ Status: **Selesai** = berjalan di produksi · **Sebagian** = berjalan dengan ket
 | FR-TR-1 | Terjemahan kata per kata instan di peramban saat mengetik (mesin lokal) | Selesai |
 | FR-TR-2 | Tombol **Terjemahkan** mengirim teks ke Gemini yang menyusun kalimat alami hanya dari entri kamus dan contoh kalimat yang relevan | Selesai |
 | FR-TR-3 | Kata Komering hasil Gemini yang tidak ditemukan di kamus diberi tanda **"periksa"** | Selesai |
-| FR-TR-4 | Bila Gemini gagal atau kuota habis, hasil mesin lokal tetap tampil dengan label "mesin lokal" | Selesai |
+| FR-TR-4 | Bila AI gagal atau kuota habis, hasil mesin lokal tetap tampil dengan label "kata per kata" dan toast penjelasan | Selesai |
 | FR-TR-5 | Tukar arah terjemahan, salin hasil, dengarkan hasil, skor keyakinan, dan rincian per kata yang bisa diklik untuk membuka kamus | Selesai |
 | FR-TR-6 | Masukan dibatasi 400 karakter | Selesai |
 
@@ -127,8 +127,8 @@ Status: **Selesai** = berjalan di produksi · **Sebagian** = berjalan dengan ket
 | FR-CH-3 | Sumber yang dipakai tampil sebagai tombol di bawah jawaban dan membuka bab atau kata terkait | Selesai |
 | FR-CH-4 | Bila data tidak cukup, Raka/Ratih mengatakannya terus terang dan menyarankan bab terdekat | Selesai |
 | FR-CH-5 | Pertanyaan di luar topik Komering ditolak dengan sopan; perintah yang menyuruh mengubah peran diabaikan | Selesai |
-| FR-CH-6 | Bila Gemini tidak tersedia, chatbot lokal berbasis niat menjawab dengan label "mesin lokal" | Selesai |
-| FR-CH-7 | Catatan di laci obrolan memberi tahu bahwa pertanyaan dikirim ke Google Gemini | Selesai |
+| FR-CH-6 | Bila AI tidak tersedia, chatbot lokal berbasis niat menjawab dengan label "dari kamus" | Selesai |
+| FR-CH-7 | Catatan di laci obrolan memberi tahu bahwa pertanyaan diproses AI di server (tanpa menyebut merek) | Selesai |
 
 ### 6.6 Halaman pendukung
 

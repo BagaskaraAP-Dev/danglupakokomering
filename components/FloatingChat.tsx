@@ -18,7 +18,7 @@ interface Pesan {
   oleh: Pembicara | 'pengguna';
   teks: string;
   aksi?: AksiChat[];
-  mesin?: 'gemini' | 'lokal';
+  mesin?: 'ai' | 'lokal';
 }
 
 const NAMA: Record<Pembicara, string> = { raka: 'Raka', ratih: 'Ratih' };
@@ -95,7 +95,7 @@ export function FloatingChat() {
     if (batal.current.signal.aborted) return;
     setMengetik(null);
     if (ai.ok) {
-      tambah({ ...ai.data, mesin: 'gemini' });
+      tambah({ ...ai.data, mesin: 'ai' });
       return;
     }
     const r = jawab(teks, kamus, penerjemah, meta);
@@ -173,7 +173,7 @@ export function FloatingChat() {
                   <p id="judul-obrolan" className="font-display font-bold leading-tight text-gading">
                     Tanya Raka &amp; Ratih
                   </p>
-                  <p className="text-[0.7rem] font-semibold text-emas-400">Gemini + Kamus Basa Kumoring</p>
+                  <p className="text-[0.7rem] font-semibold text-emas-400">Pemandu &amp; penerjemah Basa Kumoring</p>
                 </div>
                 <button type="button" className="ikon-btn kecil" aria-label="Tutup obrolan" onClick={tutupLaci}>
                   <X className="size-4" aria-hidden />
@@ -193,9 +193,10 @@ export function FloatingChat() {
                       <div className="pesan-isi">
                         <span className="mb-0.5 flex items-baseline gap-2 text-[0.68rem] font-bold text-emas-400">
                           {NAMA[m.oleh]}
-                          {m.mesin && (
-                            <span className="font-semibold text-pasir" title={m.mesin === 'gemini' ? 'Disusun Gemini dari kamus & bab situs' : 'Gemini tidak tersedia; dijawab mesin lokal'}>
-                              {m.mesin === 'gemini' ? 'Gemini' : 'mesin lokal'}
+                          {/* Jawaban cadangan tetap ditandai: lebih sederhana karena langsung dari kamus */}
+                          {m.mesin === 'lokal' && (
+                            <span className="font-semibold text-pasir" title="Jawaban ringkas langsung dari kamus situs">
+                              dari kamus
                             </span>
                           )}
                         </span>
@@ -270,7 +271,7 @@ export function FloatingChat() {
                 </button>
               </form>
               <p className="px-4 pb-3 text-[0.68rem] leading-snug text-pasir">
-                Pertanyaan dikirim ke Google Gemini lewat server situs ini bersama potongan kamus yang relevan. Jangan menulis data pribadi.
+                Pertanyaanmu diproses AI di server situs ini bersama potongan kamus yang relevan. Jangan menulis data pribadi.
               </p>
             </motion.div>
           </>
