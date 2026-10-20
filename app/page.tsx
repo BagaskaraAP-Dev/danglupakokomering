@@ -15,15 +15,41 @@ import { KamusProvider } from '@/components/providers/KamusProvider';
 import { SejarahSection } from '@/components/bab/SejarahSection';
 import { TranslatorSection } from '@/components/bab/TranslatorSection';
 import { Tumpal } from '@/components/ui/Tumpal';
+import { jsonLd, SITUS } from '@/lib/situs';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
+};
+
+/* Data terstruktur beranda: nama situs dan logo untuk hasil pencarian Google */
+const DATA_TERSTRUKTUR = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITUS}/#situs`,
+      name: 'Dang Lupa ko Komering',
+      url: `${SITUS}/`,
+      inLanguage: 'id',
+      description: 'Portal budaya Suku Komering: sejarah, Basa Kumoring, marga, busana adat, kuliner, dan lagu bersama pemandu virtual Raka & Ratih.',
+      publisher: { '@id': `${SITUS}/#organisasi` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${SITUS}/#organisasi`,
+      name: 'Dang Lupa ko Komering',
+      url: `${SITUS}/`,
+      logo: { '@type': 'ImageObject', url: `${SITUS}/logo-dang-lupa-ko-komering.jpg`, width: 512, height: 512 },
+      image: `${SITUS}/og-raka-ratih.jpg`,
+    },
+  ],
 };
 
 export default function Beranda() {
   // Kamus (±520 KB) hanya dimuat di beranda; halaman mandiri dirender di server
   return (
     <KamusProvider>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(DATA_TERSTRUKTUR) }} />
       <Navbar />
       <main id="utama" tabIndex={-1} className="outline-none">
         <HeroSection />

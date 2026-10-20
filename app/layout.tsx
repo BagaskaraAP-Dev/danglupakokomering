@@ -21,6 +21,8 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
+const GAMBAR_PRATINJAU_ALT = 'Logo Dang Lupa ko Komering dan maskot Raka & Ratih berbusana adat pengantin Komering, menangkupkan tangan memberi salam';
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITUS),
   title: {
@@ -32,13 +34,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Dang Lupa ko Komering',
     description: 'Portal budaya Suku Komering berbasis AI — Vibe Coding IT Festival 2026.',
-    // 1200×630 (rasio pratinjau tautan), 58 KB: cukup kecil untuk pratinjau WhatsApp
-    images: [{ url: '/og-beranda.jpg', width: 1200, height: 630, alt: 'Maskot Raka dan Ratih berbusana adat pengantin Komering' }],
+    // 1200×630 (rasio pratinjau tautan), 84 KB: cukup kecil untuk pratinjau WhatsApp. Nama berkas baru
+    // (bukan og-beranda.jpg) agar WhatsApp & Facebook mengambil gambar baru, bukan salinan lama di cache
+    images: [{ url: '/og-raka-ratih.jpg', width: 1200, height: 630, alt: GAMBAR_PRATINJAU_ALT }],
     type: 'website',
     locale: 'id_ID',
     siteName: 'Dang Lupa ko Komering',
   },
-  twitter: { card: 'summary_large_image' },
+  twitter: { card: 'summary_large_image', images: [{ url: '/og-raka-ratih.jpg', alt: GAMBAR_PRATINJAU_ALT }] },
   // Kode verifikasi Google Search Console & Bing Webmaster dari Environment Variable Vercel; kosong = tidak dipasang
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION || undefined,

@@ -93,7 +93,8 @@ npm run indexnow   # beri tahu Bing dkk. isi sitemap.xml (jalankan setelah deplo
 │   └── server/                 Basis pengetahuan RAG, klien Gemini, penjaga permintaan, cache
 ├── docs/                       PRD, TRD, DRD, PRD revitalisasi, PRD video hero, laporan pengembangan
 ├── public/                     maskot/ (video hero 640×800 + poster, maskot & avatar WebP), peta, busana, logo,
-│                               og-beranda.jpg, kuliner/, lagu/, data/kamus.json, berkas kunci IndexNow (<kunci>.txt)
+│                               og-raka-ratih.jpg (pratinjau tautan), logo-dang-lupa-ko-komering.jpg, kuliner/, lagu/,
+│                               data/kamus.json, berkas kunci IndexNow (<kunci>.txt)
 ├── data/
 │   ├── sumber/                 Kamus & lirik asli (tidak pernah diubah) + kamus_tambahan.json
 │   ├── kamus_komering.json/csv Kamus yang sudah dibersihkan
