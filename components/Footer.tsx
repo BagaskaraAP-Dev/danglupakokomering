@@ -35,7 +35,7 @@ export function Footer() {
           <ul className="mt-2 grid grid-cols-2 gap-x-4 text-sm text-gading/75">
             {MENU.map((m) => (
               <li key={m.id}>
-                <Link className="inline-flex min-h-11 items-center hover:text-emas-300" href={`#${m.id}`}>
+                <Link className="inline-flex min-h-11 items-center hover:text-emas-300" href={`#${m.id}`} prefetch={false}>
                   {m.label}
                 </Link>
               </li>

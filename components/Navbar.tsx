@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 /* Tautan bab memakai <Link href="#…">, bukan <a> biasa: lompatan hash lewat <a> membuat entri riwayat
-   tanpa state router, sehingga tombol Back dari halaman mandiri (mis. /kuliner/tumpi) tidak memulihkan beranda */
+   tanpa state router, sehingga tombol Back dari halaman mandiri (mis. /kuliner/tumpi) tidak memulihkan beranda.
+   prefetch={false}: tujuannya halaman yang sedang dibuka, jadi prefetch hanya menambah kerja saat halaman dimuat */
 
 export const MENU = [
   { id: 'penerjemah', label: 'Penerjemah' },
@@ -76,7 +77,7 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6" aria-label="Navigasi utama">
-        <Link href="#beranda" className="flex shrink-0 items-center gap-3" aria-label="Dang Lupa ko Komering — ke beranda">
+        <Link href="#beranda" prefetch={false} className="flex shrink-0 items-center gap-3" aria-label="Dang Lupa ko Komering — ke beranda">
           <LogoBulat />
           <span className="leading-[1.15]">
             <span className="block text-[0.72rem] font-medium tracking-[0.2em] text-white">DANG LUPA KO</span>
@@ -89,6 +90,7 @@ export function Navbar() {
             <li key={m.id}>
               <Link
                 href={`#${m.id}`}
+                prefetch={false}
                 aria-current={aktif === m.id ? 'true' : undefined}
                 className={`relative isolate block rounded-full px-3 py-2 text-[0.84rem] font-semibold transition-colors ${
                   aktif === m.id ? 'text-emas-200' : 'text-gading/70 hover:text-gading'
@@ -134,6 +136,7 @@ export function Navbar() {
                 <li key={m.id}>
                   <Link
                     href={`#${m.id}`}
+                    prefetch={false}
                     onClick={() => setBuka(false)}
                     className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ${
                       aktif === m.id ? 'bg-emas/10 text-emas-200' : 'text-gading/75 hover:bg-white/5 hover:text-gading'
