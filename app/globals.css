@@ -769,6 +769,32 @@
       linear-gradient(180deg, var(--kayu-800), var(--kayu-700));
     padding-top: 1.5rem;
   }
+  /* Pendar emas di belakang maskot; menguat selama maskot berbicara atau berpikir */
+  .pendar-maskot {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 48% 52% at 50% 52%, rgba(229, 193, 88, 0.26), transparent 70%);
+    opacity: 0.45;
+    transition: opacity 0.6s ease;
+  }
+  .pendar-maskot[data-aktif='true'] {
+    opacity: 1;
+  }
+  /* Seluruh panggung bisa disentuh untuk mendengar sapaan maskot */
+  .sentuh-maskot {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sentuh-maskot:focus-visible {
+    outline: 2px solid var(--emas-terang);
+    outline-offset: -6px;
+  }
   .panggung-maskot::after {
     content: '';
     position: absolute;

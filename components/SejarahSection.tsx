@@ -3,15 +3,16 @@
    hilir (masa kini). Sungai berliku di tengah (desktop) atau di kiri (HP); tiap era
    adalah persinggahan di tepiannya. */
 import { Volume2 } from 'lucide-react';
-import Image from 'next/image';
 import { DATA } from '@/lib/konten';
-import { suara, useSedangBicara } from '@/lib/suara';
+import { suara, useBacaanAktif, useSedangBicara } from '@/lib/suara';
 import { useToast } from './providers/ToastProvider';
 import { Bab } from './ui/Bab';
+import { MaskotHidup } from './ui/MaskotHidup';
 import { Reveal } from './ui/Reveal';
 import { TombolDengar } from './ui/TombolDengar';
 
 const CERITA = DATA.sejarah.map((s) => `${s.judul}. ${s.isi}`).join(' ');
+const SAPAAN_RAKA = 'Nyak Raka. Ayo ram susuri sejarah Way Kumoring jama-jama, dari hulu sampai ke hilir!';
 
 /** Sungai berliku; preserveAspectRatio none + non-scaling-stroke → tebal garis tetap */
 function Sungai() {
@@ -26,6 +27,9 @@ function Sungai() {
 
 export function SejarahSection() {
   const bercerita = useSedangBicara('cerita-sejarah');
+  const bacaan = useBacaanAktif();
+  // Raka bergoyang selama cerita, satu era, atau sapaannya sedang dibacakan
+  const rakaBicara = bacaan === 'cerita-sejarah' || bacaan === 'raka-sejarah' || !!bacaan?.startsWith('sejarah-');
   const toast = useToast();
 
   return (
@@ -42,20 +46,23 @@ export function SejarahSection() {
     >
       <div className="grid items-start gap-10 lg:grid-cols-[0.72fr_1.28fr]">
         <Reveal as="aside" className="lg:sticky lg:top-24">
-          <div className="panggung-maskot">
-            <Image
-              src="/maskot/raka-sejarah.webp"
-              alt="Maskot Raka berkopiah emas memegang gulungan Peta Sungai Komering"
-              width={1100}
-              height={821}
-              sizes="(min-width: 1024px) 30vw, 90vw"
-              className="relative z-[1] block h-auto w-full"
-            />
-          </div>
+          <MaskotHidup
+            src="/maskot/raka-sejarah.webp"
+            alt="Maskot Raka berkopiah emas memegang gulungan Peta Sungai Komering"
+            width={1100}
+            height={821}
+            sizes="(min-width: 1024px) 30vw, 90vw"
+            suasana={rakaBicara ? 'bicara' : 'tenang'}
+            asalPercik={{ x: 0.6, y: 0.72 }}
+            labelSentuh={rakaBicara ? 'Hentikan suara Raka' : 'Sentuh Raka untuk mendengar sapaannya'}
+            onSentuh={() => {
+              if (rakaBicara) suara.berhenti();
+              else suara.ucapkan(SAPAAN_RAKA, { id: 'raka-sejarah', jenis: 'pria', rate: 0.9 });
+            }}
+          />
           <div className="gelembung ekor-atas permukaan-kuat mt-6">
             <p className="text-sm leading-relaxed text-gading/75">
-              <strong className="text-emas-300">Raka:</strong> “Nyak Raka. Ayo ram susuri sejarah Way Kumoring jama-jama, dari hulu sampai
-              ke hilir!”
+              <strong className="text-emas-300">Raka:</strong> “{SAPAAN_RAKA}”
             </p>
             <button
               type="button"
