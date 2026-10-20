@@ -216,14 +216,16 @@ export function PemuatKamus({ selesai, onHilang, className = '' }: Props) {
       onPointerLeave={() => (kursor.current = null)}
       aria-hidden
     >
-      {/* Sumber nama fon untuk kanvas; juga tulisan pengganti saat gerak dikurangi */}
+      {/* Sumber nama fon untuk kanvas; juga tulisan pengganti saat gerak dikurangi. Pilihan tampilan lewat
+          media query CSS (motion-reduce:), bukan useReducedMotion, agar HTML server sama dengan render
+          pertama di peramban (tanpa galat hidrasi React #418) */}
       <span
         ref={huruf}
-        className={`font-display font-bold text-emas-300 ${diam && !selesai ? 'grid size-full place-items-center text-center text-3xl sm:text-4xl' : 'sr-only'}`}
+        className="sr-only font-display text-3xl font-bold text-emas-300 motion-reduce:not-sr-only motion-reduce:grid motion-reduce:size-full motion-reduce:place-items-center motion-reduce:text-center"
       >
         {TULISAN}
       </span>
-      {!diam && <canvas ref={ref} className="size-full" />}
+      <canvas ref={ref} className="size-full motion-reduce:hidden" />
     </div>
   );
 }
