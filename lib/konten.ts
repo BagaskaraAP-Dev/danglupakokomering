@@ -21,6 +21,8 @@ export interface Hidangan {
   /** Foto beresolusi kecil: ditampilkan sebagai piring bundar berbingkai emas */
   piring?: boolean;
   foto: string;
+  /** [lebar, tinggi] piksel asli foto */
+  ukuran: [number, number];
   alt: string;
   teaser: string;
   cerita: string[];
@@ -241,7 +243,7 @@ export const DATA: Konten = {
   kuliner: [
     {
       nama: 'Pindang Komering', alias: 'Pindang ikan sungai', jenis: 'Lauk Berkuah', kamus: 'KOM-K02902',
-      foto: '/kuliner/pindang-komering.jpeg', alt: 'Pindang ikan berkuah merah dengan tomat, nanas, cabai, dan daun kemangi di dalam panci',
+      foto: '/kuliner/pindang-komering.jpeg', ukuran: [635, 357], alt: 'Pindang ikan berkuah merah dengan tomat, nanas, cabai, dan daun kemangi di dalam panci',
       teaser: 'Kuah asam-pedas yang harum, ikan sungai yang lembut — inilah gulai kebanggaan tepian Way Komering.',
       cerita: [
         'Kamus Basa Kumoring mencatat pindang sebagai lauk ikan berkuah dengan bumbu dapur yang menjadi ciri khas gulai di Komering. Hidangan ini lahir dari sungai: iwak (ikan) segar tangkapan pagi langsung masuk ke kuali di pawon (dapur).',
@@ -254,7 +256,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Pindang Kuwol', alias: 'Pindang keong sawah', jenis: 'Lauk Berkuah',
-      foto: '/kuliner/pindang-kuwol.jpeg', alt: 'Semangkuk keong sawah dalam kuah kuning kemerahan',
+      foto: '/kuliner/pindang-kuwol.jpeg', ukuran: [473, 465], alt: 'Semangkuk keong sawah dalam kuah kuning kemerahan',
       teaser: 'Keong sawah dalam kuah kuning gurih-pedas. Kecil-kecil, tapi sekali coba pasti ketagihan.',
       cerita: [
         'Kuwol adalah keong yang dipungut dari huma (sawah) dan rawa di sekitar Way Komering. Sebelum dimasak, kuwol direndam dan dicuci berkali-kali sampai benar-benar bersih — pekerjaan yang butuh kesabaran.',
@@ -267,7 +269,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Pepes Tampuyak', alias: 'Pepes ikan tempoyak', jenis: 'Olahan Durian', kamus: 'KOM-K03234',
-      foto: '/kuliner/pepes-tampuyak.jpeg', alt: 'Ikan berbumbu tempoyak oranye dengan daun kemangi di atas daun pisang',
+      foto: '/kuliner/pepes-tampuyak.jpeg', ukuran: [650, 350], alt: 'Ikan berbumbu tempoyak oranye dengan daun kemangi di atas daun pisang',
       teaser: 'Ikan berselimut tempoyak, dibungkus daun pisang, lalu dimasak hingga harum — asam, gurih, dan legit sekaligus.',
       cerita: [
         'Tampuyak adalah durian yang diasamkan — cara orang Komering mengawetkan durian saat panen raya. Daging durian diberi siya (garam), lalu disimpan beberapa hari sampai rasanya asam dan aromanya makin kuat.',
@@ -280,7 +282,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Bekasam', alias: 'Ikan fermentasi goreng', jenis: 'Ikan Fermentasi',
-      foto: '/kuliner/bekasam.jpeg', alt: 'Bekasam goreng dengan taburan bawang putih dan cabai di piring enamel',
+      foto: '/kuliner/bekasam.jpeg', ukuran: [736, 416], alt: 'Bekasam goreng dengan taburan bawang putih dan cabai di piring enamel',
       teaser: 'Ikan yang “ditidurkan” bersama nasi dan garam, lalu digoreng renyah dengan bawang dan cabai. Asam-asinnya bikin nambah nasi!',
       cerita: [
         'Bekasam lahir dari kearifan masyarakat sungai. Saat tangkapan iwak melimpah, ikan dibersihkan, dilumuri siya (garam), dicampur nasi atau beras sangrai, lalu disimpan rapat selama beberapa hari.',
@@ -293,7 +295,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Sambal Jokjok', alias: 'Sambal pecel ikan', jenis: 'Sambal', kamus: 'KOM-K01610',
-      foto: '/kuliner/sambal-jokjok.jpeg', alt: 'Sambal jokjok berwarna merah oranye di atas cobek batu',
+      foto: '/kuliner/sambal-jokjok.jpeg', ukuran: [387, 387], alt: 'Sambal jokjok berwarna merah oranye di atas cobek batu',
       teaser: 'Pecel ikan ala Komering: ikan dan cabai diulek jadi satu. Pedasnya nendang, gurihnya bikin lupa diri.',
       cerita: [
         'Dalam kamus, jokjok berarti sambal berupa pecel ikan. Daging iwak yang sudah dimasak diulek bersama cabi, bawang, dan siya di atas cobek batu hingga rasa ikannya menyatu dengan sambal.',
@@ -306,7 +308,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Juadah Basah', alias: 'Kue basah pandan', jenis: 'Kue Basah', kamus: 'KOM-K01638', piring: true,
-      foto: '/kuliner/juadah-basah-hd.jpeg', alt: 'Juadah basah hijau pandan berbentuk cincin',
+      foto: '/kuliner/juadah-basah-hd.jpeg', ukuran: [600, 600], alt: 'Juadah basah hijau pandan berbentuk cincin',
       teaser: 'Kue hijau yang lembut dan lembap, harum pandan dan santan — teman setia kopi sore dan suguhan wajib saat Lebaran.',
       cerita: [
         'Sekilas juadah basah mirip bolu pandan, tetapi teksturnya lebih padat, lembut, dan lembap. Warna hijaunya alami: berasal dari daun pandan dan daun suji yang direbus bersama santan hingga harum.',
@@ -319,7 +321,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Tumpi', alias: 'Ketan bungkus daun pisang', jenis: 'Penganan', kamus: 'KOM-K03634',
-      foto: '/kuliner/tumpi.jpeg', alt: 'Tumpukan tumpi berbungkus daun pisang di atas nyiru anyaman',
+      foto: '/kuliner/tumpi.jpeg', ukuran: [415, 739], alt: 'Tumpukan tumpi berbungkus daun pisang di atas nyiru anyaman',
       teaser: 'Bungkusan hijau mungil berisi ketan pulen — sederhana, wangi daun pisang, dan selalu habis duluan.',
       cerita: [
         'Menurut kamus, tumpi adalah makanan dari ketan yang dibungkus dengan daun pisang. Ketan dibungkus rapi dengan bulung punti sehingga aroma daunnya meresap dan ketannya tetap lembut.',
@@ -533,7 +535,7 @@ export const DATA: Konten = {
       { id: 'maskot', oleh: 'raka', kata: ['raka', 'ratih', 'maskot', 'siapa kamu', 'kamu siapa'],
         jawab: 'Nyak Raka, pemandu sejarah, dan ini Ratih, pemandu bahasa. Kami mengenakan busana adat Komering: kawai beludru merah bersulam emas, kopiah emas untuk Raka, dan mahkota emas untuk Ratih.' },
       { id: 'ai', oleh: 'ratih', kata: ['ai', 'kecerdasan buatan', 'cara kerja', 'teknologi', 'algoritma'],
-        jawab: 'Penerjemah dan chatbot ini berjalan sepenuhnya di browser-mu. Ia memakai {jumlahKata} kata dari kamus, lalu mempelajari padanan kata fungsi (nyak = saya, sina = itu, mak = tidak, …) dari {jumlahContoh} pasangan contoh kalimat dengan penyelarasan statistik. Ia juga mengenali imbuhan, memperbaiki salah ketik, dan menghitung tingkat keyakinan. Tanpa server — tidak ada data yang dikirim ke mana pun.' },
+        jawab: 'Ada dua lapis. Mesin lokal di browser-mu memakai {jumlahKata} kata kamus dan {jumlahContoh} contoh kalimat untuk mencocokkan kata, mengenali imbuhan, dan memperbaiki salah ketik. Lalu AI di server situs ini menyusun jawaban atau kalimat yang alami hanya dari entri kamus dan bab situs yang relevan, dan menyebutkan sumbernya. Bila AI sedang tidak tersedia, mesin lokal tetap menjawab.' },
     ],
     fallback: [
       'Maaf, nyak mak pacak — aku belum tahu jawabannya. Coba tanya tentang sejarah, bahasa, marga, kuliner, atau ketik **arti [kata]** untuk mencari di kamus.',

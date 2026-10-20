@@ -1,10 +1,13 @@
 'use client';
 /* Asisten mengambang "Tanya Raka & Ratih": tombol di pojok kanan bawah yang membuka
-   laci obrolan bergaya songket. Jawaban dari lib/chatbot.ts (niat + penerjemah + kamus). */
+   laci obrolan bergaya songket. Jawaban dari Gemini lewat /api/chat (RAG kamus + bab situs);
+   bila gagal, lib/chatbot.ts (niat + penerjemah + kamus lokal) menjawab sebagai cadangan. */
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Send, X } from 'lucide-react';
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { tanyaAi } from '@/lib/ai';
 import { jawab, isiAngka, type Pembicara } from '@/lib/chatbot';
+import { useJebakFokus } from '@/lib/fokus';
 import { DATA, type AksiChat } from '@/lib/konten';
 import { suara } from '@/lib/suara';
 import { useKamus } from './providers/KamusProvider';
@@ -15,6 +18,7 @@ interface Pesan {
   oleh: Pembicara | 'pengguna';
   teks: string;
   aksi?: AksiChat[];
+  mesin?: 'ai' | 'lokal';
 }
 
 const NAMA: Record<Pembicara, string> = { raka: 'Raka', ratih: 'Ratih' };
@@ -30,7 +34,7 @@ function formatTeks(t: string): ReactNode {
 }
 
 export function FloatingChat() {
-  const { kamus, penerjemah, meta, bukaKamus } = useKamus();
+  const { kamus, penerjemah, meta, bukaKamus, muat } = useKamus();
   const diam = useReducedMotion();
   const [buka, setBuka] = useState(false);
   const [pesan, setPesan] = useState<Pesan[]>([]);
@@ -39,16 +43,20 @@ export function FloatingChat() {
   const daftarRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const laciRef = useRef<HTMLDivElement>(null);
   const nomor = useRef(0);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const batal = useRef<AbortController>(undefined);
 
   const tambah = (p: Omit<Pesan, 'id'>) => setPesan((d) => [...d, { ...p, id: ++nomor.current }]);
 
   const bukaLaci = () => {
+    muat();
     setBuka(true);
     if (pesan.length === 0) tambah({ oleh: 'ratih', teks: isiAngka(DATA.chatbot.sapaanAwal, meta) });
   };
   const tutupLaci = () => setBuka(false);
+
+  useJebakFokus(laciRef, buka);
 
   // Kembalikan fokus ke tombol mengambang setelah laci ditutup
   const pernahBuka = useRef(false);
@@ -74,19 +82,25 @@ export function FloatingChat() {
     daftarRef.current?.scrollTo({ top: daftarRef.current.scrollHeight, behavior: diam ? 'auto' : 'smooth' });
   }, [pesan, mengetik, diam]);
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => () => batal.current?.abort(), []);
 
-  const kirim = (q: string) => {
+  const kirim = async (q: string) => {
     const teks = q.trim();
     if (!teks || mengetik) return;
+    const riwayat = pesan.slice(-6).map(({ oleh, teks: t }) => ({ oleh, teks: t }));
     tambah({ oleh: 'pengguna', teks });
+    setMengetik('ratih');
+    batal.current = new AbortController();
+    const ai = await tanyaAi(teks, riwayat, batal.current.signal);
+    if (batal.current.signal.aborted) return;
+    setMengetik(null);
+    if (ai.ok) {
+      tambah({ ...ai.data, mesin: 'ai' });
+      return;
+    }
     const r = jawab(teks, kamus, penerjemah, meta);
-    setMengetik(r.oleh);
-    timer.current = setTimeout(() => {
-      setMengetik(null);
-      tambah({ oleh: r.oleh, teks: r.teks, aksi: r.aksi });
-      if (r.ucap) suara.ucapkan(r.ucap, { id: 'chat' });
-    }, diam ? 0 : 450 + Math.min(900, r.teks.length * 6));
+    tambah({ oleh: r.oleh, teks: r.teks, aksi: r.aksi, mesin: 'lokal' });
+    if (r.ucap) suara.ucapkan(r.ucap, { id: 'chat' });
   };
 
   const ikutiAksi = (a: AksiChat) => {
@@ -138,6 +152,7 @@ export function FloatingChat() {
               aria-hidden
             />
             <motion.div
+              ref={laciRef}
               id="laci-obrolan"
               role="dialog"
               aria-modal="true"
@@ -158,7 +173,7 @@ export function FloatingChat() {
                   <p id="judul-obrolan" className="font-display font-bold leading-tight text-gading">
                     Tanya Raka &amp; Ratih
                   </p>
-                  <p className="text-[0.7rem] font-semibold text-emas-400">● Daring · AI budaya Komering</p>
+                  <p className="text-[0.7rem] font-semibold text-emas-400">Pemandu &amp; penerjemah Basa Kumoring</p>
                 </div>
                 <button type="button" className="ikon-btn kecil" aria-label="Tutup obrolan" onClick={tutupLaci}>
                   <X className="size-4" aria-hidden />
@@ -176,7 +191,15 @@ export function FloatingChat() {
                     <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex max-w-[92%] items-end gap-2">
                       <Avatar siapa={m.oleh} className="!size-8" />
                       <div className="pesan-isi">
-                        <span className="mb-0.5 block text-[0.68rem] font-bold text-emas-400">{NAMA[m.oleh]}</span>
+                        <span className="mb-0.5 flex items-baseline gap-2 text-[0.68rem] font-bold text-emas-400">
+                          {NAMA[m.oleh]}
+                          {/* Jawaban cadangan tetap ditandai: lebih sederhana karena langsung dari kamus */}
+                          {m.mesin === 'lokal' && (
+                            <span className="font-semibold text-pasir" title="Jawaban ringkas langsung dari kamus situs">
+                              dari kamus
+                            </span>
+                          )}
+                        </span>
                         {formatTeks(m.teks)}
                         {m.aksi && m.aksi.length > 0 && (
                           <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -186,6 +209,8 @@ export function FloatingChat() {
                                 href={a.href}
                                 className="rounded-full border border-emas/40 px-2.5 py-1 text-xs font-bold text-emas-300 hover:bg-emas/15"
                                 onClick={(e) => {
+                                  // Tautan ke halaman lain (mis. /kuliner/…) dibiarkan berpindah halaman
+                                  if (!a.cari && !a.href.startsWith('#')) return;
                                   e.preventDefault();
                                   ikutiAksi(a);
                                 }}
@@ -236,15 +261,18 @@ export function FloatingChat() {
                   id="obrolan-masukan"
                   className="isian !py-2.5"
                   autoComplete="off"
-                  maxLength={200}
+                  maxLength={300}
                   placeholder="Tanya tentang Komering…"
                   value={masukan}
                   onChange={(e) => setMasukan(e.target.value)}
                 />
-                <button type="submit" className="btn-emas btn-kecil !px-3.5" aria-label="Kirim">
+                <button type="submit" className="btn-emas btn-kecil !px-3.5" aria-label="Kirim" disabled={!!mengetik}>
                   <Send className="size-4" aria-hidden />
                 </button>
               </form>
+              <p className="px-4 pb-3 text-[0.68rem] leading-snug text-pasir">
+                Pertanyaanmu diproses AI di server situs ini bersama potongan kamus yang relevan. Jangan menulis data pribadi.
+              </p>
             </motion.div>
           </>
         )}

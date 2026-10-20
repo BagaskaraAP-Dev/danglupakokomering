@@ -62,7 +62,9 @@ function cobaTerjemah(q: string, kamus: Kamus, tr: Penerjemah): Balasan | null {
       const kataKm = from === 'km' ? frasa : res.text;
       const entri = entriKamus(kamus, kataKm);
       if (entri) {
-        teks = from === 'km' ? entri : `“${frasa}” dalam Basa Kumoring: **${res.text}**\n\n${entri}`;
+        // Kata yang sama di kedua bahasa (mis. "juadah") cukup ditampilkan entrinya, tanpa "juadah → juadah"
+        const sama = norm(res.text) === norm(frasa);
+        teks = from === 'km' || sama ? entri : `“${frasa}” dalam Basa Kumoring: **${res.text}**\n\n${entri}`;
         aksi.unshift({ label: 'Buka di kamus', href: '#kamus', cari: kataKm });
       }
     }

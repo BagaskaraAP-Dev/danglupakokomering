@@ -2,8 +2,10 @@
 /* Pemutar lagu daerah "Dang Lupa ko Komering" (public/lagu/). Lirik tersorot mengikuti
    waktu tiap baris (DATA.lagu…t); reff yang dinyanyikan berulang menyala setiap kali muncul. */
 import { useReducedMotion } from 'framer-motion';
-import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
+import { Maximize2, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
+import { useJebakFokus } from '@/lib/fokus';
 import { DATA } from '@/lib/konten';
 import { suara } from '@/lib/suara';
 import { artiSingkat, clamp, fmtWaktu, norm } from '@/lib/teks';
@@ -49,6 +51,32 @@ export function LaguSection() {
   const [main, setMain] = useState(false);
   const [terjemahan, setTerjemahan] = useState(true);
   const [ikuti, setIkuti] = useState(true);
+  const [panggung, setPanggung] = useState(false);
+  const panggungRef = useRef<HTMLDivElement>(null);
+  const pemicuPanggung = useRef<HTMLButtonElement>(null);
+
+  useJebakFokus(panggungRef, panggung);
+
+  // Mode layar penuh: kunci gulir halaman, Esc menutup, dan pakai Fullscreen API bila tersedia
+  useEffect(() => {
+    if (!panggung) return;
+    const el = panggungRef.current;
+    const tombol = pemicuPanggung.current;
+    document.body.style.overflow = 'hidden';
+    el?.requestFullscreen?.().catch(() => {});
+    el?.focus();
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setPanggung(false);
+    const keluarLayarPenuh = () => !document.fullscreenElement && setPanggung(false);
+    window.addEventListener('keydown', esc);
+    document.addEventListener('fullscreenchange', keluarLayarPenuh);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', esc);
+      document.removeEventListener('fullscreenchange', keluarLayarPenuh);
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      tombol?.focus();
+    };
+  }, [panggung]);
 
   // Posisi diperbarui tiap frame selama lagu diputar
   useEffect(() => {
@@ -64,6 +92,11 @@ export function LaguSection() {
 
   const oi = kemunculanPada(pos);
   const aktif = oi >= 0 ? KEMUNCULAN[oi].baris : -1;
+  // Baris sebelum & sesudah untuk mode layar penuh (saat jeda musik: baris yang akan datang)
+  const berikutO = KEMUNCULAN.findIndex((o) => o.mulai > pos);
+  const barisKe = (o: number) => (o >= 0 && o < KEMUNCULAN.length ? BARIS[KEMUNCULAN[o].baris] : null);
+  const barisSebelum = barisKe((oi >= 0 ? oi : berikutO >= 0 ? berikutO : KEMUNCULAN.length) - 1);
+  const barisSesudah = barisKe(oi >= 0 ? oi + 1 : berikutO);
 
   const gulirKe = (i: number) => {
     const box = lirikRef.current;
@@ -119,7 +152,7 @@ export function LaguSection() {
       <audio
         ref={audioRef}
         src={L.audio}
-        preload="metadata"
+        preload="none"
         onPlay={() => setMain(true)}
         onPause={() => {
           setMain(false);
@@ -199,6 +232,9 @@ export function LaguSection() {
             <button type="button" className="chip" aria-pressed={ikuti} onClick={() => setIkuti((t) => !t)}>
               Ikuti lirik
             </button>
+            <button ref={pemicuPanggung} type="button" className="chip" onClick={() => setPanggung(true)}>
+              <Maximize2 className="size-4" aria-hidden /> Layar penuh
+            </button>
           </div>
           <dl className="mt-6 w-full space-y-1.5 rounded-2xl border border-emas/20 bg-white/[0.03] px-4 py-3 text-left text-xs leading-relaxed">
             <div className="flex gap-2">
@@ -254,6 +290,97 @@ export function LaguSection() {
           </div>
         </Reveal>
       </div>
+
+      {panggung &&
+        createPortal(
+          <div
+            ref={panggungRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Lirik layar penuh: ${L.judul}`}
+            className="panggung-lagu fixed inset-0 z-[90] flex flex-col px-5 py-5 outline-none sm:px-10 sm:py-8"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="truncate font-display text-lg font-bold text-gading">{L.judul}</p>
+                <p className="text-xs font-bold tracking-wider text-emas-300">{status(pos, oi)}</p>
+              </div>
+              <button type="button" className="ikon-btn" aria-label="Tutup layar penuh" onClick={() => setPanggung(false)}>
+                <X className="size-5" aria-hidden />
+              </button>
+            </div>
+
+            <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center gap-8 text-center" aria-live="polite">
+              <p className="min-h-[2.5rem] font-display text-xl text-gading/35 sm:text-2xl">{barisSebelum?.km}</p>
+              <div key={oi} className="sorotan-kuliner min-h-[9rem]">
+                {aktif >= 0 ? (
+                  <>
+                    <p className="font-display text-[clamp(2.2rem,6vw,4.5rem)] font-bold leading-tight text-emas-300">{BARIS[aktif].km}</p>
+                    {terjemahan && <p className="mt-3 text-lg text-gading/75 sm:text-2xl">{BARIS[aktif].id}</p>}
+                  </>
+                ) : (
+                  <p className="font-display text-[clamp(1.8rem,4vw,3rem)] italic text-gading/60">{status(pos, oi).replace('♪ ', '')}</p>
+                )}
+              </div>
+              <p className="min-h-[2.5rem] font-display text-xl text-gading/45 sm:text-2xl">{barisSesudah?.km}</p>
+            </div>
+
+            <div className="mx-auto w-full max-w-3xl">
+              <label htmlFor="lagu-posisi-panggung" className="sr-only">
+                Posisi lagu
+              </label>
+              <input
+                id="lagu-posisi-panggung"
+                type="range"
+                className="penggeser"
+                min={0}
+                max={durasi}
+                step={0.1}
+                value={pos}
+                style={{ '--pct': `${(pos / durasi) * 100}%` } as CSSProperties}
+                onChange={(e) => lompatKe(Number(e.target.value))}
+              />
+              <div className="mt-4 flex items-center justify-between">
+                <span className="w-12 text-xs font-semibold text-pasir tabular-nums">{fmtWaktu(pos)}</span>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    className="ikon-btn"
+                    aria-label="Baris sebelumnya"
+                    onClick={() => {
+                      const prev = [...KEMUNCULAN].reverse().find((o) => o.mulai < pos - 1.5);
+                      lompatKe(prev ? prev.mulai : 0);
+                    }}
+                  >
+                    <SkipBack className="size-5" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    className="grid size-16 place-items-center rounded-full bg-emas-300 text-kayu-950 transition-transform hover:scale-105"
+                    aria-label={main ? 'Jeda lagu' : 'Putar lagu'}
+                    onClick={() => (main ? audioRef.current?.pause() : putar())}
+                  >
+                    {main ? <Pause className="size-7 fill-current" aria-hidden /> : <Play className="ml-1 size-7 fill-current" aria-hidden />}
+                  </button>
+                  <button
+                    type="button"
+                    className="ikon-btn"
+                    aria-label="Baris berikutnya"
+                    onClick={() => {
+                      const next = KEMUNCULAN.find((o) => o.mulai > pos + 0.25);
+                      if (next) lompatKe(next.mulai);
+                    }}
+                  >
+                    <SkipForward className="size-5" aria-hidden />
+                  </button>
+                </div>
+                <span className="w-12 text-right text-xs font-semibold text-pasir tabular-nums">{fmtWaktu(durasi)}</span>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </Bab>
   );
 }

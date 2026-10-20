@@ -1,7 +1,12 @@
 'use client';
 
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
+import Link from 'next/link';
 import { useRef, type PointerEvent, type ReactNode } from 'react';
+
+// Link (bukan <a>) agar lompatan ke #bab tercatat di router dan tombol Back tetap memulihkan halaman.
+// prefetch={false}: tujuannya bab di halaman yang sedang dibuka, prefetch hanya membebani saat muat
+const MotionLink = motion.create(Link);
 
 interface TautanMagnetProps {
   href: string;
@@ -32,8 +37,8 @@ export function TautanMagnet({ href, className, children, kekuatan = 0.3 }: Taut
   };
 
   return (
-    <motion.a ref={ref} href={href} className={className} style={{ x: sx, y: sy }} onPointerMove={gerak} onPointerLeave={lepas} whileTap={{ scale: 0.97 }}>
+    <MotionLink ref={ref} href={href} prefetch={false} className={className} style={{ x: sx, y: sy }} onPointerMove={gerak} onPointerLeave={lepas} whileTap={{ scale: 0.97 }}>
       {children}
-    </motion.a>
+    </MotionLink>
   );
 }

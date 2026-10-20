@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "kamus": "node tools/build-kamus.cjs"
+    "kamus": "node tools/build-kamus.cjs",
+    "indexnow": "node tools/indexnow.cjs"
   },
   "dependencies": {
     "framer-motion": "13.5.0",
