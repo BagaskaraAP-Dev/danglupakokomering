@@ -3,7 +3,9 @@
    Maskot Raka & Ratih di bingkai lengkung bermotif pucuk rebung.
    - Video 3D Raka & Ratih memberi salam "Tabik pun" berputar tanpa suara selama bingkai
      terlihat. Poster (bingkai pertama video) tampil sejak HTML pertama.
-     Gerak dikurangi atau mode hemat data: video tidak diputar otomatis.
+     Peramban memutar video sejak HTML dimuat (atribut autoPlay), tanpa menunggu JavaScript,
+     jadi di HP pun langsung jalan. Gerak dikurangi: dihentikan di bingkai pertama begitu
+     halaman siap. Autoplay diblokir (mis. mode hemat daya iPhone): mulai pada sentuhan pertama.
    - Setelah pengunjung pernah klik/ketuk/menekan tombol di halaman (syarat peramban untuk
      suara), Raka menyapa "Tabik pun" dengan suara asli setiap kali selesai menunduk.
    - Sentuh/klik Raka: Raka membesar sedikit (Web Animations API) dan video melompat ke
@@ -167,8 +169,9 @@ export function MascotShowcase() {
   const bingkaiRef = useRef<HTMLDivElement>(null);
   const gambarRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  /** Video diputar otomatis setiap kali bingkai terlihat (false: gerak dikurangi/hemat data) */
+  /** Video diputar otomatis setiap kali bingkai terlihat (false: gerak dikurangi) */
   const putarSaatTerlihat = useRef(false);
+  const terlihat = useRef(false);
   /** Peramban baru mengizinkan video bersuara setelah pengunjung pernah klik/ketuk/menekan tombol */
   const izinSuara = useRef(false);
   const diam = useReducedMotion();
@@ -184,16 +187,21 @@ export function MascotShowcase() {
   // Poster adalah gambar terbesar di layar pertama (LCP)
   preload(POSTER, { as: 'image', type: 'image/webp', fetchPriority: 'high' });
 
-  // Jeda saat bingkai keluar layar; putar lagi saat kembali
+  // Jeda saat bingkai keluar layar; putar lagi saat kembali. Gerak dikurangi: video yang sudah
+  // diputar peramban (autoPlay) dihentikan di bingkai pertama, yang sama dengan poster
   useEffect(() => {
     const video = videoRef.current;
     const bingkai = bingkaiRef.current;
     if (!video || !bingkai) return;
-    const hematData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    putarSaatTerlihat.current = !diam && !hematData;
+    putarSaatTerlihat.current = !diam;
+    if (diam) {
+      video.pause();
+      video.currentTime = 0;
+    }
     // Satu panggilan bisa membawa beberapa perubahan sekaligus; entri terakhir = keadaan terkini
     const pengamat = new IntersectionObserver((entri) => {
-      if (!entri[entri.length - 1].isIntersecting) video.pause();
+      terlihat.current = entri[entri.length - 1].isIntersecting;
+      if (!terlihat.current) video.pause();
       else if (putarSaatTerlihat.current) video.play().catch(() => {});
     });
     pengamat.observe(bingkai);
@@ -201,9 +209,11 @@ export function MascotShowcase() {
   }, [diam]);
 
   // Interaksi pertama di mana pun membuka izin suara. Safari iOS juga mensyaratkan elemen video
-  // itu sendiri pernah diubah suaranya di dalam gestur, maka muted dibalik sesaat (tak terdengar)
+  // itu sendiri pernah diubah suaranya di dalam gestur, maka muted dibalik sesaat (tak terdengar).
+  // Menggulir saja tidak dihitung peramban sebagai interaksi; ketukan, klik, atau tombol papan ketik dihitung
   useEffect(() => {
     if (navigator.userActivation?.hasBeenActive) izinSuara.current = true;
+    const peristiwa = ['pointerup', 'touchend', 'click', 'keydown'] as const;
     const buka = () => {
       izinSuara.current = true;
       const video = videoRef.current;
@@ -211,15 +221,12 @@ export function MascotShowcase() {
         video.muted = false;
         video.muted = true;
       }
-      window.removeEventListener('pointerup', buka, true);
-      window.removeEventListener('keydown', buka, true);
+      // Autoplay sempat diblokir (mis. mode hemat daya iPhone): mulai pada sentuhan pertama
+      if (video?.paused && putarSaatTerlihat.current && terlihat.current) video.play().catch(() => {});
+      peristiwa.forEach((p) => window.removeEventListener(p, buka, true));
     };
-    window.addEventListener('pointerup', buka, true);
-    window.addEventListener('keydown', buka, true);
-    return () => {
-      window.removeEventListener('pointerup', buka, true);
-      window.removeEventListener('keydown', buka, true);
-    };
+    peristiwa.forEach((p) => window.addEventListener(p, buka, true));
+    return () => peristiwa.forEach((p) => window.removeEventListener(p, buka, true));
   }, []);
 
   const pantauWaktu = () => {
@@ -284,14 +291,15 @@ export function MascotShowcase() {
       {/* Di HP bingkai sedikit lebih kecil agar maskot muat di layar pertama */}
       <div ref={bingkaiRef} className="bingkai-lengkung mx-auto w-[min(17rem,72vw)] sm:w-full">
         <div ref={gambarRef} className="lapis-maskot">
-          {/* preload="none": unduhan video menunggu hidrasi agar tidak berebut dengan CSS/JS halaman */}
+          {/* autoPlay: di HP hidrasi bisa makan 5–8 detik; tanpa atribut ini video baru berputar setelahnya */}
           <video
             ref={videoRef}
             poster={POSTER}
             muted={!bersuara || adaBacaan}
+            autoPlay
             loop
             playsInline
-            preload="none"
+            preload="auto"
             disablePictureInPicture
             disableRemotePlayback
             aria-label="Animasi Raka dan Ratih berbusana adat pengantin Komering merah marun dan emas, menangkupkan tangan dan membungkuk memberi salam Tabik pun"

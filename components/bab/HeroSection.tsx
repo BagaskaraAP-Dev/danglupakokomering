@@ -34,7 +34,8 @@ export function HeroSection() {
           {/* Link (bukan <a>) agar lompatan ke #bab tercatat di router dan tombol Back tetap memulihkan halaman.
               prefetch={false}: tujuannya bab di halaman yang sama. Tombol diam (tanpa efek magnetik): dulu tombol
               bergeser mengikuti kursor sampai ±30 px dan menabrak tombol di sebelahnya */}
-          <div className="flex flex-wrap gap-3 pt-1">
+          {/* HP: dua tombol selebar layar dan bertumpuk rata; mulai sm berdampingan */}
+          <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap">
             <Link href="#penerjemah" prefetch={false} className="btn-emas">
               <Languages className="size-[1.1rem]" aria-hidden />
               Coba Penerjemah
