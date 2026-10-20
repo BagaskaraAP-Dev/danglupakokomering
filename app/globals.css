@@ -769,6 +769,19 @@
       linear-gradient(180deg, var(--kayu-800), var(--kayu-700));
     padding-top: 1.5rem;
   }
+  /* Tulisan & efek memuat baru tampak bila pemuatan lebih dari ±0,5 detik, agar tidak berkedip sekejap */
+  .tunda-muncul {
+    animation: tunda-muncul 0.3s ease 0.5s both;
+  }
+  @keyframes tunda-muncul {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   /* Pendar emas di belakang maskot; menguat selama maskot berbicara atau berpikir */
   .pendar-maskot {
     position: absolute;
