@@ -4,8 +4,8 @@
 
 | | |
 | --- | --- |
-| Versi dokumen | 1.0 |
-| Tanggal | 19 Oktober 2026 |
+| Versi dokumen | 1.1 |
+| Tanggal | 21 Oktober 2026 |
 | Sumber kebenaran kode | `tailwind.config.ts` (token) · `app/globals.css` (motif & kelas komponen) · `components/ui/` |
 | Dokumen terkait | [PRD](PRD.md) (produk) · [TRD](TRD.md) (teknis) |
 
@@ -136,12 +136,14 @@ Latar halaman: gradasi radial marun hangat di pojok kanan atas dan kiri, cahaya 
 | Ciri | Laki-laki, berkopiah emas | Perempuan, bermahkota emas |
 | Aset | `public/maskot/raka-sejarah.webp` (transparan) | `public/maskot/ratih-penerjemah.webp` (transparan) |
 | Avatar | `public/maskot/avatar-raka.webp` (128 px) | `public/maskot/avatar-ratih.webp` (128 px) |
+| Hero (berdua) | `public/maskot/video3d-maskot-pasangan-hero.mp4` (video 3D, 640×800) + poster `poster-video-hero.webp` | |
 
 Aturan:
 
 - Maskot selalu berlatar transparan di atas **panggung marun bermotif songket** (`.panggung-maskot`), tidak boleh dalam kotak putih.
-- Di hero, keduanya berdiri dalam bingkai lengkung (`.bingkai-lengkung`) berisi pola pucuk rebung. **Tidak ada teks, balon, atau badge di atas maskot.**
-- Mengetuk tubuh Raka (`.sentuh-raka`): Raka membesar 5% dengan cahaya emas (`.cahaya-raka`) lalu terdengar "Tabik pun!". Mengetuk Ratih tidak memicunya.
+- Di hero, keduanya tampil sebagai **video 3D** dalam bingkai lengkung (`.bingkai-lengkung`) berisi pola pucuk rebung: menangkupkan tangan, menunduk, lalu Raka mengucapkan "Tabik pun". Video dibaurkan `multiply` agar pola pucuk rebung tetap tampak, dan `object-position: top` agar mahkota tidak terpotong lengkungan. **Tidak ada teks, balon, badge, atau tombol di atas maskot.**
+- Mengetuk tubuh Raka di hero (`.sentuh-raka`): Raka membesar 5% dengan cahaya emas (`.cahaya-raka`) dan video melompat ke sapaannya, sehingga suara keluar bersama gerak bibir. Setelah interaksi pertama, sapaan juga terdengar otomatis setiap kali Raka selesai menunduk.
+- Di bab Sejarah dan Penerjemah, maskot **tidak bergerak**. Yang hidup hanya cahayanya (`MaskotHidup`): debu emas songket di belakang maskot, pendar emas (`.pendar-maskot`) yang menguat selama maskot berbicara, dan percikan emas saat disentuh atau saat Ratih selesai menyusun terjemahan. Keputusan pemilik produk 21 Okt 2026: maskot yang miring, melompat, atau bergoyang terasa tidak wajar.
 - Di HP, maskot tampil di layar pertama, tepat di bawah judul.
 - Avatar dipakai di tombol chat, gelembung jawaban, dan kartu sapaan. Jangan memakai gambar maskot ukuran penuh untuk avatar.
 
@@ -219,10 +221,13 @@ Pembatas antarbab: deret tumpal. Bab berselang memakai pita songket (`pita`) aga
 | Tombol magnetik | `<TautanMagnet>` mengikuti kursor sedikit | Umpan balik arah pada CTA hero |
 | Bicara | Riak (`.riak-suara`) dan sorotan kata hanya selama suara berbunyi | Menunjukkan apa yang sedang dibacakan |
 | Laci chat, toast | Framer Motion masuk/keluar | Menjaga konteks saat panel muncul |
+| Video hero | Berputar tanpa suara selama bingkai terlihat, berhenti di luar layar | Menghidupkan sapaan pembuka; berhenti saat tidak dilihat agar hemat daya |
+| Cahaya maskot | Debu emas di kanvas (`DebuEmas`), pendar `.pendar-maskot` | Menandai maskot yang sedang berbicara/berpikir tanpa menggerakkan tubuhnya |
+| Pemuat kamus | Butir emas merangkai "Kamus Basa Kumoring" lalu memencar (`PemuatKamus`); baru tampak bila pemuatan > 0,5 dtk (`.tunda-muncul`) | Umpan balik saat kamus dimuat lambat tanpa berkedip sekejap saat cepat |
 
 Aturan:
 
-- **Tidak ada animasi tak berujung** yang berjalan tanpa interaksi. Animasi lama `kilau` dan `kelip` sudah dihapus dari `tailwind.config.ts`.
+- **Tidak ada animasi tak berujung** yang berjalan tanpa interaksi. Animasi lama `kilau` dan `kelip` sudah dihapus dari `tailwind.config.ts`. Pengecualian atas keputusan pemilik produk (20–21 Okt 2026): video hero yang berulang dan debu emas di panggung maskot. Keduanya berhenti saat tidak terlihat dan mati bila gerak dikurangi. Video hero sengaja tidak diberi tombol jeda/suara; catatan WCAG 2.2.2 dan 1.4.2 ada di [Laporan Pengembangan](LAPORAN-PENGEMBANGAN.md).
 - `prefers-reduced-motion: reduce` mematikan semua animasi dan transisi (durasi 0,01 ms), mengganti gulir halus dengan lompatan langsung, dan `useReducedMotion()` dipakai di komponen Framer Motion.
 - Animasi tidak boleh menyembunyikan teks sampai JavaScript selesai.
 
@@ -286,7 +291,9 @@ Dibuat otomatis oleh `kartuOg()` (`lib/server/kartu-og.tsx`), 1200×630:
 | Emoji sebagai ikon | Merusak keseragaman dan terlihat seperti template |
 | Glow emas di banyak elemen sekaligus | Emas kehilangan fungsinya sebagai penanda fokus |
 | Blur kaca di panel isi | Membebani GPU HP dan menurunkan keterbacaan |
-| Animasi berulang otomatis (bernapas, kilau, riak titik peta) | Mengalihkan perhatian dan menguras baterai |
+| Animasi berulang otomatis (bernapas, kilau, riak titik peta) | Mengalihkan perhatian dan menguras baterai (pengecualian tercatat di §8) |
+| Maskot yang miring, melompat, atau bergoyang saat disentuh/berbicara | Terasa tidak wajar; reaksi maskot cukup lewat cahaya |
+| Tombol dengan emoji 🔊/🔇 | Emoji bukan ikon; tombol di atas maskot juga melanggar aturan §5 |
 | Maskot berlatar putih | Memecah tema gelap |
 | Kepala bab seragam "◆ BAB 0X ◆" | Membuat semua bab terasa sama |
 | Angka statistik yang ditulis tangan | Semua angka diambil dari data kamus |
@@ -296,3 +303,4 @@ Dibuat otomatis oleh `kartuOg()` (`lib/server/kartu-og.tsx`), 1200×630:
 | Versi | Tanggal | Perubahan |
 | --- | --- | --- |
 | 1.0 | 19 Okt 2026 | Dokumen pertama, sesuai kode di branch `revitalisasi-prd-tahap-1-2` |
+| 1.1 | 21 Okt 2026 | Video 3D di hero, maskot pemandu hidup lewat cahaya (tanpa gerak tubuh), pemuat kamus berpartikel, pengecualian aturan gerak |

@@ -4,8 +4,8 @@
 
 | | |
 | --- | --- |
-| Versi dokumen | 1.0 |
-| Tanggal | 19 Oktober 2026 |
+| Versi dokumen | 1.1 |
+| Tanggal | 21 Oktober 2026 |
 | Versi aplikasi | 2.0.0 (`package.json`) |
 | Dokumen terkait | [PRD](PRD.md) (produk) · [DRD](DRD.md) (desain) |
 
@@ -86,12 +86,15 @@ app/
   lagu/[slug]/               Halaman lagu + opengraph-image.tsx
   sumber/page.tsx            Sumber, rujukan & kredit
   sitemap.ts · robots.ts     SEO
-  icon.png · apple-icon.png  Ikon situs
+  not-found.tsx              Halaman 404 berjudul "Halaman tidak ditemukan"
+  icon.png · apple-icon.png · favicon.ico   Ikon situs
 components/
-  *Section.tsx               Satu komponen per bab
-  Navbar · Footer · FloatingChat · MascotShowcase · HalamanMandiri · StatCounter
+  bab/                       Satu komponen per bab (*Section.tsx), termasuk HeroSection
+  maskot/                    MascotShowcase (video hero), MaskotHidup (panggung bercahaya), DebuEmas (kanvas), Avatar
+  tata-letak/                Navbar, Footer, FloatingChat, HalamanMandiri
   providers/                 KamusProvider (kamus + penerjemah), ToastProvider
-  ui/                        Bab, Reveal, TombolDengar, TautanMagnet, GambarBertitik, Mahkota, Tumpal, Avatar, TagKata
+  ui/                        Bab, Reveal, TombolDengar, TautanMagnet, GambarBertitik, Mahkota, Tumpal, TagKata,
+                             TautanLewati, StatCounter, PemuatKamus, useKanvas (loop kanvas hemat daya)
 lib/
   konten.ts                  Seluruh konten situs bertipe (sejarah, marga, kuliner, lagu, kuis, niat chatbot)
   kamus.ts                   Tipe & indeks kamus
@@ -107,16 +110,16 @@ data/
   laporan-perbaikan.md       Perbaikan otomatis & entri yang perlu ditinjau
 tools/build-kamus.cjs        Pembersih & pembangun kamus
 tools/indexnow.cjs           Pengirim alamat sitemap ke IndexNow
-public/                      Gambar, maskot/, kuliner/, lagu/, data/kamus.json, og-beranda.jpg, kunci IndexNow
-docs/                        PRD, TRD, DRD, PRD-REVITALISASI, LAPORAN-PENGEMBANGAN
-DOKUMENTASIITFEST2026/       Dokumentasi lomba tim (tidak ikut deploy)
+public/                      Gambar, maskot/ (termasuk video hero + poster), kuliner/, lagu/, data/kamus.json, og-beranda.jpg, kunci IndexNow
+docs/                        PRD, TRD, DRD, PRD-REVITALISASI, PRD-VIDEO-HERO, LAPORAN-PENGEMBANGAN
+DOKUMENTASIITFEST2026/       Dokumentasi lomba tim + 00-bahan/ (tautan, video maskot asli 1080×1920); tidak ikut deploy
 ```
 
 ## 5. Rute dan strategi render
 
 | Rute | Jenis | Strategi |
 | --- | --- | --- |
-| `/` | Halaman | Statis saat build. Hero adalah Server Component; bab interaktif adalah Client Component |
+| `/` | Halaman | Statis saat build. Hero adalah Server Component; maskot hero (video) dan bab interaktif adalah Client Component |
 | `/kamus/[kata]` | Halaman + OG | `generateStaticParams` mengembalikan `[]`: tiap kata dirender saat pertama dikunjungi lalu disimpan. Kata tidak dikenal → 404 |
 | `/kuliner/[slug]` | Halaman + OG | 7 halaman statis saat build, `dynamicParams = false` |
 | `/lagu/[slug]` | Halaman + OG | 1 halaman statis saat build, `dynamicParams = false` |
@@ -299,13 +302,18 @@ Klien (`lib/ai.ts`) mengembalikan `{ ok: false }` pada galat apa pun, dan kompon
 
 | Anggaran | Target | Teknik |
 | --- | --- | --- |
-| Berat halaman awal (HP) | < 800 KB | Avatar maskot WebP 128 px (3–5 KB); kamus dimuat setelah interaksi; lagu `preload="none"`; gambar di bawah layar pertama `loading="lazy"` |
+| Berat halaman awal (HP) | < 800 KB | Avatar maskot WebP 128 px (3–5 KB); kamus dimuat setelah interaksi atau saat peramban senggang setelah halaman termuat; lagu `preload="none"`; gambar di bawah layar pertama `loading="lazy"` |
 | LCP | Teks hero langsung | Hero Server Component; animasi masuk tidak menyembunyikan teks; `next/font` dengan `display: swap` |
 | CLS | 0 | Ukuran gambar eksplisit; `scrollbar-gutter: stable` agar mode layar penuh tidak menggeser halaman |
 | JS utama | Seminimal mungkin | GSAP dicabut; animasi memakai CSS dan Framer Motion seperlunya |
-| Gambar | AVIF/WebP | `next/image` dengan `formats: ['image/avif', 'image/webp']`. Latar buram foto kuliner memakai versi 128 px dari `getImageProps` (±2 KB, sebelumnya JPEG asli 41 KB yang termuat sejak awal). Sumber hero `maskot-pasangan-hero.jpg` 1200 px, 118 KB (tampil maks. 400 px; sebelumnya 2400 px, 2,4 MB) |
+| Gambar | AVIF/WebP | `next/image` dengan `formats: ['image/avif', 'image/webp']`. Latar buram foto kuliner memakai versi 128 px dari `getImageProps` (±2 KB, sebelumnya JPEG asli 41 KB yang termuat sejak awal) |
+| Video hero | Tidak menunda muatan awal | `maskot/video3d-maskot-pasangan-hero.mp4` dipotong ke area bingkai 4:5 (640×800, 647 KB, `faststart`, keyframe di detik 4,5 untuk lompatan ke sapaan) dari video asli 1080×1920 5,1 MB. Poster `maskot/poster-video-hero.webp` (bingkai pertama, 51 KB) di-*preload* `fetchpriority=high` dan menjadi elemen LCP. Video `preload="none"`: unduhan mulai saat diputar setelah hidrasi; berhenti di luar layar; tidak diputar otomatis bila gerak dikurangi atau mode hemat data |
+| Kanvas cahaya | Tanpa beban saat tak terlihat | Debu emas maskot dan pemuat kamus memakai `useKanvas`: loop `requestAnimationFrame` hanya berjalan selama kanvas terlihat (IntersectionObserver) dan tab aktif; kerapatan piksel dibatasi 2×; mati bila gerak dikurangi |
 
-Hasil terakhir (situs produksi, 18 Okt 2026): Lighthouse HP Performance 86–93, Accessibility/Best Practices/SEO 100, halaman 484 KB, LCP 3,1–3,4 dtk, TBT 100–150 ms, CLS 0.
+Hasil terakhir:
+
+- Situs produksi, 18 Okt 2026: Lighthouse HP Performance 86–93, Accessibility/Best Practices/SEO 100, halaman 484 KB, LCP 3,1–3,4 dtk, TBT 100–150 ms, CLS 0.
+- Build produksi lokal, 21 Okt 2026 (HP 390 px, tanpa cache, 9 detik pertama): muatan awal halaman **463 KB** (skrip 239 KB, fon 103 KB, gambar 78 KB, dokumen 21 KB, CSS 16 KB), lalu video hero 632 KB setelah hidrasi dan `kamus.json` 154 KB saat peramban senggang, total 1.249 KB. Elemen LCP: poster video. Lighthouse produksi perlu diukur ulang setelah deploy.
 
 ## 12. Konfigurasi lingkungan
 
@@ -353,6 +361,8 @@ npm run indexnow   # kirim alamat sitemap ke IndexNow (setelah deploy)
 ### Catatan operasional
 
 - Folder proyek berada di OneDrive. Bila `npm run build` gagal dengan `EPERM … .next`, hapus folder `.next` lalu build ulang.
+- Setelah berkas komponen dipindah atau dinamai ulang, jalankan ulang `npm run dev`. Server dev yang terus berjalan bisa membalas 500 dengan `Jest worker encountered 2 child process exceptions` untuk halaman mandiri, padahal build produksinya normal.
+- Ikon `app/favicon.ico` harus ICO berisi PNG RGBA; ICO berformat BMP (mis. keluaran ffmpeg) membuat build Turbopack gagal.
 - Log galat Gemini tercatat di log fungsi Vercel dengan awalan `[gemini]`, `[api/chat]`, `[api/translate]`.
 - `AGENTS.md` ditulis ulang otomatis oleh `next dev`; biarkan ikut ter-commit agar pohon kerja bersih.
 
@@ -391,3 +401,4 @@ Belum ada tes unit otomatis; mesin penerjemah adalah kandidat pertama.
 | Versi | Tanggal | Perubahan |
 | --- | --- | --- |
 | 1.0 | 19 Okt 2026 | Dokumen pertama, sesuai kode di branch `revitalisasi-prd-tahap-1-2` |
+| 1.1 | 21 Okt 2026 | Video hero, kanvas cahaya maskot & pemuat kamus, kamus dimuat saat senggang, struktur `components/` baru (bab, maskot, tata-letak, ui), favicon.ico, hasil ukur berat halaman |

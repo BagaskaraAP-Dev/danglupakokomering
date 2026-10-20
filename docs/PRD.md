@@ -4,8 +4,8 @@
 
 | | |
 | --- | --- |
-| Versi dokumen | 1.0 |
-| Tanggal | 19 Oktober 2026 |
+| Versi dokumen | 1.1 |
+| Tanggal | 21 Oktober 2026 |
 | Pemilik produk | Bagaskara Amukti Palapa (BagaskaraAP-Dev) |
 | Situs produksi | https://danglupakokomering.mooncrust.my.id (alamat lama `danglupakokomering.vercel.app` dialihkan ke sini) |
 | Repositori | `BagaskaraAP-Dev/danglupakokomering` |
@@ -79,8 +79,11 @@ Status: **Selesai** = berjalan di produksi · **Sebagian** = berjalan dengan ket
 | FR-NAV-3 | Tautan "Lewati ke konten utama" untuk pengguna papan ketik dan pembaca layar | Selesai |
 | FR-HERO-1 | Judul dan teks pembuka tampil tanpa menunggu JavaScript | Selesai |
 | FR-HERO-2 | Raka & Ratih terlihat di layar pertama HP (urutan: judul → maskot → isi) | Selesai |
-| FR-HERO-3 | Mengetuk Raka memutar sapaan "Tabik pun!" dengan suara; kartu "Raka & Ratih menyapa" membacakan sapaan bergilir beserta artinya dengan sorotan kata | Selesai |
+| FR-HERO-3 | Mengetuk Raka memutar sapaan "Tabik pun" dengan suara asli video sehingga gerak bibir pas; kartu "Raka & Ratih menyapa" membacakan sapaan bergilir beserta artinya dengan sorotan kata | Selesai |
 | FR-HERO-4 | Statistik kamus (jumlah kata, contoh kalimat, dsb.) diambil dari data kamus saat build, bukan angka tulisan tangan | Selesai |
+| FR-HERO-5 | Maskot hero berupa video 3D Raka & Ratih menunduk dan memberi salam, berputar tanpa suara, mahkota tidak terpotong ([PRD Video Hero](PRD-VIDEO-HERO.md)) | Selesai |
+| FR-HERO-6 | Setelah pengunjung pertama kali berinteraksi dengan halaman, Raka otomatis mengucapkan "Tabik pun" setiap kali selesai menunduk | Selesai |
+| FR-MSK-1 | Raka (bab Sejarah) dan Ratih (bab Penerjemah) terasa hidup lewat cahaya tanpa gerak tubuh: debu emas, pendar saat berbicara, percikan saat disentuh atau saat terjemahan selesai; disentuh = sapaan dibacakan | Selesai |
 
 ### 6.2 Penerjemah Indonesia ⇄ Basa Kumoring
 
@@ -104,6 +107,7 @@ Status: **Selesai** = berjalan di produksi · **Sebagian** = berjalan dengan ket
 | FR-KM-5 | Entri sensitif tetap bisa dicari tetapi tidak tampil acak (kuis, kata acak, kata hari ini) | Selesai |
 | FR-KM-6 | Setiap kata punya halaman sendiri `/kamus/<kata>` dengan judul, deskripsi, gambar pratinjau tautan, dan data terstruktur | Selesai |
 | FR-KM-7 | Tombol kata di bagian mana pun (penerjemah, kuliner, lagu, chat, adat) membuka kata itu di bab Kamus | Selesai |
+| FR-KM-8 | Kamus sudah siap sebelum pengunjung mencari kata (dimuat saat peramban senggang dan saat kolom pencarian disentuh). Tulisan "Memuat kamus…" tidak berkedip sekejap; bila pemuatan > 0,5 detik tampil pemuat butir emas "Kamus Basa Kumoring" | Selesai |
 
 ### 6.4 Bab budaya
 
@@ -142,7 +146,7 @@ Status: **Selesai** = berjalan di produksi · **Sebagian** = berjalan dengan ket
 
 | ID | Kategori | Kebutuhan | Kondisi terakhir (18 Okt 2026) |
 | --- | --- | --- | --- |
-| NFR-1 | Performa | Lighthouse HP Performance ≥ 85; berat halaman awal < 800 KB; CLS 0 | 86–93 · 484 KB · CLS 0 |
+| NFR-1 | Performa | Lighthouse HP Performance ≥ 85; berat halaman awal < 800 KB; CLS 0 | 86–93 · 484 KB · CLS 0 (18 Okt). 21 Okt, build lokal: muatan awal 463 KB, lalu video hero 632 KB setelah hidrasi; Lighthouse perlu diukur ulang |
 | NFR-2 | Aksesibilitas | Lighthouse Accessibility 100; kontras teks minimal WCAG AA; semua kontrol bisa dipakai dengan papan ketik; menghormati `prefers-reduced-motion` | 100 |
 | NFR-3 | SEO | Lighthouse SEO 100; judul, deskripsi, canonical, dan JSON-LD di setiap halaman mandiri | 100 |
 | NFR-4 | Privasi | Tidak ada akun, cookie pelacak, atau analitik pihak ketiga. Hanya teks pertanyaan/terjemahan yang dikirim ke Gemini. Skor kuis disimpan lokal di peramban | Terpenuhi |
@@ -194,3 +198,4 @@ Rencana rinci beserta latar belakang masalahnya ada di [PRD Revitalisasi](PRD-RE
 | Versi | Tanggal | Perubahan |
 | --- | --- | --- |
 | 1.0 | 19 Okt 2026 | Dokumen pertama, disusun dari kondisi produksi setelah revitalisasi Tahap 1 & 2 |
+| 1.1 | 21 Okt 2026 | FR-HERO-5/6 (video 3D & sapaan otomatis), FR-MSK-1 (maskot bercahaya), FR-KM-8 (kamus siap lebih awal), NFR-1 hasil ukur terbaru |
