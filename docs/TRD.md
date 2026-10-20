@@ -93,7 +93,7 @@ components/
   maskot/                    MascotShowcase (video hero), MaskotHidup (panggung bercahaya), DebuEmas (kanvas), Avatar
   tata-letak/                Navbar, Footer, FloatingChat, HalamanMandiri
   providers/                 KamusProvider (kamus + penerjemah), ToastProvider
-  ui/                        Bab, Reveal, TombolDengar, TautanMagnet, GambarBertitik, Mahkota, Tumpal, TagKata,
+  ui/                        Bab, Reveal, TombolDengar, GambarBertitik, Mahkota, Tumpal, TagKata,
                              TautanLewati, StatCounter, PemuatKamus, useKanvas (loop kanvas hemat daya)
 lib/
   konten.ts                  Seluruh konten situs bertipe (sejarah, marga, kuliner, lagu, kuis, niat chatbot)
