@@ -16,8 +16,9 @@ Situs produksi: https://danglupakokomering.mooncrust.my.id
 | [TRD](docs/TRD.md) | Technical Requirements: arsitektur, rute & strategi render, alur data kamus, kontrak `/api/chat` & `/api/translate`, keamanan, performa, deploy |
 | [DRD](docs/DRD.md) | Design Requirements: arah desain, palet & kontras, tipografi, motif songket/tumpal, maskot, komponen, gerak, aksesibilitas |
 | [PRD Revitalisasi](docs/PRD-REVITALISASI.md) | Rencana revitalisasi Tahap 1–3 |
+| [PRD Video Hero](docs/PRD-VIDEO-HERO.md) | Video 3D Raka & Ratih di hero (20 Oktober 2026) beserta penyesuaiannya |
 | [Laporan Pengembangan](docs/LAPORAN-PENGEMBANGAN.md) | Log pengerjaan dan hasil pengujian |
-| [Dokumentasi lomba](DOKUMENTASIITFEST2026/README.md) | 31 tangkapan layar proses pengerjaan, urut menurut waktu |
+| [Dokumentasi lomba](DOKUMENTASIITFEST2026/README.md) | 36 tangkapan layar proses pengerjaan, urut menurut waktu, dan bahan mentah (tautan, video maskot asli) |
 
 ## Fitur
 
@@ -25,9 +26,10 @@ Situs produksi: https://danglupakokomering.mooncrust.my.id
 | --- | --- |
 | Navbar | Logo bundar, teks brand dua baris, penanda bab aktif yang bergeser (Framer Motion `layoutId`), kaca buram saat halaman digulir |
 | Hero | Teks tampil tanpa menunggu JavaScript, tombol CTA magnetik, statistik kamus yang menghitung naik saat terlihat |
-| Maskot | Raka & Ratih di bingkai lengkung bermotif pucuk rebung tanpa tulisan apa pun di atasnya. Sentuh/klik Raka → ia membesar sedikit dengan cahaya emas dan mengucapkan "Tabik pun!" (suara pria). Kartu "Raka & Ratih menyapa" membacakan sapaan + artinya dengan sorotan kata dan riak pada tombol speaker |
+| Maskot hero | Video 3D Raka & Ratih menunduk lalu mengucapkan "Tabik pun" di bingkai lengkung bermotif pucuk rebung. Video berputar tanpa suara; setelah pengunjung pertama kali mengetuk/mengklik halaman, Raka menyapa dengan suara asli setiap kali selesai menunduk. Sentuh Raka → video melompat ke sapaannya sehingga gerak bibir pas dengan suara. Kartu "Raka & Ratih menyapa" membacakan sapaan + artinya dengan sorotan kata |
+| Maskot pemandu | Raka (Sejarah) dan Ratih (Penerjemah) diam seperti gambar biasa, hidup lewat cahaya: debu emas songket yang menyingkir dari kursor, pendar yang menguat saat mereka berbicara, dan percikan emas saat disentuh atau saat Ratih selesai menyusun terjemahan |
 | Penerjemah AI | Terjemahan dua arah Indonesia ⇄ Basa Kumoring. Mesin lokal menerjemahkan kata per kata saat mengetik (stemming imbuhan, koreksi salah ketik, skor keyakinan); tombol **Terjemahkan** meminta Gemini menyusun kalimat alami hanya dari entri dan contoh kalimat kamus, lalu kata yang tidak ada di kamus ditandai "periksa" |
-| Kamus | 3.739 kata (1.808 dasar + 1.931 turunan) dengan contoh kalimat, termasuk 7 kata lirik bertanda "arti dugaan"; pencarian dua arah, filter kelas kata, kata turunan, tautan silang, "Kata Hari Ini" |
+| Kamus | 3.739 kata (1.808 dasar + 1.931 turunan) dengan contoh kalimat, termasuk 7 kata lirik bertanda "arti dugaan"; pencarian dua arah, filter kelas kata, kata turunan, tautan silang, "Kata Hari Ini". Kamus dimuat saat peramban senggang sehingga biasanya sudah siap sebelum mencari kata; bila pemuatan lebih dari 0,5 detik, butir emas merangkai tulisan "Kamus Basa Kumoring" lalu memencar saat kamus siap |
 | Sejarah | Linimasa 8 era yang bisa dibacakan |
 | Peta | Titik interaktif di peta wilayah sebaran Komering |
 | Marga | Data kebuayan dengan filter kabupaten & pencarian |
@@ -73,23 +75,25 @@ npm run indexnow   # beri tahu Bing dkk. isi sitemap.xml (jalankan setelah deplo
 │   ├── api/chat, api/translate Endpoint Gemini (RAG kamus + bab situs)
 │   ├── kamus/, kuliner/, lagu/ Halaman mandiri + gambar pratinjau tautan
 │   ├── sumber/                 Sumber, rujukan & kredit
-│   └── icon.png                Favicon (lingkaran logo)
+│   ├── not-found.tsx           Halaman 404 ("Halaman tidak ditemukan")
+│   └── icon.png  favicon.ico   Ikon situs (lingkaran logo)
 ├── components/
-│   ├── Navbar.tsx  HeroSection.tsx  MascotShowcase.tsx  StatCounter.tsx
-│   ├── TranslatorSection.tsx  KamusSection.tsx  SejarahSection.tsx  PetaSection.tsx
-│   ├── MargaSection.tsx  BusanaSection.tsx  KulinerSection.tsx  LaguSection.tsx
-│   ├── JajulukSection.tsx  KuisSection.tsx  Footer.tsx  FloatingChat.tsx
+│   ├── bab/                    Satu komponen per bab: HeroSection, TranslatorSection, KamusSection,
+│   │                           SejarahSection, PetaSection, MargaSection, BusanaSection, KulinerSection,
+│   │                           LaguSection, JajulukSection, KuisSection
+│   ├── maskot/                 MascotShowcase (video hero), MaskotHidup (panggung bercahaya), DebuEmas, Avatar
+│   ├── tata-letak/             Navbar, Footer, FloatingChat (Tanya Raka & Ratih), HalamanMandiri
 │   ├── providers/              KamusProvider (kamus + mesin penerjemah), ToastProvider
-│   └── ui/                     Bab, Reveal, TombolDengar, TautanMagnet, GambarBertitik, …
+│   └── ui/                     Bab, Reveal, TombolDengar, TautanMagnet, StatCounter, PemuatKamus, useKanvas, …
 ├── lib/
 │   ├── konten.ts               Konten situs bertipe (sejarah, marga, adat, kuliner, lagu, kuis, chatbot)
 │   ├── kamus.ts                Tipe & indeks kamus
 │   ├── penerjemah.ts           Mesin NLP penerjemah
 │   ├── chatbot.ts  kuis.ts  jajuluk.ts  suara.ts  teks.ts  ai.ts  fokus.ts
 │   └── server/                 Basis pengetahuan RAG, klien Gemini, penjaga permintaan, cache
-├── docs/                       PRD, TRD, DRD, PRD revitalisasi, laporan pengembangan
-├── public/                     Gambar maskot, peta, busana, logo, og-beranda.jpg, kuliner/, lagu/, data/kamus.json,
-│                               berkas kunci IndexNow (<kunci>.txt)
+├── docs/                       PRD, TRD, DRD, PRD revitalisasi, PRD video hero, laporan pengembangan
+├── public/                     maskot/ (video hero 640×800 + poster, maskot & avatar WebP), peta, busana, logo,
+│                               og-beranda.jpg, kuliner/, lagu/, data/kamus.json, berkas kunci IndexNow (<kunci>.txt)
 ├── data/
 │   ├── sumber/                 Kamus & lirik asli (tidak pernah diubah) + kamus_tambahan.json
 │   ├── kamus_komering.json/csv Kamus yang sudah dibersihkan
@@ -115,7 +119,9 @@ Pola songket (belah ketupat) tampil samar di sisi kiri latar dan pita bab; pola 
 
 ## Suara
 
-Sapaan Raka ("Tabik pun!") dan kartu "Raka & Ratih menyapa" memakai Web Speech API peramban (`SpeechSynthesisUtterance`, bahasa `id-ID`) lewat `lib/suara.ts`. Untuk Raka dipilih suara pria Indonesia bila tersedia (mis. *Microsoft Ardi* di Edge); bila tidak ada, suara Indonesia lain dipakai dengan nada diturunkan. Tidak ada file audio sapaan yang dimuat, sehingga tidak ada permintaan 404 dan tidak ada pesan "suara belum tersedia".
+Sapaan "Tabik pun" di hero memakai **suara asli video 3D** (sapaan + suling), sehingga gerak bibir Raka pas dengan suaranya. Peramban hanya mengizinkan video bersuara setelah pengunjung pernah mengetuk, mengklik, atau menekan tombol di halaman; sebelum itu video berputar tanpa suara.
+
+Suara lain (kartu "Raka & Ratih menyapa", sapaan Raka di Sejarah dan Ratih di Penerjemah, cerita sejarah, hasil terjemahan, kosakata) memakai Web Speech API peramban (`SpeechSynthesisUtterance`, bahasa `id-ID`) lewat `lib/suara.ts`. Untuk Raka dipilih suara pria Indonesia bila tersedia (mis. *Microsoft Ardi* di Edge); bila tidak ada, suara Indonesia lain dipakai dengan nada diturunkan. Selama peramban membacakan teks, suara video hero dibisukan sementara agar tidak bertumpuk.
 
 ## Memperbarui Kamus
 

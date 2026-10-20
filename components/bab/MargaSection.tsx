@@ -5,8 +5,8 @@ import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { DATA } from '@/lib/konten';
 import { norm } from '@/lib/teks';
-import { Bab } from './ui/Bab';
-import { Reveal } from './ui/Reveal';
+import { Bab } from '../ui/Bab';
+import { Reveal } from '../ui/Reveal';
 
 const KABUPATEN = ['Semua', ...new Set(DATA.marga.map((m) => m.kab))];
 

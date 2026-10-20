@@ -1,11 +1,70 @@
 # Laporan Pengembangan — Dang Lupa ko Komering
 
-Tanggal laporan: 18 Oktober 2026
-Repositori: `BagaskaraAP-Dev/danglupakokomering` (privat) · situs produksi: https://danglupakokomering.vercel.app
+Tanggal laporan: 21 Oktober 2026 (pembaruan terbaru di bagian pertama)
+Repositori: `BagaskaraAP-Dev/danglupakokomering` (publik) · situs produksi: https://danglupakokomering.mooncrust.my.id
 
 > **Catatan 20 Oktober 2026:** laporan ini dipindah ke `docs/`. `prd.md` yang disebut di bawah kini [`docs/PRD-REVITALISASI.md`](PRD-REVITALISASI.md). Situs produksi kini https://danglupakokomering.mooncrust.my.id (alamat `vercel.app` dialihkan otomatis). Folder `_arsip-statis/` sudah dihapus dan tetap ada di riwayat git. Kondisi terbaru ada di [PRD](PRD.md), [TRD](TRD.md), dan [DRD](DRD.md).
 
-> **Status singkat:** situs berjalan di **Next.js 16 + TypeScript + Tailwind CSS 4 + Framer Motion** dan sudah online di Vercel. Pembaruan 18 Oktober 2026 menjalankan `prd.md` Tahap 1 dan sebagian besar Tahap 2: halaman jauh lebih ringan (484 KB, Lighthouse HP 86–93), tampilan bebas jejak "template AI", chatbot dan penerjemah memakai **Google Gemini** berbasis kamus, serta halaman mandiri per kata, hidangan, dan lagu. Rincian ada di bagian pertama di bawah.
+> **Status 21 Oktober 2026:** hero kini memakai video 3D Raka & Ratih yang menyapa "Tabik pun" dengan suara asli, Raka dan Ratih di bab Sejarah & Penerjemah hidup lewat cahaya emas, kamus siap sebelum dicari, folder `components/` dirapikan, dan dua bug kecil (judul 404, favicon) diperbaiki. Rincian di bagian pertama.
+
+> **Status 18 Oktober 2026:** situs berjalan di **Next.js 16 + TypeScript + Tailwind CSS 4 + Framer Motion** dan sudah online di Vercel. Pembaruan 18 Oktober 2026 menjalankan `prd.md` Tahap 1 dan sebagian besar Tahap 2: halaman jauh lebih ringan (484 KB, Lighthouse HP 86–93), tampilan bebas jejak "template AI", chatbot dan penerjemah memakai **Google Gemini** berbasis kamus, serta halaman mandiri per kata, hidangan, dan lagu. Rincian ada di bagian pertama di bawah.
+
+---
+
+## Pembaruan 20–21 Oktober 2026 — Video 3D hero, maskot bercahaya, kamus, dan perapian repo
+
+| Bagian | Hasil |
+| --- | --- |
+| Video 3D di hero | Gambar statis Raka & Ratih diganti video 3D dari Google Flow (menangkupkan tangan, menunduk, "Tabik pun", suling). Video dipotong ke bingkai lengkung 4:5 dan dikecilkan dari 5,1 MB menjadi 647 KB; poster = bingkai pertama (51 KB). Berputar tanpa suara, berhenti di luar layar. Rincian: [PRD Video Hero](PRD-VIDEO-HERO.md) |
+| Sapaan bersuara | Sentuh Raka: video melompat ke detik 4,5 dan suara asli diputar, sehingga gerak bibir pas (mulut terbuka "Ta-" di 4,71 dtk, suara mulai 4,75 dtk). Setelah interaksi pertama, Raka otomatis menyapa setiap kali selesai menunduk; suara mati lagi saat video berulang |
+| Maskot pemandu | Raka (Sejarah) dan Ratih (Penerjemah) diam seperti gambar biasa, hidup lewat cahaya: debu emas songket (kanvas), pendar yang menguat saat berbicara, percikan emas saat disentuh atau saat terjemahan kalimat selesai. Disentuh = sapaannya dibacakan |
+| Kamus | Kamus juga dimuat saat peramban senggang dan saat kolom pencarian disentuh, sehingga tulisan "Memuat kamus…" tidak lagi muncul sekejap saat mencari kata. Bila pemuatan > 0,5 detik, butir emas merangkai tulisan "Kamus Basa Kumoring" lalu memencar saat kamus siap |
+| Struktur folder | `components/` (17 berkas bercampur) dikelompokkan menjadi `bab/`, `maskot/`, `tata-letak/`, `ui/`, `providers/`; 72 jalur impor disesuaikan, riwayat git tiap berkas tetap tersambung (`git mv`) |
+| Berkas tak terpakai | `public/maskot-pasangan-hero.jpg` dihapus; video asli 5,1 MB dipindah dari `public/` ke `DOKUMENTASIITFEST2026/00-bahan/` (tidak ikut terunggah); `CLAUDE.md` yang hanya merujuk `AGENTS.md` dihapus; PRD video dipindah dari akar repo ke `docs/PRD-VIDEO-HERO.md` |
+| Dokumentasi lomba | Lima tangkapan layar 20 Oktober dinamai sesuai aturan (32–36) dan masuk daftar isi |
+
+### Perubahan arah selama pengerjaan
+
+Beberapa hal dibuat lalu diubah atas permintaan pemilik produk, dicatat agar alasannya tidak hilang:
+
+1. Tombol "Suara Sapaan/Bisukan" dan tombol jeda di pojok bingkai video **dihapus** karena dinilai merusak tampilan. Suara kini lewat sentuhan pada Raka dan sapaan otomatis.
+2. Maskot pemandu sempat dibuat miring 3D mengikuti kursor, bergeser saat digulir, melompat saat disentuh, dan bergoyang saat berbicara. Semua gerak tubuh itu **dihapus** karena terasa tidak wajar; yang dipertahankan hanya cahaya.
+3. Three.js dan pustaka particles.js tidak dipakai. Efek partikel ditulis langsung di kanvas (`useKanvas`) agar tidak menambah ±150 KB JavaScript.
+
+### Bug yang ditemukan dan diperbaiki
+
+| Bug | Perbaikan |
+| --- | --- |
+| Tulisan "Memuat kamus…" muncul sebentar setiap kali hendak mencari kata | Kamus dimuat lebih awal; tulisan dan pemuat baru tampak bila pemuatan > 0,5 detik |
+| Halaman 404 (alamat salah, kata yang tidak ada) berjudul sama dengan beranda | Judul "Halaman tidak ditemukan" |
+| `/favicon.ico` mengembalikan 404 untuk peramban dan crawler yang memintanya langsung | `app/favicon.ico` (PNG RGBA 48×48 di dalam ICO; ICO berformat BMP membuat build Turbopack gagal) |
+| Video hero bisa berhenti sendiri bila beberapa perubahan visibilitas datang sekaligus | IntersectionObserver membaca entri terakhir, bukan entri pertama |
+| `<source>` cadangan video menunjuk berkas 5,1 MB di `public/` yang ikut terunggah | Berkas dipindah ke dokumentasi, sumber cadangan dihapus |
+
+Catatan: setelah komponen dipindah, server `next dev` yang sedang berjalan sempat membalas 500 (`Jest worker encountered 2 child process exceptions`) untuk `/kamus/[kata]` dan `/kuliner/[slug]`. Ini masalah server dev yang perlu dijalankan ulang, bukan bug kode; build produksi melayani semua halaman dengan benar.
+
+### Pengujian
+
+- `npm run typecheck`, `npm run lint` (seluruh repo), dan `next build` (27 halaman) lolos tanpa galat.
+- Build produksi dijelajahi di Chrome headless: `/`, `/sumber`, dua halaman kata, lagu, dua hidangan, `robots.txt`, `sitemap.xml` tanpa galat konsol; 14 tautan internal beranda valid; semua tautan `#bab` punya tujuan; kata/hidangan/lagu yang tidak ada → 404; `/api/translate` & `/api/chat` menolak masukan kosong/rusak (400) dan GET (405).
+- Video hero (aturan autoplay Chrome sebenarnya): tanpa interaksi tetap tanpa suara; setelah satu klik, suara menyala di ±4,4 dtk tiap putaran dan mati saat berulang; sentuh Raka melompat ke 4,5 dtk dengan suara; gerak dikurangi = diam sampai disentuh; video diblokir = Raka memakai suara peramban. Diuji di 1366 px, 375 px, dan 320 px tanpa geser horizontal.
+- Maskot pemandu: `transform` panggung dan gambar tetap `none` saat diam, disentuh, dan berbicara; pendar naik 0,45 → 0,96 saat berbicara.
+- Kamus: tanpa interaksi apa pun sudah siap dalam 5 detik; pemuatan cepat → tulisan memuat tidak pernah tampak; pemuatan 3 detik → pemuat tampak setelah 0,5 detik lalu hilang saat siap. Respons `/api/translate` dipalsukan di peramban uji agar kuota Gemini tidak terpakai.
+- Berat halaman (build produksi lokal, HP 390 px, tanpa cache): muatan awal **463 KB**, video hero 632 KB setelah hidrasi, `kamus.json` 154 KB saat senggang, total 1.249 KB dalam 9 detik. Elemen LCP: poster video.
+
+### Catatan aksesibilitas
+
+Tanpa tombol jeda dan suara, video hero yang berulang dan sapaan otomatis tidak memenuhi WCAG 2.2.2 (jeda untuk gerak > 5 detik) dan 1.4.2 (kontrol audio otomatis). Ini keputusan pemilik produk. Peredamnya: video berhenti saat tergulir keluar layar, tidak diputar otomatis bila gerak dikurangi, dan suara baru terdengar setelah pengunjung berinteraksi.
+
+### Tindak lanjut
+
+| Prioritas | Tindakan |
+| --- | --- |
+| Tinggi | Ukur ulang Lighthouse HP di situs produksi setelah deploy (video hero belum pernah diukur di produksi) |
+| Tinggi | Aktifkan billing Gemini (kuota gratis 20 permintaan/hari/model) |
+| Sedang | Hubungkan aplikasi Vercel ke repo GitHub agar push ke `main` terdeploy otomatis; saat ini masih lewat `npx vercel deploy --prod` |
+| Sedang | Bila sapaan otomatis tiap 8 detik terasa terlalu sering, ubah menjadi sekali per kunjungan |
+| Rendah | Jalankan ulang `npm run dev` setelah menarik perubahan struktur folder |
 
 ---
 
@@ -205,6 +264,8 @@ Urutan pekerjaan sejak repositori dibuat:
 
 ### Struktur folder
 
+Kondisi 17 Oktober 2026. Struktur terbaru ada di [TRD §4](TRD.md#4-struktur-repositori).
+
 ```text
 app/            layout.tsx, page.tsx, globals.css, icon.png, apple-icon.png
 components/     16 komponen bab + providers/ (Kamus, Toast) + ui/ (9 komponen kecil)
@@ -287,7 +348,7 @@ Masalah yang ditemukan saat pengujian dan **sudah diperbaiki**:
 | Sedang | Minta penutur asli memastikan arti 7 kata lirik bertanda "arti dugaan" (*nyuntuh, tajok, andan, kacaroman, sangon, among, lebu*). Bila sudah pasti, hapus kolom `catatan` di `data/sumber/kamus_tambahan.json` lalu jalankan `npm run kamus`. |
 | Rendah | Tinjau asumsi kamus di `data/laporan-perbaikan.md` (koreksi *juadah*, arti ganda *adat*, tiga rujukan "lihat" yang kini diselesaikan). |
 | Rendah | (Opsional) Ganti foto juadah dengan foto beresolusi lebih besar; versi sekarang hasil perbesaran dari 149×148 piksel. |
-| Rendah | (Opsional) Untuk suara Raka yang sama di semua peramban, rekam suara asli lalu putar rekaman itu di `components/MascotShowcase.tsx`. |
+| Rendah | (Opsional) Untuk suara Raka yang sama di semua peramban, rekam suara asli lalu putar rekaman itu di `components/maskot/MascotShowcase.tsx`. |
 | Rendah | Hapus `_arsip-statis/` setelah versi Next.js dipastikan memuaskan. |
 
 ---
@@ -312,6 +373,6 @@ npm run dev          # buka http://localhost:3000
 
 ## 9. Status Git Saat Ini
 
-- Branch `main` di `BagaskaraAP-Dev/danglupakokomering`. Pembaruan 18 Oktober 2026 masuk lewat pull request tersendiri; riwayat lengkap: `git log`.
+- Branch `main` di `BagaskaraAP-Dev/danglupakokomering` (publik). Pekerjaan 18–21 Oktober 2026 dikerjakan di branch `revitalisasi-prd-tahap-1-2` lalu digabung ke `main` lewat pull request pada 21 Oktober 2026; riwayat lengkap: `git log`.
 - Rahasia (`.env.local`, kunci Gemini) tidak dilacak git. Kunci produksi disimpan di Environment Variable Vercel.
 - Folder `DOKUMENTASIITFEST2026/` berisi dokumentasi lomba milik tim, bukan buatan asisten.

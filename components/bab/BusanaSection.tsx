@@ -4,12 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import { DATA } from '@/lib/konten';
-import { useKamus } from './providers/KamusProvider';
-import { Bab } from './ui/Bab';
-import { GambarBertitik } from './ui/GambarBertitik';
-import { Reveal } from './ui/Reveal';
-import { TagKata } from './ui/TagKata';
-import { TombolDengar } from './ui/TombolDengar';
+import { useKamus } from '../providers/KamusProvider';
+import { Bab } from '../ui/Bab';
+import { GambarBertitik } from '../ui/GambarBertitik';
+import { Reveal } from '../ui/Reveal';
+import { TagKata } from '../ui/TagKata';
+import { TombolDengar } from '../ui/TombolDengar';
 
 export function BusanaSection() {
   const { kamus } = useKamus();

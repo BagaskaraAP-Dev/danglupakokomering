@@ -62,15 +62,33 @@ export function KamusProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Kamus (±160 KB + pengindeksan) baru dimuat saat pengunjung mulai berinteraksi,
-  // agar tidak bersaing dengan tampilan layar pertama
+  // Kamus (±160 KB + pengindeksan) dimuat saat pengunjung mulai berinteraksi, atau saat peramban
+  // senggang setelah halaman selesai dimuat: tidak bersaing dengan tampilan layar pertama, tetapi
+  // sudah siap sebelum pengunjung sampai di kolom pencarian kamus
   useEffect(() => {
     if (diminta) return;
     const peristiwa = ['scroll', 'pointerdown', 'keydown', 'touchstart'] as const;
     const mulai = () => setDiminta(true);
     peristiwa.forEach((p) => window.addEventListener(p, mulai, { once: true, passive: true }));
+    let batalSenggang = () => {};
+    const senggang = () => {
+      // Safari belum punya requestIdleCallback
+      if (typeof window.requestIdleCallback === 'function') {
+        const id = window.requestIdleCallback(mulai, { timeout: 3000 });
+        batalSenggang = () => window.cancelIdleCallback(id);
+      } else {
+        const id = window.setTimeout(mulai, 1500);
+        batalSenggang = () => window.clearTimeout(id);
+      }
+    };
+    if (document.readyState === 'complete') senggang();
+    else window.addEventListener('load', senggang, { once: true });
     if (window.scrollY > 0 || location.hash) mulai();
-    return () => peristiwa.forEach((p) => window.removeEventListener(p, mulai));
+    return () => {
+      peristiwa.forEach((p) => window.removeEventListener(p, mulai));
+      window.removeEventListener('load', senggang);
+      batalSenggang();
+    };
   }, [diminta]);
 
   useEffect(() => {

@@ -5,11 +5,11 @@ import { ArrowRight, RefreshCw, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { buatPutaran, JUMLAH_SOAL, peringkat, type Soal } from '@/lib/kuis';
 import { fmtAngka } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { useToast } from './providers/ToastProvider';
-import { Bab } from './ui/Bab';
-import { Mahkota } from './ui/Mahkota';
-import { Reveal } from './ui/Reveal';
+import { useKamus } from '../providers/KamusProvider';
+import { useToast } from '../providers/ToastProvider';
+import { Bab } from '../ui/Bab';
+import { Mahkota } from '../ui/Mahkota';
+import { Reveal } from '../ui/Reveal';
 
 const KUNCI_TERBAIK = 'dlk-kuis-terbaik';
 const EVENT_TERBAIK = 'dlk-kuis-terbaik';

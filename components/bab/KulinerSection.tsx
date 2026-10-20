@@ -8,9 +8,9 @@ import { useState, type CSSProperties } from 'react';
 import { DATA, type Hidangan } from '@/lib/konten';
 import { urlHidangan } from '@/lib/tautan';
 import { artiSingkat, norm } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { Bab } from './ui/Bab';
-import { Reveal } from './ui/Reveal';
+import { useKamus } from '../providers/KamusProvider';
+import { Bab } from '../ui/Bab';
+import { Reveal } from '../ui/Reveal';
 
 /** Tombol kata kamus: "lalak · pedas" → membuka kata itu di kamus */
 function TagKosakata({ kata, arti }: { kata: string; arti?: string }) {

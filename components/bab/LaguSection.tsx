@@ -9,10 +9,10 @@ import { useJebakFokus } from '@/lib/fokus';
 import { DATA } from '@/lib/konten';
 import { suara } from '@/lib/suara';
 import { artiSingkat, clamp, fmtWaktu, norm } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { useToast } from './providers/ToastProvider';
-import { Bab } from './ui/Bab';
-import { Reveal } from './ui/Reveal';
+import { useKamus } from '../providers/KamusProvider';
+import { useToast } from '../providers/ToastProvider';
+import { Bab } from '../ui/Bab';
+import { Reveal } from '../ui/Reveal';
 
 const L = DATA.lagu;
 

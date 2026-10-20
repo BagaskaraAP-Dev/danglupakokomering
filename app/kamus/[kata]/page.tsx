@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { HalamanMandiri } from '@/components/HalamanMandiri';
+import { HalamanMandiri } from '@/components/tata-letak/HalamanMandiri';
 import { TombolDengar } from '@/components/ui/TombolDengar';
 import { DATA } from '@/lib/konten';
 import { dataKata, ringkasKata } from '@/lib/server/kamus-halaman';

@@ -2,19 +2,21 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeftRight, Copy, Languages } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { terjemahAi, type TerjemahanAi } from '@/lib/ai';
 import { DATA } from '@/lib/konten';
 import { LABEL_BAHASA, type Bahasa, type HasilTerjemahan, type Segmen } from '@/lib/penerjemah';
+import { suara, useBacaanAktif } from '@/lib/suara';
 import { fmtAngka, glosa, norm } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { useToast } from './providers/ToastProvider';
-import { Bab } from './ui/Bab';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { useKamus } from '../providers/KamusProvider';
+import { useToast } from '../providers/ToastProvider';
+import { Bab } from '../ui/Bab';
+import { MaskotHidup } from '../maskot/MaskotHidup';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const MAKS = 400;
+const SAPAAN_RATIH = 'Tabik! Nyak Ratih. Coba ketik, saya mau makan. Nanti nyak terjemahkan jadi, nyak haga mongan.';
 const CATATAN: Record<Segmen['type'], string> = {
   exact: 'cocok di kamus',
   same: 'kata sama/serapan',
@@ -125,6 +127,9 @@ export function TranslatorSection() {
   const [ai, setAi] = useState<{ kunci: string; data: TerjemahanAi } | null>(null);
   const [menunggu, setMenunggu] = useState<string | null>(null);
   const [putaran, setPutaran] = useState(0);
+  /** Bertambah setiap kali Ratih selesai menyusun kalimat: Ratih melompat & memercikkan emas */
+  const [sorakRatih, setSorakRatih] = useState(0);
+  const bacaan = useBacaanAktif();
   const terakhir = useRef('');
   const batal = useRef<AbortController>(undefined);
   const ke: Bahasa = dari === 'id' ? 'km' : 'id';
@@ -149,8 +154,10 @@ export function TranslatorSection() {
     const r = await terjemahAi(t, arah, c.signal);
     if (c.signal.aborted) return;
     setMenunggu(null);
-    if (r.ok) setAi({ kunci, data: r.data });
-    else toast(r.status === 429 ? 'Penerjemah kalimat sedang ramai, jadi ditampilkan terjemahan kata per kata.' : 'Penerjemah kalimat sedang tidak tersedia, jadi ditampilkan terjemahan kata per kata.');
+    if (r.ok) {
+      setAi({ kunci, data: r.data });
+      setSorakRatih((n) => n + 1);
+    } else toast(r.status === 429 ? 'Penerjemah kalimat sedang ramai, jadi ditampilkan terjemahan kata per kata.' : 'Penerjemah kalimat sedang tidak tersedia, jadi ditampilkan terjemahan kata per kata.');
   };
 
   useEffect(() => () => batal.current?.abort(), []);
@@ -175,6 +182,7 @@ export function TranslatorSection() {
   };
 
   const pct = Math.round((hasil?.conf ?? 0) * 100);
+  const ratihBicara = bacaan === 'hasil-terjemahan' || bacaan === 'ratih-penerjemah';
 
   return (
     <Bab
@@ -198,16 +206,22 @@ export function TranslatorSection() {
     >
       <div className="grid items-start gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal as="aside" className="order-2 space-y-5 lg:order-1">
-          <div className="panggung-maskot mx-auto max-w-sm lg:max-w-none">
-            <Image
-              src="/maskot/ratih-penerjemah.webp"
-              alt="Maskot Ratih berhijab merah dengan mahkota emas, menunjuk ke arah penerjemah"
-              width={1100}
-              height={821}
-              sizes="(min-width: 1024px) 30vw, 90vw"
-              className="relative z-[1] block h-auto w-full"
-            />
-          </div>
+          <MaskotHidup
+            className="mx-auto max-w-sm lg:max-w-none"
+            src="/maskot/ratih-penerjemah.webp"
+            alt="Maskot Ratih berhijab merah dengan mahkota emas, menunjuk ke arah penerjemah"
+            width={1100}
+            height={821}
+            sizes="(min-width: 1024px) 30vw, 90vw"
+            suasana={ratihBicara ? 'bicara' : sedangAi ? 'berpikir' : 'tenang'}
+            sorak={sorakRatih}
+            asalPercik={{ x: 0.78, y: 0.56 }}
+            labelSentuh={ratihBicara ? 'Hentikan suara Ratih' : 'Sentuh Ratih untuk mendengar sapaannya'}
+            onSentuh={() => {
+              if (ratihBicara) suara.berhenti();
+              else suara.ucapkan(SAPAAN_RATIH, { id: 'ratih-penerjemah', jenis: 'wanita', rate: 0.92 });
+            }}
+          />
           <div className="gelembung ekor-atas permukaan-kuat">
             <p className="text-sm leading-relaxed text-gading/75">
               <strong className="text-emas-300">Ratih:</strong> “Tabik! Nyak Ratih. Coba ketik <em>‘Saya mau makan’</em>, nanti nyak

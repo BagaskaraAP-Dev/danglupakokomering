@@ -114,3 +114,8 @@ const langganan = (f: () => void) => {
 export function useSedangBicara(id: string): boolean {
   return useSyncExternalStore(langganan, () => aktif === id, () => false);
 }
+
+/** Id teks yang sedang dibacakan, atau null */
+export function useBacaanAktif(): string | null {
+  return useSyncExternalStore(langganan, () => aktif, () => null);
+}

@@ -3,14 +3,15 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Dices, Search } from 'lucide-react';
 import Link from 'next/link';
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import type { Entri, Kamus } from '@/lib/kamus';
 import { DATA } from '@/lib/konten';
 import { urlKata } from '@/lib/tautan';
 import { fmtAngka, glosa, norm, pick } from '@/lib/teks';
-import { useKamus } from './providers/KamusProvider';
-import { Reveal } from './ui/Reveal';
-import { TombolDengar } from './ui/TombolDengar';
+import { useKamus } from '../providers/KamusProvider';
+import { PemuatKamus } from '../ui/PemuatKamus';
+import { Reveal } from '../ui/Reveal';
+import { TombolDengar } from '../ui/TombolDengar';
 
 const PER_HALAMAN = 12;
 
@@ -112,12 +113,16 @@ function KartuKata({ e, kamus }: { e: Entri; kamus: Kamus }) {
 }
 
 export function KamusSection() {
-  const { kamus, meta, permintaan, status } = useKamus();
+  const { kamus, meta, permintaan, status, muat } = useKamus();
   const [query, setQuery] = useState('');
   const [kelas, setKelas] = useState('semua');
   const [dasarSaja, setDasarSaja] = useState(false);
   const [tampil, setTampil] = useState(PER_HALAMAN);
   const q = useDeferredValue(query);
+  // Pemuat partikel tetap tampil sebentar setelah kamus siap, selama butirnya memencar
+  const [pemuatHilang, setPemuatHilang] = useState(false);
+  const sembunyikanPemuat = useCallback(() => setPemuatHilang(true), []);
+  const pemuatTampil = status === 'memuat' || (status === 'siap' && !pemuatHilang);
 
   // Permintaan dari tombol kata di bagian lain (penerjemah, kuliner, chatbot, …)
   const [permintaanTerakhir, setPermintaanTerakhir] = useState(0);
@@ -166,6 +171,7 @@ export function KamusSection() {
               placeholder="Cari: makan, lombahan, rumah…"
               autoComplete="off"
               value={query}
+              onFocus={muat}
               onChange={(e) => ubah(() => setQuery(e.target.value))}
             />
           </div>
@@ -195,26 +201,29 @@ export function KamusSection() {
         </div>
 
         <p className="mb-4 text-xs font-semibold text-pasir" aria-live="polite">
-          {status === 'memuat'
-            ? 'Memuat kamus…'
-            : status === 'gagal'
+          {status === 'memuat' ? (
+            <span className="tunda-muncul">Memuat kamus…</span>
+          ) : status === 'gagal'
               ? 'Kamus gagal dimuat. Muat ulang halaman.'
               : q.trim()
                 ? `${fmtAngka(hasil.length)} hasil untuk “${q.trim()}”`
                 : `Menampilkan ${fmtAngka(Math.min(tampil, hasil.length))} dari ${fmtAngka(hasil.length)} kata`}
         </p>
 
-        <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {!kamus &&
-            Array.from({ length: 8 }, (_, i) => <div key={i} className="permukaan h-40 animate-pulse rounded-2xl" aria-hidden />)}
-          <AnimatePresence mode="popLayout" initial={false}>
-            {kamus && hasil.slice(0, tampil).map((e) => <KartuKata key={e.id} e={e} kamus={kamus} />)}
-          </AnimatePresence>
-          {kamus && hasil.length === 0 && (
-            <p className="col-span-full py-8 text-center text-pasir">
-              Kata “{q.trim()}” belum ada di kamus. Coba ejaan lain, atau pakai penerjemah di atas.
-            </p>
+        <div className={`relative ${status === 'memuat' ? 'min-h-56 sm:min-h-64' : ''}`}>
+          {pemuatTampil && (
+            <PemuatKamus selesai={status !== 'memuat'} onHilang={sembunyikanPemuat} className="absolute inset-x-0 top-0 z-10 h-56 sm:h-64" />
           )}
+          <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <AnimatePresence mode="popLayout" initial={false}>
+              {kamus && hasil.slice(0, tampil).map((e) => <KartuKata key={e.id} e={e} kamus={kamus} />)}
+            </AnimatePresence>
+            {kamus && hasil.length === 0 && (
+              <p className="col-span-full py-8 text-center text-pasir">
+                Kata “{q.trim()}” belum ada di kamus. Coba ejaan lain, atau pakai penerjemah di atas.
+              </p>
+            )}
+          </div>
         </div>
 
         {tampil < hasil.length && (

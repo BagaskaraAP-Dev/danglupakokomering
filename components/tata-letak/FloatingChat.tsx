@@ -10,8 +10,8 @@ import { jawab, isiAngka, type Pembicara } from '@/lib/chatbot';
 import { useJebakFokus } from '@/lib/fokus';
 import { DATA, type AksiChat } from '@/lib/konten';
 import { suara } from '@/lib/suara';
-import { useKamus } from './providers/KamusProvider';
-import { Avatar } from './ui/Avatar';
+import { useKamus } from '../providers/KamusProvider';
+import { Avatar } from '../maskot/Avatar';
 
 interface Pesan {
   id: number;
