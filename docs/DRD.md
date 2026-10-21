@@ -235,7 +235,7 @@ Aturan:
 
 - Ikon UI dari **lucide-react** (garis tipis, seragam) untuk aksi fungsional: salin, kirim, tutup, tukar arah, bahasa. Ornamen budaya memakai SVG kustom (`Mahkota`, `Tumpal`, sudut songket).
 - **Tidak memakai emoji** sebagai ikon atau isi tombol.
-- Foto kuliner ditampilkan di ukuran aslinya (387–736 px) agar tidak pecah; juadah memakai bingkai piring bundar (`data-piring`). Foto baru minimal 1200 px sisi panjang.
+- Foto kuliner (387–736 px) tidak diperbesar melewati ukuran aslinya agar tidak pecah. Semua dibingkai seragam seperti cetakan foto (`data-cetak`: jarak tepi minimal 1,5rem, sudut 0,9rem, garis emas tipis) di atas latar songket marun yang sama untuk setiap hidangan; juadah memakai bingkai piring bundar (`data-piring`) di latar yang sama. Di HP daftar hidangan berupa grid 2 kolom (3 di `sm`, 4 di `md`), bukan baris geser. Foto baru minimal 1200 px sisi panjang.
 - Semua gambar isi punya `alt` deskriptif dalam Bahasa Indonesia; gambar dekoratif `alt=""` dan `aria-hidden`.
 - Format: WebP/AVIF lewat `next/image`; maskot WebP transparan.
 

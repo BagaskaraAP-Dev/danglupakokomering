@@ -18,27 +18,39 @@ function TagKosakata({ kata, arti }: { kata: string; arti?: string }) {
   const e = kamus?.cari(kata).find((x) => !x.sensitif);
   if (!e) return null;
   const singkat = arti ?? artiSingkat(e.arti, e.kata);
+  // Jarak kata–arti diatur gap .tag; tanpa &nbsp; tambahan agar "iwak · ikan" berjarak rata
   return (
     <button type="button" className="tag" title={e.arti} onClick={() => bukaKamus(e.kata)}>
       <strong>{e.kata}</strong>
-      {singkat !== norm(e.kata) && <>&nbsp;· {singkat}</>}
+      {singkat !== norm(e.kata) && <span className="font-semibold opacity-80">· {singkat}</span>}
     </button>
   );
 }
 
-/** Foto ditampilkan utuh di ukuran aslinya (tidak diperbesar), di atas latar buram fotonya sendiri */
+/* Foto kuliner beresolusi kecil (387–736 px). Semua dibingkai seragam seperti cetakan foto di atas latar
+   songket yang sama, tanpa diperbesar melewati ukuran aslinya (tetap tajam). Juadah tampil sebagai piring bundar */
 function FotoHidangan({ h }: { h: Hidangan }) {
-  // Latar diburamkan 18 px, jadi cukup versi 128 px teroptimasi (±3 KB), bukan JPEG asli (hingga 84 KB)
-  const latar = getImageProps({ src: h.foto, alt: '', width: 64, height: Math.round((64 * h.ukuran[1]) / h.ukuran[0]) }).props.src;
-  return (
-    <span className="foto-hidangan block h-[clamp(15rem,40vw,24rem)]" data-utuh data-piring={h.piring ? 'true' : undefined} style={{ '--foto': `url('${latar}')` } as CSSProperties}>
-      {h.piring ? (
+  if (h.piring) {
+    // Latar piring diburamkan 28 px, jadi cukup versi kecil teroptimasi (±3 KB), bukan JPEG asli
+    const latar = getImageProps({ src: h.foto, alt: '', width: 64, height: Math.round((64 * h.ukuran[1]) / h.ukuran[0]) }).props.src;
+    return (
+      <span className="foto-hidangan h-[clamp(15rem,40vw,24rem)]" data-piring="true" style={{ '--foto': `url('${latar}')` } as CSSProperties}>
         <span className="piring-hidangan block">
           <Image src={h.foto} alt={h.alt} width={h.ukuran[0]} height={h.ukuran[1]} sizes="(min-width: 1024px) 320px, 60vw" />
         </span>
-      ) : (
-        <Image src={h.foto} alt={h.alt} width={h.ukuran[0]} height={h.ukuran[1]} sizes="(min-width: 1024px) 640px, 100vw" style={{ maxWidth: h.ukuran[0] }} />
-      )}
+      </span>
+    );
+  }
+  return (
+    <span className="foto-hidangan h-[clamp(15rem,40vw,24rem)]" data-cetak>
+      <Image
+        src={h.foto}
+        alt={h.alt}
+        width={h.ukuran[0]}
+        height={h.ukuran[1]}
+        sizes="(min-width: 1024px) 640px, 100vw"
+        style={{ '--lebar-asli': `${h.ukuran[0]}px` } as CSSProperties}
+      />
     </span>
   );
 }
@@ -73,7 +85,7 @@ export function KulinerSection() {
                 <button type="button" aria-pressed={i === aktif} aria-controls="sorotan-kuliner" onClick={() => setAktif(i)}>
                   <span className="nomor-menu">{String(i + 1).padStart(2, '0')}</span>
                   <span className="min-w-0">
-                    <span className="block font-display text-xl font-bold leading-tight">{x.nama}</span>
+                    <span className="block font-display text-base font-bold leading-tight sm:text-lg lg:text-xl">{x.nama}</span>
                     <span className="hidden text-sm text-pasir lg:block">{x.alias}</span>
                   </span>
                   <span className="ml-auto hidden shrink-0 text-xs font-semibold text-pasir xl:block">{x.jenis}</span>
