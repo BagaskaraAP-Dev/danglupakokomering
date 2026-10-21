@@ -308,7 +308,7 @@ export const DATA: Konten = {
     },
     {
       nama: 'Juadah Basah', alias: 'Kue basah pandan', jenis: 'Kue Basah', kamus: 'KOM-K01638', piring: true,
-      foto: '/kuliner/juadah-basah-hd.jpeg', ukuran: [600, 600], alt: 'Juadah basah hijau pandan berbentuk cincin',
+      foto: '/kuliner/juadah-basah.jpg', ukuran: [560, 560], alt: 'Juadah basah hijau pandan berbentuk cincin',
       teaser: 'Kue hijau yang lembut dan lembap, harum pandan dan santan, teman setia kopi sore dan suguhan wajib saat Lebaran.',
       cerita: [
         'Sekilas juadah basah mirip bolu pandan, tetapi teksturnya lebih padat, lembut, dan lembap. Warna hijaunya alami: berasal dari daun pandan dan daun suji yang direbus bersama santan hingga harum.',
