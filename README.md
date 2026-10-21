@@ -18,7 +18,7 @@ Situs produksi: https://danglupakokomering.mooncrust.my.id
 | [PRD Revitalisasi](docs/PRD-REVITALISASI.md) | Rencana revitalisasi Tahap 1–3 |
 | [PRD Video Hero](docs/PRD-VIDEO-HERO.md) | Video 3D Raka & Ratih di hero (20 Oktober 2026) beserta penyesuaiannya |
 | [Laporan Pengembangan](docs/LAPORAN-PENGEMBANGAN.md) | Log pengerjaan dan hasil pengujian |
-| [Log pengerjaan (PDF)](DOKUMENTASIITFEST2026/Log-Pengerjaan-Dang-Lupa-ko-Komering.pdf) | Linimasa commit git dari awal dan ringkasan prompt pemilik beserta hasil kerja Claude, 16–21 Oktober 2026 |
+| [Log pengerjaan (PDF)](DOKUMENTASIITFEST2026/Log-Pengerjaan-Dang-Lupa-ko-Komering.pdf) | Linimasa commit git dari awal dan ringkasan prompt pemilik beserta hasil kerja Claude, 16–21 Oktober 2026, dengan foto Komering, Raka & Ratih, dan tangkapan layar tiap tanggal |
 | [Dokumentasi lomba](DOKUMENTASIITFEST2026/README.md) | 36 tangkapan layar proses pengerjaan, urut menurut waktu, dan bahan mentah (tautan, video maskot asli) |
 
 ## Fitur
