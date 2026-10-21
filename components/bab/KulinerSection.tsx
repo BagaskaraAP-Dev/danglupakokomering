@@ -62,17 +62,11 @@ export function KulinerSection() {
   return (
     <Bab
       id="kuliner"
-      tata="belah"
+      tata="kiri"
       label="Bangik nihan!"
       judul={
         <>
           Kuliner Khas <span className="teks-emas">Tanah Komering</span>
-        </>
-      }
-      deskripsi={
-        <>
-          Way Komering kaya iwak (ikan), dan pawon (dapur)-nya kaya rasa: asam, pedas, gurih, hingga legit. Ada pula tradisi{' '}
-          <em>katodan</em>: membagi nasi dan lauk pauk kepada tetangga.
         </>
       }
     >
