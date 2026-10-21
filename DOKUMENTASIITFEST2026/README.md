@@ -4,6 +4,10 @@ Tangkapan layar proses pembuatan **Dang Lupa ko Komering**, diurutkan menurut wa
 
 Situs: https://danglupakokomering.mooncrust.my.id
 
+## Log pengerjaan
+
+[Log-Pengerjaan-Dang-Lupa-ko-Komering.pdf](Log-Pengerjaan-Dang-Lupa-ko-Komering.pdf) (14 halaman): linimasa semua commit git dari commit pertama (16 Oktober 2026), daftar pull request, dan ringkasan 60 prompt pemilik beserta hasil kerja Claude (Claude Code) per tanggal, 16–21 Oktober 2026. Prompt diringkas dan ejaannya dirapikan tanpa mengubah maksud.
+
 ## Bahan
 
 | Berkas | Isi |
