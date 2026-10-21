@@ -360,7 +360,7 @@ npm run indexnow   # kirim alamat sitemap ke IndexNow (setelah deploy)
 
 ### Catatan operasional
 
-- Folder proyek berada di OneDrive. Bila `npm run build` gagal dengan `EPERM … .next`, hapus folder `.next` lalu build ulang.
+- Folder proyek berada di OneDrive. Bila `npm run build` gagal dengan `EPERM … .next` (OneDrive mengubah isi `.next` menjadi *reparse point* yang tidak bisa dihapus Next), hapus folder `.next` lalu build ulang. Bila `npm run dev` sedang berjalan, hapus semua isi `.next` **kecuali** `.next/dev` agar server dev tidak terganggu.
 - Setelah berkas komponen dipindah atau dinamai ulang, jalankan ulang `npm run dev`. Server dev yang terus berjalan bisa membalas 500 dengan `Jest worker encountered 2 child process exceptions` untuk halaman mandiri, padahal build produksinya normal.
 - Ikon `app/favicon.ico` harus ICO berisi PNG RGBA; ICO berformat BMP (mis. keluaran ffmpeg) membuat build Turbopack gagal.
 - Log galat Gemini tercatat di log fungsi Vercel dengan awalan `[gemini]`, `[api/chat]`, `[api/translate]`.
