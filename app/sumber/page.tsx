@@ -13,8 +13,10 @@ export const metadata: Metadata = {
   alternates: { canonical: '/sumber' },
 };
 
-/* Kredit foto kuliner per berkas. Kosong = belum tercatat; isi dengan nama pemilik/sumber foto. */
+/* Kredit foto kuliner per berkas. Kosong = pakai SUMBER_FOTO_UMUM; isi dengan nama pemilik bila sudah diketahui. */
 const KREDIT_FOTO: Record<string, string> = {};
+const SUMBER_FOTO_UMUM = 'Google Gambar, pemilik asli belum terlacak';
+const ISU_GITHUB = 'https://github.com/BagaskaraAP-Dev/danglupakokomering/issues';
 
 const RUJUKAN_SEJARAH = [
   { judul: 'Tradisi lisan Ulun Kumoring', isi: 'Asal leluhur dari Sekala Brak dan cerita tutur asal nama "Komering". Dicantumkan sebagai cerita rakyat; versinya bisa berbeda antar-marga.' },
@@ -93,10 +95,19 @@ export default function HalamanSumber() {
                 <Link href={urlHidangan(h.nama)} className="font-semibold text-emas-200 hover:underline">
                   {h.nama}
                 </Link>
-                <span className={KREDIT_FOTO[h.foto] ? 'text-gading/75' : 'text-pasir'}>{KREDIT_FOTO[h.foto] || 'Sumber foto belum tercatat'}</span>
+                <span className={KREDIT_FOTO[h.foto] ? 'text-gading/75' : 'text-pasir'}>{KREDIT_FOTO[h.foto] || SUMBER_FOTO_UMUM}</span>
               </li>
             ))}
           </ul>
+          <p className="text-sm text-pasir">
+            Ketujuh foto diambil dari hasil pencarian Google Gambar dan dipakai sebagai ilustrasi untuk tujuan edukasi non-komersial. Hak cipta
+            tetap milik pemotretnya. Foto Juadah Basah diperjelas dengan AI Real-ESRGAN karena berkas aslinya hanya 149×148 piksel. Bila kamu
+            pemilik salah satu foto dan ingin namamu dicantumkan atau fotonya diganti, sampaikan lewat{' '}
+            <a href={ISU_GITHUB} target="_blank" rel="noopener noreferrer" className="text-emas-200 underline-offset-2 hover:underline">
+              GitHub Issues
+            </a>
+            .
+          </p>
         </Bagian>
 
         <Bagian judul="Peran AI di situs ini">
